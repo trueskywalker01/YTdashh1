@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#050506">
 <meta name="color-scheme" content="dark">
 <title>Daily Stack — Customizable Template</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="sync.js" defer></script>
   <script src="topbar.js" defer></script>
@@ -36,6 +37,12 @@
 
   --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+
+  --glass-shadow: 0 1px 0 0 rgba(255,255,255,0.06) inset, 0 12px 40px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.25);
+  --green: #30D158; --blue: #0A84FF; --cyan: #64D2FF; --orange: #FF9F0A; --red: #FF453A;
+  --ring-move: #FF375F; --ring-exercise: #A2FF00; --ring-stand: #00E5FF;
+  --radius-md: 12px; --radius-lg: 16px; --radius-xl: 22px;
 }
 
 * { box-sizing: border-box; }
@@ -461,6 +468,170 @@ main {
   .stack-search-results { width: 100%; }
 }
 
+/* ===== Apple Watch widget ===== */
+.aw-wrap { margin-bottom: 36px; }
+.aw-section-title {
+  font-family: var(--font-serif); font-style: italic;
+  font-size: 38px; letter-spacing: -0.02em;
+  margin-bottom: 16px; font-weight: 400; color: var(--text-primary);
+}
+.card {
+  background: var(--bg-card); border: 1px solid var(--border-soft);
+  border-radius: var(--radius-xl); padding: 22px; box-shadow: var(--glass-shadow);
+  transition: box-shadow 0.3s;
+}
+.card:hover { box-shadow: 0 1px 0 0 rgba(255,255,255,0.08) inset, 0 18px 50px rgba(0,0,0,0.50); }
+.aw-brand { display: inline-flex; align-items: center; gap: 10px; }
+.aw-brand-icon {
+  width: 24px; height: 24px; border-radius: 6px;
+  background: linear-gradient(135deg, var(--ring-move), var(--ring-exercise), var(--ring-stand));
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 14px rgba(255,55,95,0.25);
+}
+.aw-brand-icon svg { width: 14px; height: 14px; }
+.aw-brand-text { font-weight: 800; font-size: 13px; letter-spacing: 0.12em; }
+.aw-disconnected {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; padding: 18px 8px 8px; gap: 6px;
+}
+.aw-disconnected .aw-brand { margin-bottom: 14px; }
+.aw-disconnected-title { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-top: 2px; }
+.aw-disconnected-sub { font-size: 13px; color: var(--text-tertiary); max-width: 300px; line-height: 1.5; margin-bottom: 18px; }
+.aw-import-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 22px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.85);
+  background: linear-gradient(180deg, #FFFFFF 0%, #E8E5DD 100%);
+  color: #0A0A0B; font-family: inherit; font-size: 13.5px; font-weight: 700;
+  cursor: pointer; transition: transform 0.12s, box-shadow 0.18s;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 6px 20px rgba(0,0,0,0.45);
+}
+.aw-import-btn:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.65), 0 8px 24px rgba(0,0,0,0.55); }
+.aw-import-btn:active { transform: translateY(0) scale(0.98); }
+.aw-demo-link {
+  display: block; margin-top: 14px; font-size: 11px;
+  color: var(--text-tertiary); cursor: pointer; border: none; background: none;
+  font-family: inherit; text-decoration: underline; text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+.aw-demo-link:hover { color: var(--text-secondary); }
+.aw-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+.aw-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--green); margin-left: 4px;
+}
+.aw-tag-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+  box-shadow: 0 0 8px rgba(48,209,88,0.65);
+  animation: aw-pulse 1.6s ease-in-out infinite;
+}
+@keyframes aw-pulse { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)} }
+.aw-updated { font-size: 11px; color: var(--text-tertiary); font-family: var(--font-mono); }
+.aw-header-right { display: flex; align-items: center; gap: 10px; }
+.aw-refresh-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--border-soft); background: rgba(255,255,255,0.04);
+  color: var(--text-secondary); cursor: pointer; display: flex;
+  align-items: center; justify-content: center; transition: all 0.18s;
+}
+.aw-refresh-btn:hover { background: rgba(255,255,255,0.10); color: var(--text-primary); }
+.aw-refresh-btn:active { transform: rotate(180deg); }
+.aw-rings-wrap { position: relative; width: 220px; max-width: 78%; margin: 0 auto 24px; aspect-ratio: 1; }
+.aw-rings-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.aw-ring-track { fill: none; stroke-width: 14; opacity: 0.15; }
+.aw-ring-fill {
+  fill: none; stroke-width: 14; stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.22,1,0.36,1);
+}
+.aw-rings-center {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; pointer-events: none;
+}
+.aw-rings-label { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 4px; }
+.aw-rings-score { font-size: 48px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+.aw-rings-unit { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; font-weight: 600; }
+.aw-ring-legend { display: flex; justify-content: center; gap: 18px; margin-bottom: 22px; }
+.aw-ring-leg { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+.aw-ring-dot { width: 8px; height: 8px; border-radius: 50%; }
+.aw-stats {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 8px;
+  padding-top: 22px; border-top: 1px solid var(--border-soft);
+}
+.aw-stat {
+  position: relative; background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border-soft); border-radius: 12px;
+  padding: 12px 10px; text-align: center; transition: all 0.18s;
+}
+.aw-stat:hover { background: rgba(255,255,255,0.05); }
+.aw-stat-label { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; margin-bottom: 8px; }
+.aw-stat-value { font-size: 22px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+.aw-stat-sub { font-size: 10px; color: var(--text-tertiary); margin-top: 5px; font-family: var(--font-mono); }
+.aw-zone {
+  position: absolute; top: 9px; right: 9px; width: 7px; height: 7px;
+  border-radius: 50%; background: rgba(255,255,255,0.12); transition: all 0.3s;
+}
+.z-good { background: #30D158; box-shadow: 0 0 7px rgba(48,209,88,0.55); }
+.z-norm { background: rgba(255,255,255,0.30); }
+.z-warn { background: #FF9F0A; box-shadow: 0 0 7px rgba(255,159,10,0.55); }
+.z-bad  { background: #FF453A; box-shadow: 0 0 7px rgba(255,69,58,0.55); }
+.aw-stages { margin-bottom: 22px; padding-top: 22px; border-top: 1px solid var(--border-soft); }
+.aw-stages-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.aw-stages-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-tertiary); }
+.aw-stages-meta { font-size: 11px; color: var(--text-tertiary); font-family: var(--font-mono); }
+.aw-stages-bar { display: flex; height: 10px; background: rgba(255,255,255,0.04); border-radius: 999px; overflow: hidden; margin-bottom: 12px; border: 1px solid var(--border-soft); }
+.aw-stage { height: 100%; transition: width 0.7s cubic-bezier(0.22,1,0.36,1); }
+.aw-stage-rem   { background: var(--cyan); }
+.aw-stage-deep  { background: var(--blue); }
+.aw-stage-core  { background: #5E5CE6; }
+.aw-stage-awake { background: var(--red); opacity: 0.5; }
+.aw-stages-legend { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.aw-stages-leg { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+.aw-stages-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.aw-stages-num { margin-left: auto; color: var(--text-primary); font-weight: 700; font-family: var(--font-mono); font-size: 11px; }
+.aw-bio { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 12px; }
+.aw-bio-item {
+  display: flex; flex-direction: column; gap: 4px; padding: 11px 12px;
+  background: rgba(255,255,255,0.025); border: 1px solid var(--border-soft);
+  border-radius: 12px; text-align: center; position: relative; transition: all 0.18s;
+}
+.aw-bio-item:hover { background: rgba(255,255,255,0.05); }
+.aw-bio-label { font-size: 9.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary); }
+.aw-bio-val { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.aw-legend {
+  display: flex; justify-content: center; flex-wrap: wrap; gap: 14px;
+  margin-top: 14px; padding: 10px 12px; background: rgba(255,255,255,0.02);
+  border-radius: 999px; border: 1px solid var(--border-soft);
+}
+.aw-legend-item { display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 600; color: var(--text-tertiary); }
+.aw-legend-item .aw-zone { position: static; display: inline-block; }
+.aw-verdict {
+  margin-top: 18px; padding: 16px 18px; background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border-soft); border-left: 2px solid rgba(255,255,255,0.40);
+  border-radius: 0 12px 12px 0;
+}
+.aw-verdict-eyebrow { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.18em; font-weight: 700; }
+.aw-verdict-badge {
+  font-size: 9.5px; font-weight: 800; padding: 3px 9px; border-radius: 999px;
+  letter-spacing: 0.14em; text-transform: uppercase; border: 1px solid;
+}
+.aw-verdict-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.aw-verdict-headline { font-size: 15px; font-weight: 600; line-height: 1.4; margin-bottom: 12px; letter-spacing: -0.01em; }
+.aw-verdict-reasons { font-size: 12.5px; color: var(--text-secondary); line-height: 1.65; }
+.aw-disconnect-btn {
+  display: block; margin: 16px auto 0; padding: 7px 14px;
+  background: transparent; border: 1px solid transparent; color: var(--text-tertiary);
+  font-size: 11px; font-family: inherit; font-weight: 500; letter-spacing: 0.04em;
+  border-radius: 999px; cursor: pointer; transition: all 0.15s;
+}
+.aw-disconnect-btn:hover { color: var(--text-secondary); border-color: var(--border-soft); }
+.aw-file-input { display: none; }
+@media (max-width: 480px) {
+  .aw-stats { grid-template-columns: repeat(2,1fr); }
+  .aw-stages-legend { grid-template-columns: repeat(2,1fr); }
+  .aw-bio { grid-template-columns: 1fr; }
+}
+
 ::selection { background: rgba(224, 118, 88, 0.3); color: var(--text-primary); }
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -471,6 +642,158 @@ main {
 <body>
 
 <main>
+  <section class="aw-wrap">
+    <div class="aw-section-title">Apple Watch</div>
+    <div class="card">
+
+      <!-- DISCONNECTED -->
+      <div id="awDisconnected" class="aw-disconnected">
+        <div class="aw-brand">
+          <div class="aw-brand-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 2a10 10 0 0 1 0 20 10 10 0 0 1 0-20"/></svg>
+          </div>
+          <span class="aw-brand-text">HEALTH</span>
+        </div>
+        <div class="aw-disconnected-title">No data loaded</div>
+        <div class="aw-disconnected-sub">Import your Apple Health export to see activity rings, sleep, heart, and vitals.</div>
+        <button class="aw-import-btn" id="awImportBtn">
+          Import Health Data
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+        </button>
+        <input type="file" id="awFileInput" class="aw-file-input" accept=".xml,.zip">
+        <button class="aw-demo-link" id="awDemoBtn">Load demo data instead</button>
+      </div>
+
+      <!-- CONNECTED -->
+      <div id="awConnected" style="display:none">
+        <div class="aw-header">
+          <div class="aw-brand">
+            <div class="aw-brand-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 2a10 10 0 0 1 0 20 10 10 0 0 1 0-20"/></svg>
+            </div>
+            <span class="aw-brand-text">HEALTH</span>
+            <span class="aw-tag"><span class="aw-tag-dot"></span>loaded</span>
+          </div>
+          <div class="aw-header-right">
+            <span class="aw-updated" id="awUpdated">—</span>
+            <button class="aw-refresh-btn" id="awRefreshBtn" title="Re-import">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15A9 9 0 1 1 5.64 5.64L23 10"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Activity rings -->
+        <div class="aw-rings-wrap">
+          <svg class="aw-rings-svg" viewBox="0 0 220 220">
+            <circle class="aw-ring-track" cx="110" cy="110" r="96" stroke="var(--ring-move)"/>
+            <circle class="aw-ring-fill" cx="110" cy="110" r="96" stroke="var(--ring-move)" id="ringMove" stroke-dasharray="603.19" stroke-dashoffset="603.19"/>
+            <circle class="aw-ring-track" cx="110" cy="110" r="78" stroke="var(--ring-exercise)"/>
+            <circle class="aw-ring-fill" cx="110" cy="110" r="78" stroke="var(--ring-exercise)" id="ringExercise" stroke-dasharray="490.09" stroke-dashoffset="490.09"/>
+            <circle class="aw-ring-track" cx="110" cy="110" r="60" stroke="var(--ring-stand)"/>
+            <circle class="aw-ring-fill" cx="110" cy="110" r="60" stroke="var(--ring-stand)" id="ringStand" stroke-dasharray="376.99" stroke-dashoffset="376.99"/>
+          </svg>
+          <div class="aw-rings-center">
+            <div class="aw-rings-label">Activity</div>
+            <div class="aw-rings-score" id="awActivityScore">—</div>
+            <div class="aw-rings-unit" id="awActivityUnit">cal burned</div>
+          </div>
+        </div>
+        <div class="aw-ring-legend">
+          <div class="aw-ring-leg"><span class="aw-ring-dot" style="background:var(--ring-move)"></span>Move <span id="awMoveVal" style="font-weight:700;font-family:var(--font-mono);margin-left:4px">—</span></div>
+          <div class="aw-ring-leg"><span class="aw-ring-dot" style="background:var(--ring-exercise)"></span>Exercise <span id="awExVal" style="font-weight:700;font-family:var(--font-mono);margin-left:4px">—</span></div>
+          <div class="aw-ring-leg"><span class="aw-ring-dot" style="background:var(--ring-stand)"></span>Stand <span id="awStandVal" style="font-weight:700;font-family:var(--font-mono);margin-left:4px">—</span></div>
+        </div>
+
+        <!-- Sleep stages -->
+        <div class="aw-stages" id="awStages" style="display:none">
+          <div class="aw-stages-head">
+            <span class="aw-stages-eyebrow">Sleep stages</span>
+            <span class="aw-stages-meta" id="awSleepMeta"></span>
+          </div>
+          <div class="aw-stages-bar">
+            <div class="aw-stage aw-stage-rem"   id="awStageRem"   style="width:0%"></div>
+            <div class="aw-stage aw-stage-deep"  id="awStageDeep"  style="width:0%"></div>
+            <div class="aw-stage aw-stage-core"  id="awStageCore"  style="width:0%"></div>
+            <div class="aw-stage aw-stage-awake" id="awStageAwake" style="width:0%"></div>
+          </div>
+          <div class="aw-stages-legend">
+            <div class="aw-stages-leg"><span class="aw-stages-dot" style="background:var(--cyan)"></span>REM <span class="aw-stages-num" id="awRemTxt">—</span></div>
+            <div class="aw-stages-leg"><span class="aw-stages-dot" style="background:var(--blue)"></span>Deep <span class="aw-stages-num" id="awDeepTxt">—</span></div>
+            <div class="aw-stages-leg"><span class="aw-stages-dot" style="background:#5E5CE6"></span>Core <span class="aw-stages-num" id="awCoreTxt">—</span></div>
+            <div class="aw-stages-leg"><span class="aw-stages-dot" style="background:var(--red);opacity:0.5"></span>Awake <span class="aw-stages-num" id="awAwakeTxt">—</span></div>
+          </div>
+        </div>
+
+        <!-- Stats grid -->
+        <div class="aw-stats">
+          <div class="aw-stat">
+            <span class="aw-zone" id="zSleep"></span>
+            <div class="aw-stat-label">Sleep</div>
+            <div class="aw-stat-value" id="awSleep">—</div>
+            <div class="aw-stat-sub" id="awSleepSub">hours</div>
+          </div>
+          <div class="aw-stat">
+            <span class="aw-zone" id="zSteps"></span>
+            <div class="aw-stat-label">Steps</div>
+            <div class="aw-stat-value" id="awSteps">—</div>
+            <div class="aw-stat-sub">today</div>
+          </div>
+          <div class="aw-stat">
+            <span class="aw-zone" id="zHrv"></span>
+            <div class="aw-stat-label">HRV</div>
+            <div class="aw-stat-value" id="awHrv">—</div>
+            <div class="aw-stat-sub">ms</div>
+          </div>
+          <div class="aw-stat">
+            <span class="aw-zone" id="zRhr"></span>
+            <div class="aw-stat-label">RHR</div>
+            <div class="aw-stat-value" id="awRhr">—</div>
+            <div class="aw-stat-sub">bpm</div>
+          </div>
+        </div>
+
+        <!-- Biomarkers -->
+        <div class="aw-bio" id="awBio" style="display:none">
+          <div class="aw-bio-item">
+            <span class="aw-zone" id="zWrist"></span>
+            <span class="aw-bio-label">Wrist temp</span>
+            <span class="aw-bio-val" id="awWristTemp">—</span>
+          </div>
+          <div class="aw-bio-item">
+            <span class="aw-zone" id="zSpo2"></span>
+            <span class="aw-bio-label">Blood O₂</span>
+            <span class="aw-bio-val" id="awSpo2">—</span>
+          </div>
+          <div class="aw-bio-item">
+            <span class="aw-zone" id="zResp"></span>
+            <span class="aw-bio-label">Resp rate</span>
+            <span class="aw-bio-val" id="awResp">—</span>
+          </div>
+        </div>
+
+        <!-- Zone legend -->
+        <div class="aw-legend">
+          <span class="aw-legend-item"><span class="aw-zone z-good"></span>Good</span>
+          <span class="aw-legend-item"><span class="aw-zone z-norm"></span>Normal</span>
+          <span class="aw-legend-item"><span class="aw-zone z-warn"></span>Watch</span>
+          <span class="aw-legend-item"><span class="aw-zone z-bad"></span>High / Low</span>
+        </div>
+
+        <!-- Verdict -->
+        <div class="aw-verdict" id="awVerdict" style="display:none">
+          <div class="aw-verdict-head">
+            <span class="aw-verdict-eyebrow">Today's call</span>
+            <span class="aw-verdict-badge" id="awVerdictBadge"></span>
+          </div>
+          <div class="aw-verdict-headline" id="awVerdictHeadline"></div>
+          <div class="aw-verdict-reasons" id="awVerdictReasons"></div>
+        </div>
+
+        <button class="aw-disconnect-btn" id="awDisconnectBtn">Clear data</button>
+      </div>
+    </div>
+  </section>
+
   <div class="section-title">Daily Stack</div>
 
   <div class="stack-card">
@@ -1046,6 +1369,146 @@ document.addEventListener('DOMContentLoaded', function () {
     onApplied: function () { window.dispatchEvent(new Event('storage')); }
   });
 });
+</script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const discEl = $('awDisconnected'), connEl = $('awConnected');
+  $('awImportBtn').addEventListener('click', () => $('awFileInput').click());
+  $('awFileInput').addEventListener('change', e => { if(e.target.files[0]) parseHealthExport(e.target.files[0]); });
+  $('awDemoBtn').addEventListener('click', loadDemo);
+  $('awDisconnectBtn').addEventListener('click', () => { discEl.style.display=''; connEl.style.display='none'; });
+  $('awRefreshBtn').addEventListener('click', () => $('awFileInput').click());
+
+  function parseHealthExport(file){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(e.target.result, 'text/xml');
+        const records = doc.querySelectorAll('Record');
+        render(extractLatest(records));
+      } catch(err) {
+        alert('Could not parse the file. Please export from Apple Health as XML.');
+        console.error(err);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function extractLatest(records){
+    const today = new Date().toISOString().slice(0,10);
+    const vals = { steps:0, activeCal:0, exerciseMin:0, standHrs:0, rhr:null, hrv:null, spo2:null, resp:null, wristTemp:null, sleepMin:0, rem:0, deep:0, core:0, awake:0 };
+    const typeMap = {
+      'HKQuantityTypeIdentifierStepCount':'steps',
+      'HKQuantityTypeIdentifierActiveEnergyBurned':'activeCal',
+      'HKQuantityTypeIdentifierAppleExerciseTime':'exerciseMin',
+      'HKQuantityTypeIdentifierAppleStandTime':'standHrs',
+      'HKQuantityTypeIdentifierRestingHeartRate':'rhr',
+      'HKQuantityTypeIdentifierHeartRateVariabilitySDNN':'hrv',
+      'HKQuantityTypeIdentifierOxygenSaturation':'spo2',
+      'HKQuantityTypeIdentifierRespiratoryRate':'resp',
+      'HKQuantityTypeIdentifierAppleSleepingWristTemperature':'wristTemp',
+    };
+    records.forEach(r => {
+      const type = r.getAttribute('type');
+      const date = (r.getAttribute('startDate')||'').slice(0,10);
+      const v = parseFloat(r.getAttribute('value'));
+      if(date !== today || isNaN(v)) return;
+      const key = typeMap[type];
+      if(!key) return;
+      if(['steps','activeCal','exerciseMin','standHrs'].includes(key)) vals[key] += v;
+      else vals[key] = v;
+    });
+    records.forEach(r => {
+      if(r.getAttribute('type') !== 'HKCategoryTypeIdentifierSleepAnalysis') return;
+      const val = r.getAttribute('value')||'';
+      const min = (new Date(r.getAttribute('endDate')) - new Date(r.getAttribute('startDate')))/60000;
+      if(val.includes('REM')) vals.rem += min;
+      else if(val.includes('Deep')) vals.deep += min;
+      else if(val.includes('Core')) vals.core += min;
+      else if(val.includes('Awake')||val.includes('InBed')) vals.awake += min;
+      else vals.core += min;
+    });
+    vals.sleepMin = vals.rem + vals.deep + vals.core;
+    if(vals.spo2 && vals.spo2 <= 1) vals.spo2 = Math.round(vals.spo2 * 100);
+    return vals;
+  }
+
+  function loadDemo(){
+    render({ steps:8742, activeCal:534, exerciseMin:42, standHrs:10, rhr:56, hrv:48, spo2:97, resp:15.2, wristTemp:0.3, sleepMin:432, rem:95, deep:72, core:235, awake:30 });
+  }
+
+  function render(d){
+    discEl.style.display='none'; connEl.style.display='';
+    $('awUpdated').textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    const moveGoal=500, exGoal=30, standGoal=12;
+    setRing('ringMove',96,Math.min(d.activeCal/moveGoal,1));
+    setRing('ringExercise',78,Math.min(d.exerciseMin/exGoal,1));
+    setRing('ringStand',60,Math.min(d.standHrs/standGoal,1));
+    $('awActivityScore').textContent = d.activeCal;
+    $('awMoveVal').textContent = d.activeCal+'/'+moveGoal;
+    $('awExVal').textContent = d.exerciseMin+'/'+exGoal+'m';
+    $('awStandVal').textContent = d.standHrs+'/'+standGoal+'h';
+    const sleepH=(d.sleepMin/60).toFixed(1);
+    $('awSleep').textContent=sleepH;
+    zone($('zSleep'), sleepH>=7?'good':sleepH>=6?'norm':sleepH>=5?'warn':'bad');
+    if(d.rem||d.deep||d.core){
+      $('awStages').style.display='';
+      const tot=d.rem+d.deep+d.core+d.awake||1;
+      $('awStageRem').style.width=(d.rem/tot*100)+'%';
+      $('awStageDeep').style.width=(d.deep/tot*100)+'%';
+      $('awStageCore').style.width=(d.core/tot*100)+'%';
+      $('awStageAwake').style.width=(d.awake/tot*100)+'%';
+      $('awRemTxt').textContent=fmtMin(d.rem); $('awDeepTxt').textContent=fmtMin(d.deep);
+      $('awCoreTxt').textContent=fmtMin(d.core); $('awAwakeTxt').textContent=fmtMin(d.awake);
+      $('awSleepMeta').textContent=fmtMin(d.sleepMin)+' total';
+    }
+    $('awSteps').textContent=d.steps.toLocaleString();
+    zone($('zSteps'), d.steps>=10000?'good':d.steps>=6000?'norm':d.steps>=3000?'warn':'bad');
+    $('awHrv').textContent=d.hrv!==null?Math.round(d.hrv):'—';
+    if(d.hrv!==null) zone($('zHrv'), d.hrv>=50?'good':d.hrv>=30?'norm':d.hrv>=20?'warn':'bad');
+    $('awRhr').textContent=d.rhr!==null?Math.round(d.rhr):'—';
+    if(d.rhr!==null) zone($('zRhr'), d.rhr<=60?'good':d.rhr<=72?'norm':d.rhr<=85?'warn':'bad');
+    if(d.spo2!==null||d.resp!==null||d.wristTemp!==null){
+      $('awBio').style.display='';
+      if(d.wristTemp!==null){ $('awWristTemp').textContent=(d.wristTemp>=0?'+':'')+d.wristTemp.toFixed(1)+'°C'; zone($('zWrist'),Math.abs(d.wristTemp)<=0.5?'good':Math.abs(d.wristTemp)<=1?'norm':'warn'); }
+      if(d.spo2!==null){ $('awSpo2').textContent=d.spo2+'%'; zone($('zSpo2'),d.spo2>=96?'good':d.spo2>=93?'norm':d.spo2>=90?'warn':'bad'); }
+      if(d.resp!==null){ $('awResp').textContent=d.resp.toFixed(1)+' rpm'; zone($('zResp'),d.resp>=12&&d.resp<=18?'good':d.resp>=10&&d.resp<=22?'norm':'warn'); }
+    }
+    generateVerdict(d);
+  }
+
+  function setRing(id,r,pct){ const c=2*Math.PI*r; document.getElementById(id).style.strokeDashoffset=c*(1-pct); }
+  function zone(el,z){ el.className='aw-zone z-'+z; }
+  function fmtMin(m){ const h=Math.floor(m/60),mn=Math.round(m%60); return h?h+'h '+mn+'m':mn+'m'; }
+
+  function generateVerdict(d){
+    const v=$('awVerdict'); v.style.display='';
+    const sleepH=d.sleepMin/60;
+    let score=50;
+    if(sleepH>=7) score+=20; else if(sleepH>=6) score+=10; else score-=10;
+    if(d.hrv!==null&&d.hrv>=40) score+=10; else if(d.hrv!==null&&d.hrv<25) score-=10;
+    if(d.rhr!==null&&d.rhr<=60) score+=10; else if(d.rhr!==null&&d.rhr>80) score-=10;
+    if(d.steps>=8000) score+=10;
+    score=Math.max(0,Math.min(100,score));
+    let label,color,bg,headline,reasons=[];
+    if(score>=75){ label='GREEN'; color='#30D158'; bg='rgba(48,209,88,0.12)'; headline='Looking strong — your body is well-recovered.'; }
+    else if(score>=50){ label='STEADY'; color='#FF9F0A'; bg='rgba(255,159,10,0.10)'; headline='Decent baseline — listen to your body today.'; }
+    else { label='TAKE IT EASY'; color='#FF453A'; bg='rgba(255,69,58,0.10)'; headline='Your metrics suggest you could use more rest.'; }
+    if(sleepH<6) reasons.push('Sleep was under 6 hours');
+    if(d.hrv!==null&&d.hrv<30) reasons.push('HRV is below your typical range');
+    if(d.rhr!==null&&d.rhr>75) reasons.push('Resting heart rate is elevated');
+    if(d.steps<4000) reasons.push('Low activity so far today');
+    if(sleepH>=7.5) reasons.push('Great sleep duration');
+    if(d.hrv!==null&&d.hrv>=50) reasons.push('HRV looks solid');
+    if(!reasons.length) reasons.push('Metrics are within normal ranges');
+    const badge=$('awVerdictBadge');
+    badge.textContent=label; badge.style.color=color; badge.style.borderColor=color; badge.style.background=bg;
+    $('awVerdictHeadline').textContent=headline;
+    $('awVerdictReasons').textContent=reasons.join(' · ');
+  }
+})();
 </script>
 
 </body>
