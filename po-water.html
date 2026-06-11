@@ -1101,6 +1101,8 @@ html, body {
    safe-area padding so nothing sits under it. */
 .shell {
   padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
 }
 .modal-bg {
   padding-bottom: max(20px, env(safe-area-inset-bottom));
