@@ -16,6 +16,7 @@
   --text-quaternary: #4A4845;
   --border-soft:     rgba(255,255,255,0.07);
   --bg-card:         rgba(255,255,255,0.04);
+  --accent:          #E879F9;
   --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
@@ -33,206 +34,405 @@ body {
            max(80px, env(safe-area-inset-bottom))
            max(20px, env(safe-area-inset-left));
 }
-main {
-  max-width: 480px;
-  margin: 0 auto;
-  padding-top: 32px;
-}
+main { max-width: 500px; margin: 0 auto; padding-top: 32px; display: flex; flex-direction: column; gap: 16px; }
 
 /* ── Page header ── */
 .page-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-quaternary); margin-bottom: 6px; }
-.page-title   { font-size: 26px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; margin-bottom: 28px; }
+.page-title   { font-size: 26px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; margin-bottom: 4px; }
 
-/* ── Card ── */
-.profile-card {
+/* ── Section card ── */
+.section-card {
   background: var(--bg-card);
   border: 1px solid var(--border-soft);
   border-radius: 18px;
-  padding: 24px;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  padding: 20px;
+}
+.section-heading {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-quaternary); margin-bottom: 16px;
 }
 
-/* ── Field ── */
-.field { margin-bottom: 20px; }
-.field:last-of-type { margin-bottom: 0; }
-.field-label {
-  display: flex; justify-content: space-between; align-items: baseline;
-  margin-bottom: 8px;
+/* ── Unit toggle ── */
+.unit-row { display: flex; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+.unit-group { display: flex; align-items: center; gap: 8px; }
+.unit-group-label { font-size: 12px; color: var(--text-tertiary); font-weight: 600; }
+.unit-toggle { display: flex; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.10); }
+.unit-btn {
+  padding: 5px 12px; font-size: 12px; font-weight: 700; font-family: var(--font);
+  background: none; border: none; color: var(--text-quaternary); cursor: pointer;
+  transition: background 0.12s, color 0.12s;
 }
-.field-name  { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-.field-unit  { font-size: 11px; color: var(--text-quaternary); font-family: var(--font-mono); }
+.unit-btn.active { background: rgba(232,121,249,0.18); color: var(--accent); }
+
+/* ── Field ── */
+.field { margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+.field-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+.field-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.field-hint { font-size: 11px; color: var(--text-quaternary); font-family: var(--font-mono); }
 .field-input {
   width: 100%;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.10);
   border-radius: 12px;
-  padding: 13px 16px;
+  padding: 12px 15px;
   color: var(--text-primary);
-  font-size: 16px;
-  font-weight: 600;
-  font-family: var(--font-mono);
+  font-size: 16px; font-weight: 600; font-family: var(--font-mono);
   outline: none;
   transition: border-color 0.15s, background 0.15s;
   -webkit-appearance: none;
 }
-.field-input:focus {
-  border-color: rgba(255,255,255,0.25);
-  background: rgba(255,255,255,0.07);
-}
+.field-input:focus { border-color: rgba(232,121,249,0.45); background: rgba(255,255,255,0.06); }
 .field-input::placeholder { color: var(--text-quaternary); font-weight: 400; }
 
+/* ── Time-to-goal display (inline, below weekly rate) ── */
+.time-to-goal {
+  margin-top: 14px; padding: 14px 16px; border-radius: 12px;
+  background: rgba(232,121,249,0.05); border: 1px solid rgba(232,121,249,0.15);
+  display: flex; align-items: center; gap: 12px;
+}
+.ttg-icon { font-size: 20px; flex-shrink: 0; }
+.ttg-text { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
+.ttg-text strong { color: var(--text-primary); font-weight: 700; }
+.time-to-goal[hidden] { display: none; }
+
 /* ── Divider ── */
-.card-divider { height: 1px; background: var(--border-soft); margin: 22px 0; }
+.card-divider { height: 1px; background: var(--border-soft); margin: 18px 0; }
 
 /* ── Save button ── */
 .save-btn {
-  width: 100%;
-  padding: 14px;
-  border-radius: 13px;
-  border: none;
-  background: rgba(255,255,255,0.10);
-  color: var(--text-primary);
-  font-size: 15px;
-  font-weight: 700;
-  font-family: var(--font);
-  cursor: pointer;
-  transition: background 0.15s, transform 0.10s;
+  width: 100%; padding: 14px; border-radius: 14px; border: none;
+  background: rgba(232,121,249,0.12); color: var(--accent);
+  font-size: 15px; font-weight: 700; font-family: var(--font);
+  cursor: pointer; transition: background 0.15s, transform 0.10s;
   letter-spacing: -0.01em;
 }
-.save-btn:hover  { background: rgba(255,255,255,0.16); }
+.save-btn:hover  { background: rgba(232,121,249,0.20); }
 .save-btn:active { transform: scale(0.98); }
-.save-btn.saved  { background: rgba(48,209,88,0.18); color: #30D158; }
+.save-btn.saved  { background: rgba(48,209,88,0.15); color: #30D158; }
 
-/* ── Stats row ── */
-.stats-row {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-  margin-top: 16px;
-}
+/* ── Stats grid ── */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .stat-card {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--border-soft);
-  border-radius: 14px;
-  padding: 16px;
-  text-align: center;
+  background: var(--bg-card); border: 1px solid var(--border-soft);
+  border-radius: 14px; padding: 16px; text-align: center;
 }
-.stat-value { font-size: 22px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; font-family: var(--font-mono); }
-.stat-label { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+.stat-value {
+  font-size: 20px; font-weight: 800; color: var(--text-primary);
+  letter-spacing: -0.03em; font-family: var(--font-mono); line-height: 1;
+}
+.stat-label { font-size: 10px; color: var(--text-tertiary); margin-top: 5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
 .stat-value.green  { color: #30D158; }
 .stat-value.yellow { color: #FF9F0A; }
 .stat-value.red    { color: #FF6B6B; }
+.stat-value.blue   { color: #7DD3FC; }
+.stat-value.purple { color: var(--accent); }
 </style>
 </head>
 <body>
 <main>
-  <div class="page-eyebrow">My info</div>
-  <div class="page-title">Profile</div>
-
-  <div class="profile-card">
-    <div class="field">
-      <div class="field-label">
-        <span class="field-name">Weight</span>
-        <span class="field-unit">kg</span>
-      </div>
-      <input id="fieldWeight" class="field-input" type="number" min="20" max="300" step="0.1" placeholder="e.g. 80" inputmode="decimal" />
-    </div>
-
-    <div class="field">
-      <div class="field-label">
-        <span class="field-name">Height</span>
-        <span class="field-unit">cm</span>
-      </div>
-      <input id="fieldHeight" class="field-input" type="number" min="100" max="250" step="1" placeholder="e.g. 178" inputmode="decimal" />
-    </div>
-
-    <div class="field">
-      <div class="field-label">
-        <span class="field-name">Goal weight</span>
-        <span class="field-unit">kg</span>
-      </div>
-      <input id="fieldGoalWeight" class="field-input" type="number" min="20" max="300" step="0.1" placeholder="e.g. 75" inputmode="decimal" />
-    </div>
-
-    <div class="card-divider"></div>
-
-    <button id="saveBtn" class="save-btn">Save</button>
+  <div>
+    <div class="page-eyebrow">My info</div>
+    <div class="page-title">Profile</div>
   </div>
 
-  <div class="stats-row" id="statsRow" style="display:none"></div>
+  <!-- ── Body ── -->
+  <div class="section-card">
+    <div class="section-heading">Body</div>
+
+    <div class="unit-row">
+      <div class="unit-group">
+        <span class="unit-group-label">Weight</span>
+        <div class="unit-toggle">
+          <button class="unit-btn active" data-unit-group="weight" data-unit="kg">kg</button>
+          <button class="unit-btn"        data-unit-group="weight" data-unit="lbs">lbs</button>
+        </div>
+      </div>
+      <div class="unit-group">
+        <span class="unit-group-label">Height</span>
+        <div class="unit-toggle">
+          <button class="unit-btn active" data-unit-group="height" data-unit="cm">cm</button>
+          <button class="unit-btn"        data-unit-group="height" data-unit="in">in</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <span class="field-name">Age</span>
+        <span class="field-hint">years</span>
+      </div>
+      <input id="fieldAge" class="field-input" type="number" min="1" max="120" step="1" placeholder="e.g. 24" inputmode="numeric" />
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <span class="field-name">Weight</span>
+        <span class="field-hint" id="hintWeight">kg</span>
+      </div>
+      <input id="fieldWeight" class="field-input" type="number" min="1" max="700" step="0.1" placeholder="e.g. 80" inputmode="decimal" />
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <span class="field-name">Height</span>
+        <span class="field-hint" id="hintHeight">cm</span>
+      </div>
+      <input id="fieldHeight" class="field-input" type="number" min="1" max="120" step="0.1" placeholder="e.g. 178" inputmode="decimal" />
+    </div>
+  </div>
+
+  <!-- ── Weight Goal ── -->
+  <div class="section-card">
+    <div class="section-heading">Weight Goal</div>
+
+    <div class="field">
+      <div class="field-row">
+        <span class="field-name">Goal weight</span>
+        <span class="field-hint" id="hintGoalWeight">kg</span>
+      </div>
+      <input id="fieldGoalWeight" class="field-input" type="number" min="1" max="700" step="0.1" placeholder="e.g. 75" inputmode="decimal" />
+    </div>
+
+    <div class="field" style="margin-top:14px">
+      <div class="field-row">
+        <span class="field-name">Weekly target</span>
+        <span class="field-hint" id="hintWeeklyRate">kg / week</span>
+      </div>
+      <input id="fieldWeeklyRate" class="field-input" type="number" min="0.1" max="5" step="0.1" placeholder="e.g. 0.5" inputmode="decimal" />
+    </div>
+
+    <div id="timeToGoal" class="time-to-goal" hidden>
+      <span class="ttg-icon">🎯</span>
+      <span class="ttg-text" id="timeToGoalText"></span>
+    </div>
+  </div>
+
+  <!-- ── Sleep ── -->
+  <div class="section-card">
+    <div class="section-heading">Sleep</div>
+
+    <div class="field">
+      <div class="field-row">
+        <span class="field-name">Sleep goal</span>
+        <span class="field-hint">hrs / night</span>
+      </div>
+      <input id="fieldSleepGoal" class="field-input" type="number" min="1" max="24" step="0.5" placeholder="e.g. 8" inputmode="decimal" />
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <span class="field-name">Current avg sleep</span>
+        <span class="field-hint">hrs / night</span>
+      </div>
+      <input id="fieldSleepCurrent" class="field-input" type="number" min="1" max="24" step="0.5" placeholder="e.g. 6.5" inputmode="decimal" />
+    </div>
+  </div>
+
+  <button id="saveBtn" class="save-btn">Save profile</button>
+
+  <!-- ── Stats ── -->
+  <div id="statsGrid" class="stats-grid" style="display:none"></div>
 </main>
 
 <script>
 (function () {
   const STORE_KEY = 'profile:data';
-  const fields = {
-    weight:     document.getElementById('fieldWeight'),
-    height:     document.getElementById('fieldHeight'),
-    goalWeight: document.getElementById('fieldGoalWeight'),
-  };
-  const saveBtn   = document.getElementById('saveBtn');
-  const statsRow  = document.getElementById('statsRow');
 
+  const $ = id => document.getElementById(id);
+  const f = {
+    age:         $('fieldAge'),
+    weight:      $('fieldWeight'),
+    height:      $('fieldHeight'),
+    goalWeight:  $('fieldGoalWeight'),
+    weeklyRate:  $('fieldWeeklyRate'),
+    sleepGoal:   $('fieldSleepGoal'),
+    sleepCurrent:$('fieldSleepCurrent'),
+  };
+
+  let units = { weight: 'kg', height: 'cm' };
+
+  // ── Conversions ──────────────────────────────────────────────────
+  const KG_TO_LBS = 2.20462;
+  const CM_TO_IN  = 0.393701;
+
+  function toKg(v, u)  { return u === 'lbs' ? v / KG_TO_LBS : v; }
+  function fromKg(v, u){ return u === 'lbs' ? v * KG_TO_LBS : v; }
+  function toCm(v, u)  { return u === 'in'  ? v / CM_TO_IN  : v; }
+  function fromCm(v, u){ return u === 'in'  ? v * CM_TO_IN  : v; }
+  function fmt(v, decimals) { return v == null ? '' : parseFloat(v.toFixed(decimals)); }
+
+  // ── Unit toggle ───────────────────────────────────────────────────
+  function updateUnitHints() {
+    $('hintWeight').textContent    = units.weight;
+    $('hintGoalWeight').textContent= units.weight;
+    $('hintWeeklyRate').textContent= units.weight + ' / week';
+    $('hintHeight').textContent    = units.height;
+  }
+
+  document.querySelectorAll('.unit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group   = btn.dataset.unitGroup;
+      const newUnit = btn.dataset.unit;
+      const oldUnit = units[group];
+      if (newUnit === oldUnit) return;
+
+      // Convert displayed values before switching unit
+      if (group === 'weight') {
+        const oldKg = toKg(parseFloat(f.weight.value), oldUnit);
+        const oldGoalKg = toKg(parseFloat(f.goalWeight.value), oldUnit);
+        const oldRateKg = toKg(parseFloat(f.weeklyRate.value), oldUnit);
+        if (!isNaN(oldKg))     f.weight.value     = fmt(fromKg(oldKg, newUnit), 1);
+        if (!isNaN(oldGoalKg)) f.goalWeight.value  = fmt(fromKg(oldGoalKg, newUnit), 1);
+        if (!isNaN(oldRateKg)) f.weeklyRate.value  = fmt(fromKg(oldRateKg, newUnit), 2);
+      } else {
+        const oldCm = toCm(parseFloat(f.height.value), oldUnit);
+        if (!isNaN(oldCm)) f.height.value = fmt(fromCm(oldCm, newUnit), 1);
+      }
+
+      units[group] = newUnit;
+      // Update active button
+      document.querySelectorAll(`[data-unit-group="${group}"]`).forEach(b => b.classList.toggle('active', b.dataset.unit === newUnit));
+      updateUnitHints();
+      recalc();
+    });
+  });
+
+  // ── Recalculate derived stats ────────────────────────────────────
+  function recalc() {
+    const wRaw  = parseFloat(f.weight.value);
+    const hRaw  = parseFloat(f.height.value);
+    const gRaw  = parseFloat(f.goalWeight.value);
+    const rRaw  = parseFloat(f.weeklyRate.value);
+    const sg    = parseFloat(f.sleepGoal.value);
+    const sc    = parseFloat(f.sleepCurrent.value);
+
+    const wKg   = isNaN(wRaw) ? null : toKg(wRaw, units.weight);
+    const hCm   = isNaN(hRaw) ? null : toCm(hRaw, units.height);
+    const gKg   = isNaN(gRaw) ? null : toKg(gRaw, units.weight);
+    const rKg   = isNaN(rRaw) ? null : toKg(rRaw, units.weight);
+
+    // Time to goal
+    const ttg = $('timeToGoal');
+    if (wKg && gKg && rKg && rKg > 0) {
+      const diffKg = wKg - gKg;
+      if (Math.abs(diffKg) < 0.1) {
+        $('timeToGoalText').innerHTML = '<strong>You\'re at your goal weight!</strong> 🎉';
+      } else {
+        const weeks = Math.abs(diffKg) / rKg;
+        const months = weeks / 4.33;
+        const direction = diffKg > 0 ? 'lose' : 'gain';
+        const wLabel = units.weight === 'lbs'
+          ? `${fmt(Math.abs(fromKg(diffKg, 'lbs')), 1)} lbs`
+          : `${fmt(Math.abs(diffKg), 1)} kg`;
+        $('timeToGoalText').innerHTML =
+          `<strong>~${Math.ceil(weeks)} weeks</strong> (${months.toFixed(1)} months) to ${direction} ${wLabel}`;
+      }
+      ttg.hidden = false;
+    } else {
+      ttg.hidden = true;
+    }
+
+    // Stats grid
+    const statsGrid = $('statsGrid');
+    const cards = [];
+
+    if (wKg && hCm) {
+      const bmi = wKg / ((hCm / 100) ** 2);
+      let cls = 'green';
+      if (bmi < 18.5 || bmi > 30) cls = 'red';
+      else if (bmi > 25) cls = 'yellow';
+      cards.push(`<div class="stat-card"><div class="stat-value ${cls}">${bmi.toFixed(1)}</div><div class="stat-label">BMI</div></div>`);
+    }
+
+    if (wKg && gKg) {
+      const diffDisplay = units.weight === 'lbs'
+        ? fmt(fromKg(wKg - gKg, 'lbs'), 1)
+        : fmt(wKg - gKg, 1);
+      const sign = (wKg - gKg) > 0 ? '−' : '+';
+      const absDiff = Math.abs(diffDisplay);
+      const cls = absDiff < 0.5 ? 'green' : (absDiff < 5 ? 'yellow' : 'red');
+      cards.push(`<div class="stat-card"><div class="stat-value ${cls}">${sign}${absDiff} ${units.weight}</div><div class="stat-label">To goal</div></div>`);
+    }
+
+    if (!isNaN(sg) && !isNaN(sc)) {
+      const diff = (sc - sg).toFixed(1);
+      const cls  = diff >= 0 ? 'green' : (Math.abs(diff) < 1 ? 'yellow' : 'red');
+      const sign = diff >= 0 ? '+' : '';
+      cards.push(`<div class="stat-card"><div class="stat-value ${cls}">${sign}${diff}h</div><div class="stat-label">Sleep gap</div></div>`);
+    }
+
+    if (!isNaN(sg)) {
+      cards.push(`<div class="stat-card"><div class="stat-value blue">${sg}h</div><div class="stat-label">Sleep goal</div></div>`);
+    }
+
+    if (cards.length) {
+      statsGrid.innerHTML = cards.join('');
+      statsGrid.style.display = 'grid';
+      statsGrid.style.gridTemplateColumns = cards.length === 1 ? '1fr' : '1fr 1fr';
+    } else {
+      statsGrid.style.display = 'none';
+    }
+  }
+
+  // ── Persistence ───────────────────────────────────────────────────
   function load() {
     try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; }
   }
-  function save(data) { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
-
-  function renderStats(data) {
-    const w = parseFloat(data.weight);
-    const h = parseFloat(data.height);
-    const g = parseFloat(data.goalWeight);
-    if (!w || !h) { statsRow.style.display = 'none'; return; }
-
-    const bmi = w / ((h / 100) ** 2);
-    let bmiClass = 'green';
-    if (bmi < 18.5 || bmi > 30) bmiClass = 'red';
-    else if (bmi > 25) bmiClass = 'yellow';
-
-    let toGoalHtml = '';
-    if (g && w) {
-      const diff = +(w - g).toFixed(1);
-      const sign = diff > 0 ? '−' : '+';
-      const cls  = diff <= 0 ? 'green' : (Math.abs(diff) < 5 ? 'yellow' : 'red');
-      toGoalHtml = `<div class="stat-card">
-        <div class="stat-value ${cls}">${sign}${Math.abs(diff)} kg</div>
-        <div class="stat-label">To goal</div>
-      </div>`;
-    }
-
-    statsRow.innerHTML = `
-      <div class="stat-card">
-        <div class="stat-value ${bmiClass}">${bmi.toFixed(1)}</div>
-        <div class="stat-label">BMI</div>
-      </div>
-      ${toGoalHtml}`;
-    statsRow.style.display = 'grid';
-    statsRow.style.gridTemplateColumns = toGoalHtml ? '1fr 1fr' : '1fr';
+  function saveData() {
+    const wRaw = parseFloat(f.weight.value);
+    const hRaw = parseFloat(f.height.value);
+    const gRaw = parseFloat(f.goalWeight.value);
+    const rRaw = parseFloat(f.weeklyRate.value);
+    const data = {
+      weightUnit:   units.weight,
+      heightUnit:   units.height,
+      age:          parseFloat(f.age.value)          || null,
+      weight:       isNaN(wRaw) ? null : wRaw,
+      height:       isNaN(hRaw) ? null : hRaw,
+      goalWeight:   isNaN(gRaw) ? null : gRaw,
+      weeklyRate:   isNaN(rRaw) ? null : rRaw,
+      sleepGoal:    parseFloat(f.sleepGoal.value)    || null,
+      sleepCurrent: parseFloat(f.sleepCurrent.value) || null,
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(data));
+    return data;
   }
 
   function init() {
     const data = load();
-    if (data.weight)     fields.weight.value     = data.weight;
-    if (data.height)     fields.height.value     = data.height;
-    if (data.goalWeight) fields.goalWeight.value = data.goalWeight;
-    renderStats(data);
+    if (data.weightUnit) {
+      units.weight = data.weightUnit;
+      document.querySelectorAll('[data-unit-group="weight"]').forEach(b => b.classList.toggle('active', b.dataset.unit === data.weightUnit));
+    }
+    if (data.heightUnit) {
+      units.height = data.heightUnit;
+      document.querySelectorAll('[data-unit-group="height"]').forEach(b => b.classList.toggle('active', b.dataset.unit === data.heightUnit));
+    }
+    updateUnitHints();
+    if (data.age)          f.age.value          = data.age;
+    if (data.weight)       f.weight.value        = data.weight;
+    if (data.height)       f.height.value        = data.height;
+    if (data.goalWeight)   f.goalWeight.value    = data.goalWeight;
+    if (data.weeklyRate)   f.weeklyRate.value    = data.weeklyRate;
+    if (data.sleepGoal)    f.sleepGoal.value     = data.sleepGoal;
+    if (data.sleepCurrent) f.sleepCurrent.value  = data.sleepCurrent;
+    recalc();
   }
 
-  saveBtn.addEventListener('click', () => {
-    const data = {
-      weight:     fields.weight.value     ? parseFloat(fields.weight.value)     : null,
-      height:     fields.height.value     ? parseFloat(fields.height.value)     : null,
-      goalWeight: fields.goalWeight.value ? parseFloat(fields.goalWeight.value) : null,
-    };
-    save(data);
-    renderStats(data);
-    saveBtn.textContent = 'Saved ✓';
-    saveBtn.classList.add('saved');
-    setTimeout(() => { saveBtn.textContent = 'Save'; saveBtn.classList.remove('saved'); }, 1800);
+  // ── Save button ───────────────────────────────────────────────────
+  $('saveBtn').addEventListener('click', () => {
+    saveData();
+    recalc();
+    const btn = $('saveBtn');
+    btn.textContent = 'Saved ✓';
+    btn.classList.add('saved');
+    setTimeout(() => { btn.textContent = 'Save profile'; btn.classList.remove('saved'); }, 1800);
   });
 
-  Object.values(fields).forEach(f => {
-    f.addEventListener('keydown', e => { if (e.key === 'Enter') saveBtn.click(); });
-  });
+  // Live recalc on any input change
+  Object.values(f).forEach(el => el.addEventListener('input', recalc));
+  Object.values(f).forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') $('saveBtn').click(); }));
 
   init();
 })();
