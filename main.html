@@ -948,7 +948,17 @@ body::after {
     const hoursEl = document.getElementById('dayRingHours');
     if (hoursEl) hoursEl.textContent = formatHour(WAKE_HOUR) + ' – ' + formatHour(SLEEP_HOUR);
 
-    if (hours < WAKE_HOUR) {
+    // When bedtime is after midnight, sleep window crosses midnight:
+    // sleep=[SLEEP_HOUR, WAKE_HOUR), awake=[WAKE_HOUR,24)∪[0,SLEEP_HOUR)
+    // When bedtime is before midnight (normal):
+    // sleep=[0,WAKE_HOUR)∪[SLEEP_HOUR,24), awake=[WAKE_HOUR,SLEEP_HOUR)
+    const crossesMidnight = SLEEP_HOUR < WAKE_HOUR;
+    const isSleeping = crossesMidnight
+      ? (hours >= SLEEP_HOUR && hours < WAKE_HOUR)
+      : (hours < WAKE_HOUR);
+    const isPastBedtime = !crossesMidnight && hours >= SLEEP_HOUR;
+
+    if (isSleeping) {
       fillEl.setAttribute('stroke-dashoffset', C);
       fillEl.style.stroke = '#4D4B47';
       percentEl.textContent = '—';
@@ -959,7 +969,7 @@ body::after {
       return;
     }
 
-    if (hours >= SLEEP_HOUR) {
+    if (isPastBedtime) {
       fillEl.setAttribute('stroke-dashoffset', 0);
       fillEl.style.stroke = '#E25D7A';
       percentEl.textContent = '100%';
@@ -969,22 +979,32 @@ body::after {
       return;
     }
 
-    const span = SLEEP_HOUR - WAKE_HOUR;
-    const percent = (hours - WAKE_HOUR) / span * 100;
+    // Awake — calculate elapsed and remaining
+    let span, elapsed, minsLeft;
+    if (crossesMidnight) {
+      span    = 24 - WAKE_HOUR + SLEEP_HOUR;
+      elapsed = hours >= WAKE_HOUR ? hours - WAKE_HOUR : 24 - WAKE_HOUR + hours;
+      minsLeft = hours >= WAKE_HOUR
+        ? (24 - hours + SLEEP_HOUR) * 60
+        : (SLEEP_HOUR - hours) * 60;
+    } else {
+      span     = SLEEP_HOUR - WAKE_HOUR;
+      elapsed  = hours - WAKE_HOUR;
+      minsLeft = (SLEEP_HOUR - hours) * 60;
+    }
+
+    const percent = elapsed / span * 100;
     fillEl.setAttribute('stroke-dashoffset', C * (1 - percent / 100));
     fillEl.style.stroke = rgb(paletteAt(percent));
     percentEl.textContent = Math.floor(percent) + '%';
 
     let phase, status;
-    if (percent < 25)      { phase = 'MORNING';   status = '☀️ Morning — fresh start'; }
-    else if (percent < 50) { phase = 'MIDDAY';    status = '⚡ Midday — keep moving'; }
-    else if (percent < 75) { phase = 'AFTERNOON'; status = '🔥 Afternoon — push it'; }
-    else if (percent < 90) { phase = 'EVENING';   status = '⏳ Evening — wrap up'; }
-    else                   { phase = 'BEDTIME';   status = '🌙 Bedtime soon'; }
+    if (percent < 50)      { phase = 'DAYTIME';  status = '☀️ Daytime — keep going'; }
+    else if (percent < 85) { phase = 'LATER';    status = '⏳ Getting later — wrap up'; }
+    else                   { phase = 'BEDTIME';  status = '🌙 Bedtime soon'; }
     phaseEl.textContent  = phase;
     statusEl.textContent = status;
 
-    const minsLeft = (SLEEP_HOUR - hours) * 60;
     remainingEl.textContent = formatRemaining(minsLeft) + ' awake time left';
   }
 
