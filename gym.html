@@ -1284,18 +1284,18 @@ img, video, canvas, svg { max-width: 100%; }
   text-transform: uppercase;
   color: rgba(255,255,255,0.3);
 }
-/* default: dim white */
-.mm-muscle { fill: rgba(255,255,255,0.17); transition: fill .35s, filter .35s; }
-.mm-neutral { fill: rgba(255,255,255,0.10); }
+/* default: solid white */
+.mm-muscle { fill: #e8e8e8; transition: fill .35s, filter .35s; }
+.mm-neutral { fill: rgba(255,255,255,0.22); }
 /* need to train */
 .mm-planned {
-  fill: rgba(110,231,183,0.82);
-  filter: drop-shadow(0 0 5px rgba(110,231,183,0.55));
+  fill: #6ee7b7;
+  filter: drop-shadow(0 0 4px rgba(110,231,183,0.7));
 }
 /* already trained */
 .mm-done {
-  fill: rgba(255,90,90,0.85);
-  filter: drop-shadow(0 0 5px rgba(255,90,90,0.55));
+  fill: #ff6060;
+  filter: drop-shadow(0 0 4px rgba(255,90,90,0.7));
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1616,78 +1616,88 @@ img, video, canvas, svg { max-width: 100%; }
         <!-- FRONT -->
         <div class="mm-figure">
           <svg class="mm-svg" viewBox="0 0 100 228" xmlns="http://www.w3.org/2000/svg">
-            <!-- head (small relative to wide shoulders = aesthetic) -->
+            <!-- head -->
             <ellipse cx="50" cy="11" rx="9" ry="10" class="mm-neutral"/>
-            <!-- neck (thick athletic) -->
-            <path d="M44,20 C43,27 43,32 44,34 L56,34 C57,32 57,27 56,20 C53,17 47,17 44,20 Z" class="mm-neutral"/>
-            <!-- upper trap/shoulder connection (neutral) -->
-            <path d="M44,32 C38,33 30,36 22,42 L20,44 L22,46 C30,40 38,37 46,36 Z" class="mm-neutral"/>
-            <path d="M56,32 C62,33 70,36 78,42 L80,44 L78,46 C70,40 62,37 54,36 Z" class="mm-neutral"/>
-            <!-- LEFT FRONT DELT — large round cap, hallmark of aesthetic physique -->
+            <!-- neck -->
+            <path d="M45,20 L45,33 L55,33 L55,20 C53,18 47,18 45,20 Z" class="mm-neutral"/>
+            <!-- shoulder shelf neutral (clavicle area) -->
+            <path d="M45,32 L22,40 L23,43 L46,35 Z" class="mm-neutral"/>
+            <path d="M55,32 L78,40 L77,43 L54,35 Z" class="mm-neutral"/>
+
+            <!-- LEFT FRONT DELT: cap shape, flat top, curved belly, tapers to arm -->
             <path data-muscle="front-delt"
-              d="M12,34 C3,37 1,49 2,59 C4,69 13,75 23,73 C31,71 35,63 33,53 C31,43 22,34 14,33 Z"
+              d="M15,35 L8,40 C4,46 3,54 5,62 C7,68 14,72 21,70 L26,65 C29,58 29,50 26,43 L20,37 Z"
               class="mm-muscle"/>
             <!-- RIGHT FRONT DELT -->
             <path data-muscle="front-delt"
-              d="M88,34 C97,37 99,49 98,59 C96,69 87,75 77,73 C69,71 65,63 67,53 C69,43 78,34 86,33 Z"
+              d="M85,35 L92,40 C96,46 97,54 95,62 C93,68 86,72 79,70 L74,65 C71,58 71,50 74,43 L80,37 Z"
               class="mm-muscle"/>
-            <!-- LEFT PEC — full square pec -->
+
+            <!-- LEFT PEC: fan — wide at sternum, narrows to armpit -->
             <path data-muscle="chest"
-              d="M20,42 C26,37 40,35 49,42 C51,54 49,66 44,72 C37,76 27,74 21,67 C16,59 16,50 20,42 Z"
+              d="M22,42 L23,37 C30,34 40,34 47,40 L48,48 C49,58 47,67 43,72 L37,73 C30,72 24,67 21,61 L20,52 Z"
               class="mm-muscle"/>
             <!-- RIGHT PEC -->
             <path data-muscle="chest"
-              d="M80,42 C74,37 60,35 51,42 C49,54 51,66 56,72 C63,76 73,74 79,67 C84,59 84,50 80,42 Z"
+              d="M78,42 L77,37 C70,34 60,34 53,40 L52,48 C51,58 53,67 57,72 L63,73 C70,72 76,67 79,61 L80,52 Z"
               class="mm-muscle"/>
-            <!-- LEFT BICEP — peaked belly along inner arm -->
+
+            <!-- LEFT BICEP: spindle — narrow at tendons, peak in upper middle -->
             <path data-muscle="bicep"
-              d="M7,55 C1,65 1,77 3,87 C5,95 12,99 19,95 C25,89 26,77 23,66 C20,55 12,51 9,53 Z"
+              d="M9,56 L6,62 C3,70 3,80 5,88 C7,94 13,97 19,94 L22,88 C24,80 24,70 21,62 L17,56 Z"
               class="mm-muscle"/>
             <!-- RIGHT BICEP -->
             <path data-muscle="bicep"
-              d="M93,55 C99,65 99,77 97,87 C95,95 88,99 81,95 C75,89 74,77 77,66 C80,55 88,51 91,53 Z"
+              d="M91,56 L94,62 C97,70 97,80 95,88 C93,94 87,97 81,94 L78,88 C76,80 76,70 79,62 L83,56 Z"
               class="mm-muscle"/>
-            <!-- LEFT FOREARM (neutral) -->
-            <path d="M3,90 C1,102 1,114 3,122 C6,129 13,131 19,127 C23,121 23,109 21,97 C18,90 5,89 3,90 Z" class="mm-neutral"/>
-            <!-- RIGHT FOREARM (neutral) -->
-            <path d="M97,90 C99,102 99,114 97,122 C94,129 87,131 81,127 C77,121 77,109 79,97 C82,90 95,89 97,90 Z" class="mm-neutral"/>
+
+            <!-- FOREARMS (neutral) -->
+            <path d="M5,91 L4,98 C3,108 3,116 5,122 C7,127 13,129 18,126 L20,118 C21,110 21,100 19,93 L13,90 Z" class="mm-neutral"/>
+            <path d="M95,91 L96,98 C97,108 97,116 95,122 C93,127 87,129 82,126 L80,118 C79,110 79,100 81,93 L87,90 Z" class="mm-neutral"/>
             <!-- HANDS (neutral) -->
-            <ellipse cx="13" cy="134" rx="8" ry="9" class="mm-neutral"/>
-            <ellipse cx="87" cy="134" rx="8" ry="9" class="mm-neutral"/>
-            <!-- ABS — 6-pack, fits narrow aesthetic waist -->
-            <rect data-muscle="abs" x="33" y="74" width="13" height="10" rx="3" class="mm-muscle"/>
-            <rect data-muscle="abs" x="54" y="74" width="13" height="10" rx="3" class="mm-muscle"/>
-            <rect data-muscle="abs" x="33" y="86" width="13" height="10" rx="3" class="mm-muscle"/>
-            <rect data-muscle="abs" x="54" y="86" width="13" height="10" rx="3" class="mm-muscle"/>
-            <rect data-muscle="abs" x="34" y="98" width="12" height="9"  rx="3" class="mm-muscle"/>
-            <rect data-muscle="abs" x="54" y="98" width="12" height="9"  rx="3" class="mm-muscle"/>
-            <!-- OBLIQUES / serratus (neutral side waist) -->
-            <path d="M20,66 C16,78 16,92 20,105 C23,111 29,113 31,106 C33,95 33,80 29,68 C25,61 21,62 20,66 Z" class="mm-neutral"/>
-            <path d="M80,66 C84,78 84,92 80,105 C77,111 71,113 69,106 C67,95 67,80 71,68 C75,61 79,62 80,66 Z" class="mm-neutral"/>
-            <!-- HIP / pelvis (neutral) -->
-            <path d="M29,108 C29,116 37,122 50,122 C63,122 71,116 71,108 C63,114 37,114 29,108 Z" class="mm-neutral"/>
-            <!-- LEFT QUAD — teardrop sweep (vastus lateralis bulge) -->
+            <path d="M6,124 C5,130 6,136 10,138 C14,139 18,136 19,130 L19,124 Z" class="mm-neutral"/>
+            <path d="M94,124 C95,130 94,136 90,138 C86,139 82,136 81,130 L81,124 Z" class="mm-neutral"/>
+
+            <!-- ABS: 3 rows × 2 cols, tight gap = defined 6-pack -->
+            <rect data-muscle="abs" x="34" y="74" width="12" height="9" rx="2" class="mm-muscle"/>
+            <rect data-muscle="abs" x="54" y="74" width="12" height="9" rx="2" class="mm-muscle"/>
+            <rect data-muscle="abs" x="34" y="85" width="12" height="9" rx="2" class="mm-muscle"/>
+            <rect data-muscle="abs" x="54" y="85" width="12" height="9" rx="2" class="mm-muscle"/>
+            <rect data-muscle="abs" x="35" y="96" width="11" height="9" rx="2" class="mm-muscle"/>
+            <rect data-muscle="abs" x="54" y="96" width="11" height="9" rx="2" class="mm-muscle"/>
+
+            <!-- OBLIQUES / side waist (neutral) -->
+            <path d="M21,66 L19,76 C18,86 18,96 20,104 C22,109 27,111 30,105 L31,95 C32,83 31,72 29,66 Z" class="mm-neutral"/>
+            <path d="M79,66 L81,76 C82,86 82,96 80,104 C78,109 73,111 70,105 L69,95 C68,83 69,72 71,66 Z" class="mm-neutral"/>
+
+            <!-- HIP (neutral) -->
+            <path d="M30,107 L28,114 C32,119 40,121 50,121 C60,121 68,119 72,114 L70,107 C64,113 36,113 30,107 Z" class="mm-neutral"/>
+
+            <!-- LEFT QUAD: elongated, widest at mid-thigh, tapers top and bottom -->
             <path data-muscle="quad"
-              d="M23,120 C15,130 13,150 15,166 C17,178 25,184 35,182 C45,180 50,170 50,156 C50,139 47,123 39,117 C34,113 25,115 23,120 Z"
+              d="M24,120 L19,130 C15,142 14,158 16,168 C18,177 25,183 34,181 L40,178 C45,170 47,158 46,143 C45,130 41,120 35,117 L28,117 Z"
               class="mm-muscle"/>
             <!-- RIGHT QUAD -->
             <path data-muscle="quad"
-              d="M77,120 C85,130 87,150 85,166 C83,178 75,184 65,182 C55,180 50,170 50,156 C50,139 53,123 61,117 C66,113 75,115 77,120 Z"
+              d="M76,120 L81,130 C85,142 86,158 84,168 C82,177 75,183 66,181 L60,178 C55,170 53,158 54,143 C55,130 59,120 65,117 L72,117 Z"
               class="mm-muscle"/>
+
             <!-- KNEES (neutral) -->
-            <ellipse cx="34" cy="184" rx="13" ry="8" class="mm-neutral"/>
-            <ellipse cx="66" cy="184" rx="13" ry="8" class="mm-neutral"/>
-            <!-- LEFT CALF — diamond gastrocnemius shape -->
+            <path d="M22,181 C22,188 27,192 34,192 C41,192 46,188 46,181 L40,180 C38,185 30,185 28,180 Z" class="mm-neutral"/>
+            <path d="M54,181 C54,188 59,192 66,192 C73,192 78,188 78,181 L72,180 C70,185 62,185 60,180 Z" class="mm-neutral"/>
+
+            <!-- LEFT CALF: two lobes (medial+lateral gastrocnemius) -->
             <path data-muscle="calf"
-              d="M23,196 C18,208 18,218 22,224 C26,227 32,227 36,224 C40,218 40,208 37,196 C34,190 30,189 28,189 C25,189 23,192 23,196 Z"
+              d="M24,195 L21,205 C19,213 20,220 23,224 L28,226 L32,226 L36,224 C39,220 40,213 38,205 L35,195 C33,190 31,189 30,189 C27,189 25,191 24,195 Z"
               class="mm-muscle"/>
             <!-- RIGHT CALF -->
             <path data-muscle="calf"
-              d="M77,196 C82,208 82,218 78,224 C74,227 68,227 64,224 C60,218 60,208 63,196 C66,190 70,189 72,189 C75,189 77,192 77,196 Z"
+              d="M76,195 L79,205 C81,213 80,220 77,224 L72,226 L68,226 L64,224 C61,220 60,213 62,205 L65,195 C67,190 69,189 70,189 C73,189 75,191 76,195 Z"
               class="mm-muscle"/>
+
             <!-- FEET (neutral) -->
-            <ellipse cx="30" cy="227" rx="11" ry="4" class="mm-neutral"/>
-            <ellipse cx="70" cy="227" rx="11" ry="4" class="mm-neutral"/>
+            <path d="M20,226 C19,228 22,228 30,228 C36,228 40,227 41,226 L36,224 C33,226 27,226 24,224 Z" class="mm-neutral"/>
+            <path d="M80,226 C81,228 78,228 70,228 C64,228 60,227 59,226 L64,224 C67,226 73,226 76,224 Z" class="mm-neutral"/>
           </svg>
           <div class="mm-label">Front</div>
         </div>
@@ -1698,73 +1708,84 @@ img, video, canvas, svg { max-width: 100%; }
             <!-- head -->
             <ellipse cx="50" cy="11" rx="9" ry="10" class="mm-neutral"/>
             <!-- neck -->
-            <path d="M44,20 C43,27 43,32 44,34 L56,34 C57,32 57,27 56,20 C53,17 47,17 44,20 Z" class="mm-neutral"/>
-            <!-- TRAPS — kite/diamond from neck to mid-back -->
+            <path d="M45,20 L45,33 L55,33 L55,20 C53,18 47,18 45,20 Z" class="mm-neutral"/>
+
+            <!-- TRAPS: diamond from neck to mid-back, angular edges -->
             <path data-muscle="trap"
-              d="M44,22 C50,16 56,22 60,27 C68,33 74,43 70,51 C62,57 50,59 38,57 C26,49 26,37 34,29 C38,24 44,22 44,22 Z"
+              d="M46,23 L38,30 C32,36 26,44 28,50 L36,55 C41,57 50,58 59,55 L68,50 C70,44 64,36 58,30 Z"
               class="mm-muscle"/>
-            <!-- LEFT REAR DELT — same cap as front -->
+
+            <!-- LEFT REAR DELT: same cap shape as front -->
             <path data-muscle="rear-delt"
-              d="M12,34 C3,37 1,49 2,59 C4,69 13,75 23,73 C31,71 35,63 33,53 C31,43 22,34 14,33 Z"
+              d="M15,35 L8,40 C4,46 3,54 5,62 C7,68 14,72 21,70 L26,65 C29,58 29,50 26,43 L20,37 Z"
               class="mm-muscle"/>
             <!-- RIGHT REAR DELT -->
             <path data-muscle="rear-delt"
-              d="M88,34 C97,37 99,49 98,59 C96,69 87,75 77,73 C69,71 65,63 67,53 C69,43 78,34 86,33 Z"
+              d="M85,35 L92,40 C96,46 97,54 95,62 C93,68 86,72 79,70 L74,65 C71,58 71,50 74,43 L80,37 Z"
               class="mm-muscle"/>
-            <!-- LEFT LAT — sweeps from armpit out wide to ribcage, tapers to waist -->
+
+            <!-- LEFT LAT: flat wing — angular at top, curves at outer sweep, tapers to waist -->
             <path data-muscle="lat"
-              d="M30,54 C25,57 20,62 16,70 C10,80 6,93 8,106 C10,116 18,122 28,120 C35,118 38,110 38,100 C38,86 36,70 33,58 Z"
+              d="M31,56 L25,62 C19,70 12,82 9,96 C7,107 10,116 19,120 L27,121 C33,119 36,112 37,102 C38,88 37,72 34,60 Z"
               class="mm-muscle"/>
             <!-- RIGHT LAT -->
             <path data-muscle="lat"
-              d="M70,54 C75,57 80,62 84,70 C90,80 94,93 92,106 C90,116 82,122 72,120 C65,118 62,110 62,100 C62,86 64,70 67,58 Z"
+              d="M69,56 L75,62 C81,70 88,82 91,96 C93,107 90,116 81,120 L73,121 C67,119 64,112 63,102 C62,88 63,72 66,60 Z"
               class="mm-muscle"/>
-            <!-- LEFT TRICEP — horseshoe back of arm -->
+
+            <!-- LEFT TRICEP: spindle shape, back of arm -->
             <path data-muscle="tricep"
-              d="M7,55 C1,65 1,77 3,87 C5,95 12,99 19,95 C25,89 26,77 23,66 C20,55 12,51 9,53 Z"
+              d="M9,56 L6,62 C3,70 3,80 5,88 C7,94 13,97 19,94 L22,88 C24,80 24,70 21,62 L17,56 Z"
               class="mm-muscle"/>
             <!-- RIGHT TRICEP -->
             <path data-muscle="tricep"
-              d="M93,55 C99,65 99,77 97,87 C95,95 88,99 81,95 C75,89 74,77 77,66 C80,55 88,51 91,53 Z"
+              d="M91,56 L94,62 C97,70 97,80 95,88 C93,94 87,97 81,94 L78,88 C76,80 76,70 79,62 L83,56 Z"
               class="mm-muscle"/>
+
             <!-- FOREARMS (neutral) -->
-            <path d="M3,90 C1,102 1,114 3,122 C6,129 13,131 19,127 C23,121 23,109 21,97 C18,90 5,89 3,90 Z" class="mm-neutral"/>
-            <path d="M97,90 C99,102 99,114 97,122 C94,129 87,131 81,127 C77,121 77,109 79,97 C82,90 95,89 97,90 Z" class="mm-neutral"/>
+            <path d="M5,91 L4,98 C3,108 3,116 5,122 C7,127 13,129 18,126 L20,118 C21,110 21,100 19,93 L13,90 Z" class="mm-neutral"/>
+            <path d="M95,91 L96,98 C97,108 97,116 95,122 C93,127 87,129 82,126 L80,118 C79,110 79,100 81,93 L87,90 Z" class="mm-neutral"/>
             <!-- HANDS (neutral) -->
-            <ellipse cx="13" cy="134" rx="8" ry="9" class="mm-neutral"/>
-            <ellipse cx="87" cy="134" rx="8" ry="9" class="mm-neutral"/>
-            <!-- SPINE / lower back (neutral, between lats) -->
-            <path d="M38,60 C38,78 38,98 38,120 L62,120 C62,98 62,78 62,60 C58,58 42,58 38,60 Z" class="mm-neutral"/>
-            <!-- LEFT GLUTE — round, full -->
+            <path d="M6,124 C5,130 6,136 10,138 C14,139 18,136 19,130 L19,124 Z" class="mm-neutral"/>
+            <path d="M94,124 C95,130 94,136 90,138 C86,139 82,136 81,130 L81,124 Z" class="mm-neutral"/>
+
+            <!-- SPINE / erectors between lats (neutral, narrow strip) -->
+            <path d="M37,60 L37,120 L63,120 L63,60 C58,58 42,58 37,60 Z" class="mm-neutral"/>
+
+            <!-- LEFT GLUTE: rounded square, sits below lat -->
             <path data-muscle="glute"
-              d="M16,120 C11,132 11,145 17,155 C23,163 34,167 45,163 C53,158 54,147 51,135 C47,122 38,115 28,114 C21,114 17,117 16,120 Z"
+              d="M18,121 L14,132 C12,142 13,152 18,159 C23,165 32,168 41,164 L47,159 C51,151 51,140 48,130 C45,121 37,116 28,116 L21,118 Z"
               class="mm-muscle"/>
             <!-- RIGHT GLUTE -->
             <path data-muscle="glute"
-              d="M84,120 C89,132 89,145 83,155 C77,163 66,167 55,163 C47,158 46,147 49,135 C53,122 62,115 72,114 C79,114 83,117 84,120 Z"
+              d="M82,121 L86,132 C88,142 87,152 82,159 C77,165 68,168 59,164 L53,159 C49,151 49,140 52,130 C55,121 63,116 72,116 L79,118 Z"
               class="mm-muscle"/>
-            <!-- LEFT HAMSTRING — full, hangs below glute -->
+
+            <!-- LEFT HAMSTRING: elongated, tapers at knee -->
             <path data-muscle="hamstring"
-              d="M15,158 C11,170 11,182 14,193 C17,201 25,205 34,203 C43,201 47,192 47,181 C48,169 45,157 40,150 C36,145 29,145 24,148 C20,151 16,155 15,158 Z"
+              d="M16,162 L13,172 C11,182 12,192 15,199 C18,205 25,208 33,206 L39,202 C43,195 45,184 44,173 C43,162 38,154 31,152 L24,154 Z"
               class="mm-muscle"/>
             <!-- RIGHT HAMSTRING -->
             <path data-muscle="hamstring"
-              d="M85,158 C89,170 89,182 86,193 C83,201 75,205 66,203 C57,201 53,192 53,181 C52,169 55,157 60,150 C64,145 71,145 76,148 C80,151 84,155 85,158 Z"
+              d="M84,162 L87,172 C89,182 88,192 85,199 C82,205 75,208 67,206 L61,202 C57,195 55,184 56,173 C57,162 62,154 69,152 L76,154 Z"
               class="mm-muscle"/>
+
             <!-- KNEES (neutral) -->
-            <ellipse cx="33" cy="205" rx="13" ry="8" class="mm-neutral"/>
-            <ellipse cx="67" cy="205" rx="13" ry="8" class="mm-neutral"/>
-            <!-- LEFT CALF BACK — medial/lateral head diamond -->
+            <path d="M14,202 C14,209 20,213 32,213 C44,213 47,209 46,202 L39,204 C37,208 27,208 25,204 Z" class="mm-neutral"/>
+            <path d="M54,202 C54,209 56,213 68,213 C80,213 86,209 86,202 L79,204 C77,208 63,208 61,204 Z" class="mm-neutral"/>
+
+            <!-- LEFT CALF BACK -->
             <path data-muscle="calf"
-              d="M21,213 C17,220 17,224 21,227 C25,228 32,228 36,227 C40,224 40,220 37,213 C34,208 30,207 28,207 C24,207 22,210 21,213 Z"
+              d="M19,215 L17,221 C16,224 18,227 22,228 L30,228 L35,227 C38,225 39,221 37,216 L34,210 C31,207 30,207 28,207 C25,207 21,210 19,215 Z"
               class="mm-muscle"/>
             <!-- RIGHT CALF BACK -->
             <path data-muscle="calf"
-              d="M79,213 C83,220 83,224 79,227 C75,228 68,228 64,227 C60,224 60,220 63,213 C66,208 70,207 72,207 C76,207 78,210 79,213 Z"
+              d="M81,215 L83,221 C84,224 82,227 78,228 L70,228 L65,227 C62,225 61,221 63,216 L66,210 C69,207 70,207 72,207 C75,207 79,210 81,215 Z"
               class="mm-muscle"/>
+
             <!-- FEET (neutral) -->
-            <ellipse cx="30" cy="227" rx="11" ry="4" class="mm-neutral"/>
-            <ellipse cx="70" cy="227" rx="11" ry="4" class="mm-neutral"/>
+            <path d="M15,213 C14,215 16,216 22,216 C28,216 28,215 27,213 Z" class="mm-neutral"/>
+            <path d="M73,213 C72,215 72,216 78,216 C84,216 86,215 85,213 Z" class="mm-neutral"/>
           </svg>
           <div class="mm-label">Back</div>
         </div>
