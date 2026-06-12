@@ -672,7 +672,7 @@ main {
               <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 2a10 10 0 0 1 0 20 10 10 0 0 1 0-20"/></svg>
             </div>
             <span class="aw-brand-text">HEALTH</span>
-            <span class="aw-tag"><span class="aw-tag-dot"></span>loaded</span>
+            <span class="aw-tag" id="awTag"><span class="aw-tag-dot"></span>live</span>
           </div>
           <div class="aw-header-right">
             <span class="aw-updated" id="awUpdated">—</span>
@@ -1372,13 +1372,67 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <script>
 (function(){
+  'use strict';
   const $ = id => document.getElementById(id);
+
+  const SUPA_URL = 'https://irchofgefxpgohqfngyo.supabase.co';
+  const SUPA_KEY = 'sb_publishable_sNUOPZ-EBvdFBqUpO2N1Fw_-g6DWPst';
+
   const discEl = $('awDisconnected'), connEl = $('awConnected');
+
+  async function loadFromSupabase() {
+    try {
+      const res = await fetch(
+        SUPA_URL + '/rest/v1/health_snapshots?order=snapshot_date.desc&limit=1',
+        { headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY } }
+      );
+      if (!res.ok) return null;
+      const rows = await res.json();
+      if (!rows || !rows.length) return null;
+      const row = rows[0];
+      return {
+        steps:       parseInt(row.steps)              || 0,
+        activeCal:   parseFloat(row.active_cal)       || 0,
+        exerciseMin: parseFloat(row.exercise_min)     || 0,
+        standHrs:    parseFloat(row.stand_hrs)        || 0,
+        sleepMin:    parseFloat(row.sleep_min)        || 0,
+        rem:         parseFloat(row.rem_min)          || 0,
+        deep:        parseFloat(row.deep_min)         || 0,
+        core:        parseFloat(row.core_min)         || 0,
+        awake:       parseFloat(row.awake_min)        || 0,
+        hrv:         row.hrv_ms       != null ? parseFloat(row.hrv_ms)       : null,
+        rhr:         row.rhr_bpm      != null ? parseFloat(row.rhr_bpm)      : null,
+        spo2:        row.spo2_pct     != null ? parseFloat(row.spo2_pct)     : null,
+        resp:        row.resp_rate    != null ? parseFloat(row.resp_rate)    : null,
+        wristTemp:   row.wrist_temp_c != null ? parseFloat(row.wrist_temp_c) : null,
+        _date: row.snapshot_date
+      };
+    } catch(e) { return null; }
+  }
+
   $('awImportBtn').addEventListener('click', () => $('awFileInput').click());
   $('awFileInput').addEventListener('change', e => { if(e.target.files[0]) parseHealthExport(e.target.files[0]); });
   $('awDemoBtn').addEventListener('click', loadDemo);
   $('awDisconnectBtn').addEventListener('click', () => { discEl.style.display=''; connEl.style.display='none'; });
-  $('awRefreshBtn').addEventListener('click', () => $('awFileInput').click());
+  $('awRefreshBtn').addEventListener('click', async () => {
+    const d = await loadFromSupabase();
+    if (d) render(d, true);
+    else $('awFileInput').click();
+  });
+
+  // Auto-load from Supabase on every page open
+  (async function init() {
+    const d = await loadFromSupabase();
+    if (d) render(d, true);
+  })();
+
+  // Refresh from Supabase every 10 minutes while the widget is visible
+  setInterval(async () => {
+    if (connEl.style.display !== 'none') {
+      const d = await loadFromSupabase();
+      if (d) render(d, true);
+    }
+  }, 10 * 60 * 1000);
 
   function parseHealthExport(file){
     const reader = new FileReader();
@@ -1387,7 +1441,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const parser = new DOMParser();
         const doc = parser.parseFromString(e.target.result, 'text/xml');
         const records = doc.querySelectorAll('Record');
-        render(extractLatest(records));
+        render(extractLatest(records), false);
       } catch(err) {
         alert('Could not parse the file. Please export from Apple Health as XML.');
         console.error(err);
@@ -1436,20 +1490,29 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function loadDemo(){
-    render({ steps:8742, activeCal:534, exerciseMin:42, standHrs:10, rhr:56, hrv:48, spo2:97, resp:15.2, wristTemp:0.3, sleepMin:432, rem:95, deep:72, core:235, awake:30 });
+    render({ steps:8742, activeCal:534, exerciseMin:42, standHrs:10, rhr:56, hrv:48, spo2:97, resp:15.2, wristTemp:0.3, sleepMin:432, rem:95, deep:72, core:235, awake:30 }, false);
   }
 
-  function render(d){
+  function render(d, fromSupabase){
     discEl.style.display='none'; connEl.style.display='';
-    $('awUpdated').textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    const tagEl = $('awTag');
+    if (fromSupabase && d._date) {
+      const today = new Date().toISOString().slice(0,10);
+      const label = d._date === today ? 'Today' : d._date;
+      $('awUpdated').textContent = label + ' · auto-sync';
+      if (tagEl) tagEl.innerHTML = '<span class="aw-tag-dot"></span>live';
+    } else {
+      $('awUpdated').textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      if (tagEl) tagEl.innerHTML = '<span class="aw-tag-dot"></span>imported';
+    }
     const moveGoal=500, exGoal=30, standGoal=12;
     setRing('ringMove',96,Math.min(d.activeCal/moveGoal,1));
     setRing('ringExercise',78,Math.min(d.exerciseMin/exGoal,1));
     setRing('ringStand',60,Math.min(d.standHrs/standGoal,1));
-    $('awActivityScore').textContent = d.activeCal;
-    $('awMoveVal').textContent = d.activeCal+'/'+moveGoal;
-    $('awExVal').textContent = d.exerciseMin+'/'+exGoal+'m';
-    $('awStandVal').textContent = d.standHrs+'/'+standGoal+'h';
+    $('awActivityScore').textContent = Math.round(d.activeCal);
+    $('awMoveVal').textContent = Math.round(d.activeCal)+'/'+moveGoal;
+    $('awExVal').textContent = Math.round(d.exerciseMin)+'/'+exGoal+'m';
+    $('awStandVal').textContent = Math.round(d.standHrs)+'/'+standGoal+'h';
     const sleepH=(d.sleepMin/60).toFixed(1);
     $('awSleep').textContent=sleepH;
     zone($('zSleep'), sleepH>=7?'good':sleepH>=6?'norm':sleepH>=5?'warn':'bad');
