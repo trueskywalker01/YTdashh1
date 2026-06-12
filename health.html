@@ -777,7 +777,6 @@ main {
 .macro-scan-trigger-btn:hover { border-color: rgba(100,210,255,0.35); color: #64D2FF; background: rgba(100,210,255,0.06); }
 .macro-scan-trigger-btn:active { transform: scale(0.98); }
 .macro-scan-trigger-btn.loading { pointer-events: none; opacity: 0.7; }
-.macro-scan-file { display: none; }
 .macro-scan-card {
   margin-top: 14px; border-radius: 14px; overflow: hidden;
   border: 1px solid rgba(100,210,255,0.18);
@@ -1060,7 +1059,6 @@ main {
       </div>
 
       <div class="macro-add-wrap">
-        <input type="file" id="macroScanFile" accept="image/*" capture="environment" class="macro-scan-file" />
         <button id="macroScanTrigger" class="macro-scan-trigger-btn">
           <span id="macroScanBtnIcon">📷</span>
           <span id="macroScanBtnText">Scan food photo</span>
@@ -2134,7 +2132,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const API_KEY_STORE = 'anthropic_api_key';
 
   const triggerBtn   = $('macroScanTrigger');
-  const fileInput    = $('macroScanFile');
   const scanCard     = $('macroScanCard');
   const apiKeyWrap   = $('macroApiKeyWrap');
   const apiKeyInput  = $('macroApiKeyInput');
@@ -2163,14 +2160,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
   triggerBtn.addEventListener('click', () => {
     if (!getKey()) { apiKeyWrap.hidden = false; apiKeyInput.focus(); return; }
-    fileInput.click();
+
+    // Create a fresh input each click — iOS Safari won't fire on display:none inputs
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = 'image/*';
+    inp.style.cssText = 'position:fixed;top:-200px;left:-200px;opacity:0;';
+    document.body.appendChild(inp);
+    inp.addEventListener('change', () => {
+      const file = inp.files[0];
+      document.body.removeChild(inp);
+      if (file) handleFile(file);
+    });
+    inp.click();
   });
 
-  fileInput.addEventListener('change', async () => {
-    const file = fileInput.files[0];
-    if (!file) return;
-    fileInput.value = '';
-
+  async function handleFile(file) {
     setBtnLoading(true);
     scanCard.hidden = true;
 
@@ -2183,7 +2188,7 @@ document.addEventListener('DOMContentLoaded', function () {
       setBtnLoading(false);
       alert('Scan failed: ' + (err.message || 'Unknown error'));
     }
-  });
+  }
 
   async function prepareImage(file) {
     return new Promise((resolve, reject) => {
