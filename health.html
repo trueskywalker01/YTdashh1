@@ -632,6 +632,88 @@ main {
   .aw-bio { grid-template-columns: 1fr; }
 }
 
+/* ===== Macro Tracker ===== */
+.macro-wrap { margin-bottom: 28px; }
+.macro-card {
+  background: var(--bg-card); border-radius: 16px; padding: 22px;
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+}
+.macro-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.macro-goals-btn {
+  font-size: 11px; font-weight: 700; padding: 6px 12px;
+  border-radius: 999px; border: 1px solid var(--border-strong);
+  background: transparent; color: var(--text-secondary);
+  cursor: pointer; font-family: inherit; letter-spacing: 0.04em; transition: all 0.15s;
+}
+.macro-goals-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
+.macro-overview { display: grid; grid-template-columns: 148px 1fr; gap: 20px; align-items: center; margin-bottom: 20px; }
+.macro-cal-ring { position: relative; width: 140px; height: 140px; flex-shrink: 0; }
+.macro-ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.macro-ring-track { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 10; }
+.macro-ring-fill {
+  fill: none; stroke-width: 10; stroke-linecap: round;
+  transition: stroke-dashoffset 0.7s cubic-bezier(0.22,1,0.36,1), stroke 0.4s;
+}
+.macro-cal-center {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; pointer-events: none;
+}
+.macro-cal-num { font-size: 26px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.macro-cal-unit { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary); margin-top: 3px; }
+.macro-cal-rem { font-size: 10px; color: var(--text-tertiary); font-family: var(--font-mono); margin-top: 3px; font-variant-numeric: tabular-nums; }
+.macro-bars { display: flex; flex-direction: column; gap: 13px; }
+.macro-bar-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+.macro-bar-lbl { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-tertiary); }
+.macro-bar-num { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.macro-bar-track { height: 6px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; }
+.macro-bar-fill { height: 100%; border-radius: 999px; transition: width 0.5s cubic-bezier(0.22,1,0.36,1); max-width: 100%; }
+.macro-meals-list { margin-top: 18px; border-top: 1px solid var(--border-soft); padding-top: 14px; }
+.macro-meals-lbl { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 10px; }
+.macro-meal-row {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center;
+  padding: 9px 12px; border-radius: 10px; background: var(--bg-secondary); margin-bottom: 5px; transition: background 0.15s;
+}
+.macro-meal-row:hover { background: rgba(255,255,255,0.05); }
+.macro-meal-name { font-size: 13px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.macro-meal-stats { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.macro-meal-del { background: transparent; border: none; color: var(--text-quaternary); cursor: pointer; font-size: 14px; padding: 2px 5px; line-height: 1; border-radius: 4px; transition: color 0.15s; font-family: inherit; }
+.macro-meal-del:hover { color: #FF6B6B; }
+.macro-empty { font-size: 12px; color: var(--text-quaternary); font-style: italic; padding: 6px 10px; }
+.macro-add-wrap { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-soft); }
+.macro-add-row { display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr 1fr auto; gap: 6px; align-items: center; }
+.macro-scan-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; margin-top: 10px; padding: 9px 14px; border-radius: 10px;
+  border: 1px dashed rgba(255,255,255,0.10); background: transparent;
+  color: var(--text-tertiary); font-size: 12px; font-family: inherit;
+  font-weight: 600; cursor: default; letter-spacing: 0.02em; opacity: 0.65;
+}
+.macro-modal-bg {
+  position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+}
+.macro-modal-bg[hidden] { display: none; }
+.macro-modal {
+  background: #0f0f12; border: 1px solid var(--border-strong);
+  border-radius: 18px; padding: 24px; width: 92%; max-width: 380px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.7);
+}
+.macro-modal-title { font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 18px; letter-spacing: -0.02em; }
+.macro-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.macro-modal-field label { display: block; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 5px; }
+.macro-modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.macro-modal-cancel { padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-secondary); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
+.macro-modal-save { padding: 9px 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.85); background: linear-gradient(180deg,#FFFFFF 0%,#E8E5DD 100%); color: #0A0A0B; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 4px 14px rgba(0,0,0,0.3); }
+@media (max-width: 600px) {
+  .macro-overview { grid-template-columns: 1fr; justify-items: center; }
+  .macro-add-row { grid-template-columns: 1fr 1fr 1fr; }
+  .macro-add-row > *:first-child { grid-column: 1 / -1; }
+  .macro-add-row > *:last-child { grid-column: 1 / -1; }
+}
+
 ::selection { background: rgba(224, 118, 88, 0.3); color: var(--text-primary); }
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -794,6 +876,75 @@ main {
     </div>
   </section>
 
+  <!-- ── MACRO TRACKER ── -->
+  <div class="section-title">Macro Tracker</div>
+
+  <div class="macro-wrap">
+    <div class="macro-card">
+      <div class="macro-header">
+        <div>
+          <div class="sf-eyebrow">Today</div>
+          <div class="sf-title" id="macroDateLbl"></div>
+        </div>
+        <button class="macro-goals-btn" id="macroGoalsBtn">⚙ Goals</button>
+      </div>
+
+      <div class="macro-overview">
+        <div class="macro-cal-ring">
+          <svg class="macro-ring-svg" viewBox="0 0 140 140">
+            <circle class="macro-ring-track" cx="70" cy="70" r="58"/>
+            <circle class="macro-ring-fill" id="macroRingFill" cx="70" cy="70" r="58"
+              stroke-dasharray="364.4" stroke-dashoffset="364.4"/>
+          </svg>
+          <div class="macro-cal-center">
+            <div class="macro-cal-num" id="macroCalEaten">0</div>
+            <div class="macro-cal-unit">kcal</div>
+            <div class="macro-cal-rem" id="macroCalRem">— left</div>
+          </div>
+        </div>
+        <div class="macro-bars">
+          <div>
+            <div class="macro-bar-head">
+              <span class="macro-bar-lbl">Protein</span>
+              <span class="macro-bar-num" id="macroProteinNum">0 / 0g</span>
+            </div>
+            <div class="macro-bar-track"><div class="macro-bar-fill" id="macroProteinBar" style="width:0%;background:#FF9F0A;"></div></div>
+          </div>
+          <div>
+            <div class="macro-bar-head">
+              <span class="macro-bar-lbl">Carbs</span>
+              <span class="macro-bar-num" id="macroCarbsNum">0 / 0g</span>
+            </div>
+            <div class="macro-bar-track"><div class="macro-bar-fill" id="macroCarbsBar" style="width:0%;background:#30D158;"></div></div>
+          </div>
+          <div>
+            <div class="macro-bar-head">
+              <span class="macro-bar-lbl">Fat</span>
+              <span class="macro-bar-num" id="macroFatNum">0 / 0g</span>
+            </div>
+            <div class="macro-bar-track"><div class="macro-bar-fill" id="macroFatBar" style="width:0%;background:#64D2FF;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="macro-meals-list">
+        <div class="macro-meals-lbl">Meals</div>
+        <div id="macroMealsList"></div>
+      </div>
+
+      <div class="macro-add-wrap">
+        <div class="macro-add-row">
+          <input id="macroAddName" type="text" class="stack-input" placeholder="Food / meal name" autocomplete="off" spellcheck="false" />
+          <input id="macroAddCal"  type="number" class="stack-input" placeholder="kcal" min="0" />
+          <input id="macroAddProt" type="number" class="stack-input" placeholder="Protein g" min="0" />
+          <input id="macroAddCarb" type="number" class="stack-input" placeholder="Carbs g" min="0" />
+          <input id="macroAddFat"  type="number" class="stack-input" placeholder="Fat g" min="0" />
+          <button id="macroAddBtn" class="macro-scan-btn">+ Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="section-title">Daily Stack</div>
 
   <div class="stack-card">
@@ -843,6 +994,35 @@ main {
 
   <div class="attribution">// editable template · all data stays in your browser</div>
 </main>
+
+<!-- Macro Goals Modal -->
+<div class="macro-modal-bg" id="macroModalBg" hidden>
+  <div class="macro-modal" role="dialog" aria-modal="true" aria-labelledby="macroModalTitle">
+    <div class="macro-modal-title" id="macroModalTitle">Daily Goals</div>
+    <div class="macro-modal-grid">
+      <div class="macro-modal-field">
+        <label for="goalCal">Calories (kcal)</label>
+        <input id="goalCal" type="number" class="stack-input" placeholder="2500" min="0" />
+      </div>
+      <div class="macro-modal-field">
+        <label for="goalProt">Protein (g)</label>
+        <input id="goalProt" type="number" class="stack-input" placeholder="180" min="0" />
+      </div>
+      <div class="macro-modal-field">
+        <label for="goalCarb">Carbs (g)</label>
+        <input id="goalCarb" type="number" class="stack-input" placeholder="250" min="0" />
+      </div>
+      <div class="macro-modal-field">
+        <label for="goalFat">Fat (g)</label>
+        <input id="goalFat" type="number" class="stack-input" placeholder="80" min="0" />
+      </div>
+    </div>
+    <div class="macro-modal-actions">
+      <button class="macro-modal-cancel" id="macroModalCancel">Cancel</button>
+      <button class="macro-modal-save"   id="macroModalSave">Save</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (() => {
@@ -956,6 +1136,63 @@ main {
     { name: 'Cordyceps', dose: '1–3g', window: 'morning', note: 'Energy and endurance', icon: '🍄', aliases: ['cordyceps'] },
     { name: 'Reishi', dose: '1–2g', window: 'evening', note: 'Calming adaptogen', icon: '🍄', aliases: ['reishi', 'ganoderma'] },
     { name: 'Chaga', dose: '1–2g', window: 'morning', note: 'Antioxidant and immune', icon: '🍄', aliases: ['chaga'] },
+    // === TESTOSTERONE & AAS ===
+    { name: 'Testosterone Enanthate', dose: '200–500mg/wk', window: 'anytime', note: 'IM injection · 2×/wk · bloodwork required', icon: '💉', aliases: ['test e', 'test enanthate', 'testosterone enanthate'] },
+    { name: 'Testosterone Cypionate', dose: '200–500mg/wk', window: 'anytime', note: 'IM injection · 2×/wk · similar to Enanthate', icon: '💉', aliases: ['test c', 'test cyp', 'testosterone cypionate'] },
+    { name: 'Testosterone Propionate', dose: '50–150mg/eod', window: 'anytime', note: 'IM injection · EOD/ED · shorter ester, faster acting', icon: '💉', aliases: ['test p', 'test prop', 'testosterone propionate'] },
+    { name: 'Sustanon 250', dose: '250–500mg/wk', window: 'anytime', note: 'Blend of 4 esters · 2×/wk preferred to manage peaks', icon: '💉', aliases: ['sustanon', 'sust', 'sustanon 250'] },
+    { name: 'Trenbolone Enanthate', dose: '200–400mg/wk', window: 'anytime', note: 'IM injection · highly androgenic · advanced only', icon: '💉', aliases: ['tren e', 'tren enanthate', 'trenbolone enanthate'] },
+    { name: 'Trenbolone Acetate', dose: '50–100mg/eod', window: 'anytime', note: 'IM injection · EOD · shorter ester, easier to control', icon: '💉', aliases: ['tren a', 'tren ace', 'trenbolone acetate'] },
+    { name: 'Anavar (Oxandrolone)', dose: '20–80mg/day', window: 'morning', note: 'Oral · mild androgenic · split AM/PM dose', icon: '💊', aliases: ['anavar', 'oxandrolone', 'var'] },
+    { name: 'Winstrol (Stanozolol)', dose: '20–50mg/day', window: 'morning', note: 'Oral or injectable · cut compound · joint stress at high doses', icon: '💊', aliases: ['winstrol', 'stanozolol', 'winny'] },
+    { name: 'Dianabol (Methandrostenolone)', dose: '20–50mg/day', window: 'morning', note: 'Oral · kickstart compound · hepatotoxic · 4–6 wk max', icon: '💊', aliases: ['dianabol', 'dbol', 'methandrostenolone'] },
+    { name: 'Nandrolone Decanoate (Deca)', dose: '200–400mg/wk', window: 'anytime', note: 'IM injection · joint support · manage prolactin with caber', icon: '💉', aliases: ['deca', 'deca durabolin', 'nandrolone', 'npp'] },
+    { name: 'Primobolan (Methenolone)', dose: '300–600mg/wk', window: 'anytime', note: 'IM injection · mild · often stacked with test', icon: '💉', aliases: ['primo', 'primobolan', 'methenolone'] },
+    { name: 'Masteron (Drostanolone)', dose: '200–400mg/wk', window: 'anytime', note: 'IM injection · anti-estrogenic · best below 12% BF', icon: '💉', aliases: ['masteron', 'mast', 'drostanolone'] },
+    { name: 'Equipoise (Boldenone)', dose: '300–500mg/wk', window: 'anytime', note: 'IM injection · long ester · notable appetite increase', icon: '💉', aliases: ['eq', 'equipoise', 'boldenone'] },
+    // === PCT & ANCILLARIES ===
+    { name: 'Nolvadex (Tamoxifen)', dose: '20–40mg/day', window: 'morning', note: 'PCT SERM · 4 wk post-cycle · also for gyno prevention', icon: '💊', aliases: ['nolvadex', 'tamoxifen', 'nolva'] },
+    { name: 'Clomid (Clomiphene)', dose: '25–50mg/day', window: 'morning', note: 'PCT SERM · 4 wk · often run alongside Nolvadex', icon: '💊', aliases: ['clomid', 'clomiphene', 'clomifene'] },
+    { name: 'Anastrozole (Arimidex)', dose: '0.25–1mg/eod', window: 'anytime', note: 'AI · controls estrogen on cycle · dose to bloodwork', icon: '💊', aliases: ['anastrozole', 'arimidex', 'adex'] },
+    { name: 'Exemestane (Aromasin)', dose: '12.5–25mg/eod', window: 'lunch', note: 'Suicidal AI · irreversible · take with fat', icon: '💊', aliases: ['exemestane', 'aromasin'] },
+    { name: 'Letrozole', dose: '1.25–2.5mg/eod', window: 'anytime', note: 'Powerful AI · estrogen crash risk · use cautiously', icon: '💊', aliases: ['letrozole', 'femara'] },
+    { name: 'Cabergoline', dose: '0.25–0.5mg 2×/wk', window: 'anytime', note: 'Dopamine agonist · controls prolactin on Deca/Tren', icon: '💊', aliases: ['cabergoline', 'caber', 'dostinex'] },
+    { name: 'HCG', dose: '500 IU 2×/wk', window: 'anytime', note: 'SubQ or IM injection · maintains testicular function on cycle', icon: '💉', aliases: ['hcg', 'human chorionic gonadotropin'] },
+    // === SARMs ===
+    { name: 'Ostarine (MK-2866)', dose: '10–25mg/day', window: 'morning', note: 'SARM · muscle preservation · mild suppression', icon: '🔬', aliases: ['ostarine', 'mk-2866', 'mk2866', 'enobosarm'] },
+    { name: 'RAD-140 (Testolone)', dose: '5–20mg/day', window: 'morning', note: 'SARM · potent anabolic · notable suppression · PCT advised', icon: '🔬', aliases: ['rad-140', 'rad140', 'testolone'] },
+    { name: 'LGD-4033 (Ligandrol)', dose: '5–10mg/day', window: 'morning', note: 'SARM · strong anabolic · significant suppression', icon: '🔬', aliases: ['lgd-4033', 'lgd4033', 'ligandrol'] },
+    { name: 'S4 (Andarine)', dose: '25–50mg/day', window: 'morning', note: 'SARM · visual side effects (yellow tint) at higher doses', icon: '🔬', aliases: ['s4', 'andarine'] },
+    { name: 'Cardarine (GW-501516)', dose: '10–20mg/day', window: 'morning', note: 'PPARδ agonist · endurance · not technically a SARM', icon: '🔬', aliases: ['cardarine', 'gw-501516', 'gw501516'] },
+    { name: 'YK-11', dose: '5–15mg/day', window: 'morning', note: 'Myostatin inhibitor / SARM hybrid · notable suppression', icon: '🔬', aliases: ['yk-11', 'yk11'] },
+    { name: 'S23', dose: '10–20mg/day', window: 'morning', note: 'SARM · highly suppressive · strong anabolic effects', icon: '🔬', aliases: ['s23'] },
+    { name: 'MK-677 (Ibutamoren)', dose: '10–25mg/day', window: 'evening', note: 'GH secretagogue · increases HGH + IGF-1 · hunger side effect', icon: '🔬', aliases: ['mk-677', 'mk677', 'ibutamoren'] },
+    // === PEPTIDES ===
+    { name: 'BPC-157', dose: '250–500mcg/day', window: 'anytime', note: 'SubQ or IM injection · healing peptide · gut and tendon repair', icon: '🔬', aliases: ['bpc-157', 'bpc157'] },
+    { name: 'TB-500 (Thymosin Beta-4)', dose: '2–2.5mg/wk', window: 'anytime', note: 'SubQ injection · tissue repair and recovery · pairs with BPC-157', icon: '🔬', aliases: ['tb-500', 'tb500', 'thymosin beta-4'] },
+    { name: 'Ipamorelin', dose: '100–300mcg/dose', window: 'evening', note: 'SubQ injection · clean GH pulse · 2–3×/day · no cortisol spike', icon: '🔬', aliases: ['ipamorelin'] },
+    { name: 'CJC-1295 (no DAC)', dose: '100–300mcg/dose', window: 'evening', note: 'SubQ injection · GHRH · pairs with Ipamorelin for synergistic GH release', icon: '🔬', aliases: ['cjc-1295', 'cjc1295', 'mod grf 1-29'] },
+    { name: 'CJC-1295 (with DAC)', dose: '1–2mg/wk', window: 'anytime', note: 'SubQ injection · long-acting GHRH · once or twice weekly', icon: '🔬', aliases: ['cjc-1295 dac', 'cjc dac'] },
+    { name: 'Sermorelin', dose: '200–500mcg/night', window: 'evening', note: 'SubQ injection · GHRH · stimulates natural GH release during sleep', icon: '🔬', aliases: ['sermorelin'] },
+    { name: 'GHRP-2', dose: '100–300mcg/dose', window: 'anytime', note: 'SubQ injection · strong GH release · cortisol and prolactin elevation', icon: '🔬', aliases: ['ghrp-2', 'ghrp2'] },
+    { name: 'GHRP-6', dose: '100–300mcg/dose', window: 'anytime', note: 'SubQ injection · potent hunger stimulator · cortisol elevation', icon: '🔬', aliases: ['ghrp-6', 'ghrp6'] },
+    { name: 'Hexarelin', dose: '100–200mcg/dose', window: 'anytime', note: 'SubQ injection · strongest GHRP · desensitizes with chronic use', icon: '🔬', aliases: ['hexarelin'] },
+    { name: 'PT-141 (Bremelanotide)', dose: '1–2mg', window: 'anytime', note: 'SubQ injection · sexual function · administer 1–2 hrs before activity', icon: '🔬', aliases: ['pt-141', 'pt141', 'bremelanotide'] },
+    { name: 'Melanotan II', dose: '0.25–1mg/day', window: 'anytime', note: 'SubQ injection · tanning + libido · nausea common initially', icon: '🔬', aliases: ['melanotan', 'melanotan ii', 'mt2'] },
+    { name: 'Selank', dose: '250–3000mcg/day', window: 'morning', note: 'Nasal or SubQ · anxiolytic peptide · cognitive enhancement', icon: '🔬', aliases: ['selank'] },
+    { name: 'Semax', dose: '200–900mcg/day', window: 'morning', note: 'Nasal or SubQ · nootropic peptide · BDNF upregulation', icon: '🔬', aliases: ['semax'] },
+    { name: 'Epithalon', dose: '5–10mg/course', window: 'evening', note: 'SubQ injection · telomere extension research · longevity peptide', icon: '🔬', aliases: ['epithalon', 'epithalamin'] },
+    { name: 'GHK-Cu (Copper Peptide)', dose: '1–2mg/day', window: 'anytime', note: 'SubQ or topical · wound healing · collagen synthesis · hair growth', icon: '🔬', aliases: ['ghk-cu', 'ghkcu', 'copper peptide'] },
+    // === GROWTH HORMONE & RELATED ===
+    { name: 'HGH (Human Growth Hormone)', dose: '1–4 IU/day', window: 'morning', note: 'SubQ injection · fasted morning or post-workout · monitor IGF-1', icon: '💉', aliases: ['hgh', 'human growth hormone', 'somatropin', 'gh'] },
+    { name: 'IGF-1 LR3', dose: '20–100mcg/day', window: 'anytime', note: 'SubQ or IM injection · post-workout · hypoglycemia risk · 4 wk cycles', icon: '💉', aliases: ['igf-1', 'igf1 lr3', 'igf'] },
+    // === PERFORMANCE & OTHER ===
+    { name: 'Clenbuterol', dose: '20–120mcg/day', window: 'morning', note: 'Oral · beta-2 agonist · fat loss · 2 wk on/off · taper up', icon: '💊', aliases: ['clen', 'clenbuterol'] },
+    { name: 'T3 (Cytomel / Liothyronine)', dose: '25–75mcg/day', window: 'morning', note: 'Oral · thyroid hormone · metabolic rate · taper off slowly', icon: '💊', aliases: ['t3', 'cytomel', 'liothyronine'] },
+    { name: 'T4 (Levothyroxine)', dose: '50–200mcg/day', window: 'morning', note: 'Oral · thyroid replacement · empty stomach · 30 min before food', icon: '💊', aliases: ['t4', 'levothyroxine', 'synthroid'] },
+    { name: 'Modafinil', dose: '100–200mg/day', window: 'morning', note: 'Oral · wakefulness agent · prescription · avoid dosing after noon', icon: '🧠', aliases: ['modafinil', 'provigil'] },
+    { name: 'Armodafinil', dose: '75–150mg/day', window: 'morning', note: 'Oral · R-enantiomer of modafinil · longer duration · prescription', icon: '🧠', aliases: ['armodafinil', 'nuvigil', 'waklert'] },
+    { name: 'Methylene Blue', dose: '1–4mg/kg', window: 'morning', note: 'Oral solution · mitochondrial function · neuroprotection research', icon: '🔬', aliases: ['methylene blue', 'mb'] },
   ];
 
   let todayKey = `stack:taken:${getActiveDate()}`;
@@ -1364,8 +1601,8 @@ document.addEventListener('DOMContentLoaded', function () {
   if (typeof initCloudSync !== 'function') return;
   initCloudSync({
     appKey: 'health',
-    syncedKeys: ['stack:items', 'stack:version', 'stack:low', 'po_water_v1'],
-    syncedPrefixes: ['stack:taken:'],
+    syncedKeys: ['stack:items', 'stack:version', 'stack:low', 'po_water_v1', 'macro:goals'],
+    syncedPrefixes: ['stack:taken:', 'macro:meals:'],
     onApplied: function () { window.dispatchEvent(new Event('storage')); }
   });
 });
@@ -1571,6 +1808,159 @@ document.addEventListener('DOMContentLoaded', function () {
     $('awVerdictHeadline').textContent=headline;
     $('awVerdictReasons').textContent=reasons.join(' · ');
   }
+})();
+</script>
+
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+
+  const GOALS_KEY = 'macro:goals';
+  const mealsKey  = () => 'macro:meals:' + todayStr();
+
+  function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function loadGoals() {
+    try { return JSON.parse(localStorage.getItem(GOALS_KEY)) || {}; } catch(e) { return {}; }
+  }
+  function saveGoals(g) { localStorage.setItem(GOALS_KEY, JSON.stringify(g)); }
+
+  function loadMeals() {
+    try { return JSON.parse(localStorage.getItem(mealsKey())) || []; } catch(e) { return []; }
+  }
+  function saveMeals(meals) { localStorage.setItem(mealsKey(), JSON.stringify(meals)); }
+
+  function totals(meals) {
+    return meals.reduce((acc, m) => ({
+      cal:  acc.cal  + (Number(m.cal)  || 0),
+      prot: acc.prot + (Number(m.prot) || 0),
+      carb: acc.carb + (Number(m.carb) || 0),
+      fat:  acc.fat  + (Number(m.fat)  || 0),
+    }), { cal: 0, prot: 0, carb: 0, fat: 0 });
+  }
+
+  function pct(val, goal) {
+    if (!goal) return 0;
+    return Math.min(100, Math.round((val / goal) * 100));
+  }
+
+  const CIRC = 2 * Math.PI * 58; // 364.4
+
+  function render() {
+    const goals = loadGoals();
+    const meals = loadMeals();
+    const tot   = totals(meals);
+
+    // date label
+    const d = new Date();
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    $('macroDateLbl').textContent = days[d.getDay()] + ', ' + d.getDate();
+
+    // calorie ring
+    const calGoal = Number(goals.cal) || 0;
+    const calPct  = pct(tot.cal, calGoal);
+    const offset  = CIRC - (CIRC * calPct / 100);
+    const ring = $('macroRingFill');
+    ring.style.strokeDashoffset = offset;
+    ring.style.stroke = calPct >= 100 ? '#FF6B6B' : '#FFFFFF';
+    $('macroCalEaten').textContent = tot.cal;
+    $('macroCalRem').textContent = calGoal ? (calGoal - tot.cal) + ' left' : '— left';
+
+    // macro bars
+    function setBar(numId, barId, val, goal, color) {
+      $(numId).textContent = val + ' / ' + (goal || '?') + 'g';
+      $(barId).style.width = pct(val, goal) + '%';
+      $(barId).style.background = color;
+    }
+    setBar('macroProteinNum','macroProteinBar', tot.prot, Number(goals.prot)||0, '#FF9F0A');
+    setBar('macroCarbsNum',  'macroCarbsBar',  tot.carb, Number(goals.carb)||0, '#30D158');
+    setBar('macroFatNum',    'macroFatBar',     tot.fat,  Number(goals.fat)||0,  '#64D2FF');
+
+    // meals list
+    const list = $('macroMealsList');
+    list.innerHTML = '';
+    if (!meals.length) {
+      list.innerHTML = '<div class="macro-empty">No meals logged yet</div>';
+    } else {
+      meals.forEach((m, i) => {
+        const row = document.createElement('div');
+        row.className = 'macro-meal-row';
+        row.innerHTML =
+          '<span class="macro-meal-name">' + escHtml(m.name) + '</span>' +
+          '<span class="macro-meal-stats">' + m.cal + ' kcal · ' + m.prot + 'p · ' + m.carb + 'c · ' + m.fat + 'f</span>' +
+          '<button class="macro-meal-del" data-i="' + i + '" aria-label="Delete">✕</button>';
+        list.appendChild(row);
+      });
+      list.addEventListener('click', (e) => {
+        const btn = e.target.closest('.macro-meal-del');
+        if (!btn) return;
+        const meals2 = loadMeals();
+        meals2.splice(Number(btn.dataset.i), 1);
+        saveMeals(meals2);
+        render();
+      }, { once: true });
+    }
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // add meal
+  $('macroAddBtn').addEventListener('click', () => {
+    const name = $('macroAddName').value.trim();
+    if (!name) { $('macroAddName').focus(); return; }
+    const meals = loadMeals();
+    meals.push({
+      name,
+      cal:  Number($('macroAddCal').value)  || 0,
+      prot: Number($('macroAddProt').value) || 0,
+      carb: Number($('macroAddCarb').value) || 0,
+      fat:  Number($('macroAddFat').value)  || 0,
+    });
+    saveMeals(meals);
+    ['macroAddName','macroAddCal','macroAddProt','macroAddCarb','macroAddFat'].forEach(id => $(id).value = '');
+    render();
+  });
+
+  // enter key in add row
+  ['macroAddName','macroAddCal','macroAddProt','macroAddCarb','macroAddFat'].forEach(id => {
+    $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('macroAddBtn').click(); });
+  });
+
+  // goals modal
+  const modalBg = $('macroModalBg');
+
+  $('macroGoalsBtn').addEventListener('click', () => {
+    const g = loadGoals();
+    $('goalCal').value  = g.cal  || '';
+    $('goalProt').value = g.prot || '';
+    $('goalCarb').value = g.carb || '';
+    $('goalFat').value  = g.fat  || '';
+    modalBg.hidden = false;
+    $('goalCal').focus();
+  });
+
+  $('macroModalCancel').addEventListener('click', () => { modalBg.hidden = true; });
+  modalBg.addEventListener('click', e => { if (e.target === modalBg) modalBg.hidden = true; });
+
+  $('macroModalSave').addEventListener('click', () => {
+    saveGoals({
+      cal:  Number($('goalCal').value)  || 0,
+      prot: Number($('goalProt').value) || 0,
+      carb: Number($('goalCarb').value) || 0,
+      fat:  Number($('goalFat').value)  || 0,
+    });
+    modalBg.hidden = true;
+    render();
+  });
+
+  window.addEventListener('storage', render);
+  render();
 })();
 </script>
 
