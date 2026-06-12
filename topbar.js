@@ -118,27 +118,35 @@ body.has-bottombar {
   .bottombar {
     position: fixed;
     left: 0; top: 0; bottom: 0; right: auto;
-    width: 120px;
+    width: 210px;
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-    padding: 64px 0 16px;
+    padding: 68px 10px 16px;
     border-top: none;
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: 1px solid rgba(255, 255, 255, 0.07);
   }
   .bottombar-tab {
     flex: 0;
     width: 100%;
-    padding: 22px 0;
-    gap: 6px;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 12px 14px;
+    gap: 13px;
     position: relative;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0;
+    border-radius: 10px;
+    margin-bottom: 2px;
   }
-  .bottombar-tab-icon { font-size: 22px; }
+  .bottombar-tab-icon { font-size: 19px; flex-shrink: 0; }
   body.has-bottombar {
     padding-bottom: 0 !important;
-    padding-left: 120px !important;
+    padding-left: 210px !important;
   }
-  /* Active indicator bar on left edge */
+  /* Active indicator bar */
   .bottombar-tab.active::before {
     content: '';
     position: absolute;
@@ -147,17 +155,17 @@ body.has-bottombar {
     background: currentColor;
   }
   /* Per-tab colour themes */
-  .bottombar-tab[data-page="main"].active    { color: #5B8DEF; background: rgba(91,141,239,0.08); }
+  .bottombar-tab[data-page="main"].active    { color: #5B8DEF; background: rgba(91,141,239,0.10); }
   .bottombar-tab[data-page="main"].active    .bottombar-tab-icon { filter: none; opacity: 1; }
-  .bottombar-tab[data-page="fitness"].active { color: #FF9F0A; background: rgba(255,159,10,0.08); }
+  .bottombar-tab[data-page="fitness"].active { color: #FF9F0A; background: rgba(255,159,10,0.10); }
   .bottombar-tab[data-page="fitness"].active .bottombar-tab-icon { filter: none; opacity: 1; }
-  .bottombar-tab[data-page="health"].active  { color: #30D158; background: rgba(48,209,88,0.08); }
+  .bottombar-tab[data-page="health"].active  { color: #30D158; background: rgba(48,209,88,0.10); }
   .bottombar-tab[data-page="health"].active  .bottombar-tab-icon { filter: none; opacity: 1; }
-  .bottombar-tab[data-page="water"].active   { color: #7DD3FC; background: rgba(125,211,252,0.08); }
+  .bottombar-tab[data-page="water"].active   { color: #7DD3FC; background: rgba(125,211,252,0.10); }
   .bottombar-tab[data-page="water"].active   .bottombar-tab-icon { filter: none; opacity: 1; }
-  .bottombar-tab[data-page="finance"].active { color: #BF5AF2; background: rgba(191,90,242,0.08); }
+  .bottombar-tab[data-page="finance"].active { color: #BF5AF2; background: rgba(191,90,242,0.10); }
   .bottombar-tab[data-page="finance"].active .bottombar-tab-icon { filter: none; opacity: 1; }
-  .bottombar-tab[data-page="caffeine"].active{ color: #F5A623; background: rgba(245,166,35,0.08); }
+  .bottombar-tab[data-page="caffeine"].active{ color: #F5A623; background: rgba(245,166,35,0.10); }
   .bottombar-tab[data-page="caffeine"].active .bottombar-tab-icon { filter: none; opacity: 1; }
 }
 @media (max-width: 480px) {
