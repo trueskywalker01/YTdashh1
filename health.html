@@ -8,6 +8,7 @@
 <title>Daily Stack — Customizable Template</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="sync.js" defer></script>
   <script src="topbar.js" defer></script>
 <style>
@@ -765,18 +766,39 @@ main {
   transition: background 0.15s, color 0.15s;
 }
 .macro-scan-btn:hover { background: rgba(255,255,255,0.09); color: var(--text-primary); }
-.macro-scan-trigger-btn {
+/* Action buttons */
+.macro-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.macro-action-btn {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; padding: 13px; border-radius: 12px; margin-bottom: 14px;
+  padding: 12px; border-radius: 12px;
   border: 1px dashed rgba(255,255,255,0.15);
   background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(100,210,255,0.04) 100%);
   color: var(--text-secondary); font-size: 13px; font-family: inherit;
   font-weight: 700; cursor: pointer; letter-spacing: 0.01em;
   transition: background 0.18s, border-color 0.18s, color 0.18s;
 }
-.macro-scan-trigger-btn:hover { border-color: rgba(100,210,255,0.35); color: #64D2FF; background: rgba(100,210,255,0.06); }
-.macro-scan-trigger-btn:active { transform: scale(0.98); }
-.macro-scan-trigger-btn.loading { pointer-events: none; opacity: 0.7; }
+.macro-action-btn:hover { border-color: rgba(100,210,255,0.35); color: #64D2FF; background: rgba(100,210,255,0.06); }
+.macro-action-btn:active { transform: scale(0.98); }
+.macro-action-btn:disabled { opacity: 0.5; pointer-events: none; }
+/* Search panel */
+.macro-search-panel { margin-bottom: 12px; }
+.macro-search-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.macro-search-row .stack-input { flex: 1; }
+.macro-results-list { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.macro-result-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 12px; border-radius: 10px; text-align: left;
+  border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.03);
+  font-family: inherit; cursor: pointer; width: 100%;
+  transition: background 0.15s, border-color 0.15s;
+}
+.macro-result-item:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
+.macro-result-main { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.macro-result-name { font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.macro-result-brand { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.macro-result-cal { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); flex-shrink: 0; }
+.macro-result-loading { font-size: 13px; color: var(--text-tertiary); text-align: center; padding: 16px 0; }
+/* Confirm card */
 .macro-scan-card {
   margin-top: 14px; border-radius: 14px; overflow: hidden;
   border: 1px solid rgba(100,210,255,0.18);
@@ -786,9 +808,6 @@ main {
 @keyframes macro-fade-in { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 .macro-scan-card[hidden] { display: none; }
 .macro-scan-card-inner { padding: 16px; }
-.macro-scan-card-top { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
-.macro-scan-thumb { width: 72px; height: 72px; object-fit: cover; border-radius: 10px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.08); }
-.macro-scan-card-info { flex: 1; min-width: 0; }
 .macro-scan-food-name { font-size: 15px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; margin-bottom: 3px; }
 .macro-scan-serving { font-size: 11px; color: var(--text-tertiary); margin-bottom: 8px; font-family: var(--font-mono); }
 .macro-scan-macros { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -800,34 +819,39 @@ main {
 .macro-scan-macro-pill.prot { color: #FF9F0A; border-color: rgba(255,159,10,0.3); background: rgba(255,159,10,0.07); }
 .macro-scan-macro-pill.carb { color: #30D158; border-color: rgba(48,209,88,0.3); background: rgba(48,209,88,0.07); }
 .macro-scan-macro-pill.fat  { color: #64D2FF; border-color: rgba(100,210,255,0.3); background: rgba(100,210,255,0.07); }
-.macro-scan-nutrients-wrap { margin-bottom: 12px; }
-.macro-scan-nutrients-lbl { font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-quaternary); margin-bottom: 7px; }
-.macro-scan-nutrients { display: flex; flex-wrap: wrap; gap: 5px; }
-.macro-scan-nutrient-tag {
-  font-size: 11px; padding: 3px 9px; border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04);
-  color: var(--text-tertiary); font-weight: 500;
-}
-.macro-scan-advice {
-  font-size: 12.5px; line-height: 1.6; color: var(--text-secondary);
-  border-top: 1px solid var(--border-soft); padding-top: 12px; margin-bottom: 14px;
-}
 .macro-scan-actions { display: flex; gap: 8px; justify-content: flex-end; }
-.macro-key-setup {
-  border-radius: 14px; padding: 20px 18px; text-align: center;
-  background: rgba(255,214,10,0.05); border: 1px solid rgba(255,214,10,0.15);
+/* Serving size control */
+.macro-serving-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.macro-serving-step {
+  width: 28px; height: 28px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06);
+  color: var(--text-primary); font-size: 16px; font-family: inherit;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
 }
-.macro-key-icon { font-size: 26px; margin-bottom: 8px; }
-.macro-key-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; letter-spacing: -0.01em; }
-.macro-key-desc { font-size: 12px; color: var(--text-tertiary); line-height: 1.55; margin-bottom: 14px; }
-.macro-key-row { display: flex; gap: 8px; }
-.macro-key-row .stack-input { flex: 1; }
-.macro-change-key {
-  display: block; margin: 9px auto 0; background: none; border: none;
-  color: var(--text-quaternary); font-size: 11px; cursor: pointer;
-  font-family: inherit; text-decoration: underline; padding: 2px;
+.macro-serving-step:hover { background: rgba(255,255,255,0.12); }
+.macro-serving-count { font-family: var(--font-mono); font-size: 13px; color: var(--text-primary); min-width: 28px; text-align: center; }
+/* Full-screen barcode scanner overlay */
+.scanner-modal {
+  position: fixed; inset: 0; z-index: 200;
+  background: #050506; display: flex; flex-direction: column;
 }
-.macro-change-key:hover { color: var(--text-tertiary); }
+.scanner-modal[hidden] { display: none; }
+.scanner-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: max(24px, env(safe-area-inset-top)) 20px 14px;
+  border-bottom: 1px solid var(--border-soft); flex-shrink: 0;
+}
+.scanner-modal-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.scanner-close-btn {
+  width: 32px; height: 32px; border-radius: 999px;
+  border: 1px solid var(--border-strong); background: rgba(255,255,255,0.06);
+  color: var(--text-secondary); font-size: 14px; cursor: pointer; font-family: inherit;
+}
+#scannerReader { flex: 1; min-height: 0; overflow: hidden; }
+#scannerReader video { width: 100% !important; height: 100% !important; object-fit: cover; }
+#scannerReader img { display: none; }
+.scanner-status { padding: 12px 20px; padding-bottom: max(12px, env(safe-area-inset-bottom)); font-size: 13px; color: var(--text-tertiary); text-align: center; flex-shrink: 0; }
 .macro-modal-bg {
   position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.75);
   display: flex; align-items: center; justify-content: center;
@@ -1070,57 +1094,51 @@ main {
       </div>
 
       <div class="macro-add-wrap">
-        <!-- Key setup — visible until key is saved -->
-        <div id="macroKeySetup" class="macro-key-setup">
-          <div class="macro-key-icon">🔑</div>
-          <div class="macro-key-title">Connect AI Scanner</div>
-          <div class="macro-key-desc">Paste your Anthropic API key once to enable food photo scanning</div>
-          <div class="macro-key-row">
-            <input id="macroApiKeyInput" type="password" class="stack-input" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false" />
-            <button id="macroApiKeySave" class="macro-modal-save">Save</button>
-          </div>
-        </div>
-
-        <!-- Scan button — visible once key is saved -->
-        <div id="macroScanArea" hidden>
-          <button id="macroScanTrigger" class="macro-scan-trigger-btn">
-            <span id="macroScanBtnIcon">📷</span>
-            <span id="macroScanBtnText">Scan food photo</span>
+        <div class="macro-action-grid">
+          <button id="macroBarcodeBtn" class="macro-action-btn">
+            <span>📷</span><span>Scan Barcode</span>
           </button>
-          <button id="macroClearKey" class="macro-change-key">Change API key</button>
+          <button id="macroSearchToggle" class="macro-action-btn">
+            <span>🔍</span><span>Search Food</span>
+          </button>
         </div>
 
-        <div id="macroScanCard" class="macro-scan-card" hidden>
+        <div id="macroSearchPanel" class="macro-search-panel" hidden>
+          <div class="macro-search-row">
+            <input id="macroSearchInput" class="stack-input" type="search" placeholder="e.g. Greek yoghurt, chicken breast…" />
+            <button id="macroSearchBtn" class="macro-modal-save macro-scan-btn">Go</button>
+          </div>
+          <div id="macroResultsList" class="macro-results-list"></div>
+        </div>
+
+        <div id="macroConfirmCard" class="macro-scan-card" hidden>
           <div class="macro-scan-card-inner">
-            <div class="macro-scan-card-top">
-              <img id="macroScanThumb" class="macro-scan-thumb" src="" alt="Food photo" />
-              <div class="macro-scan-card-info">
-                <div class="macro-scan-food-name" id="macroScanFoodName"></div>
-                <div class="macro-scan-serving"   id="macroScanServing"></div>
-                <div class="macro-scan-macros">
-                  <span class="macro-scan-macro-pill cal"  id="macroScanCal"></span>
-                  <span class="macro-scan-macro-pill prot" id="macroScanProt"></span>
-                  <span class="macro-scan-macro-pill carb" id="macroScanCarb"></span>
-                  <span class="macro-scan-macro-pill fat"  id="macroScanFat"></span>
-                </div>
+            <div class="macro-scan-food-name" id="macroConfirmName"></div>
+            <div class="macro-scan-serving" id="macroConfirmBrand"></div>
+            <div class="macro-serving-row">
+              <span class="macro-scan-serving" id="macroConfirmServingLbl">1 serving</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button class="macro-serving-step" id="macroServingMinus">−</button>
+                <span class="macro-serving-count" id="macroServingCount">1</span>
+                <button class="macro-serving-step" id="macroServingPlus">+</button>
               </div>
             </div>
-            <div class="macro-scan-nutrients-wrap">
-              <div class="macro-scan-nutrients-lbl">Key nutrients &amp; minerals</div>
-              <div id="macroScanNutrients" class="macro-scan-nutrients"></div>
+            <div class="macro-scan-macros" style="margin-bottom:12px;">
+              <span class="macro-scan-macro-pill cal"  id="macroConfirmCal"></span>
+              <span class="macro-scan-macro-pill prot" id="macroConfirmProt"></span>
+              <span class="macro-scan-macro-pill carb" id="macroConfirmCarb"></span>
+              <span class="macro-scan-macro-pill fat"  id="macroConfirmFat"></span>
             </div>
-            <div class="macro-scan-advice" id="macroScanAdvice"></div>
             <div class="macro-scan-note-wrap">
               <div class="macro-scan-note-lbl">Notes</div>
-              <textarea id="macroScanNote" class="macro-scan-note-input" rows="2" placeholder="e.g. chicken salt instead of regular salt, extra olive oil…"></textarea>
+              <textarea id="macroConfirmNote" class="macro-scan-note-input" rows="2" placeholder="e.g. chicken salt instead of regular salt, extra olive oil…"></textarea>
             </div>
             <div class="macro-scan-actions">
-              <button id="macroScanDismiss" class="macro-modal-cancel">Dismiss</button>
-              <button id="macroScanUse" class="macro-modal-save">Add to log</button>
+              <button id="macroConfirmDismiss" class="macro-modal-cancel">Dismiss</button>
+              <button id="macroConfirmAdd" class="macro-modal-save">Add to log</button>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -1193,6 +1211,16 @@ main {
 
   <div class="attribution">// editable template · all data stays in your browser</div>
 </main>
+
+<!-- Barcode scanner fullscreen modal -->
+<div id="scannerModal" class="scanner-modal" hidden>
+  <div class="scanner-modal-header">
+    <span class="scanner-modal-title">Point camera at barcode</span>
+    <button id="scannerClose" class="scanner-close-btn">✕</button>
+  </div>
+  <div id="scannerReader"></div>
+  <div id="scannerStatus" class="scanner-status"></div>
+</div>
 
 <!-- Macro Goals Modal -->
 <div class="macro-modal-bg" id="macroModalBg" hidden>
@@ -2148,204 +2176,262 @@ document.addEventListener('DOMContentLoaded', function () {
 (function () {
   'use strict';
   const $ = id => document.getElementById(id);
-  const KEY_STORE = 'anthropic_api_key';
 
-  let pendingScan = null;
-
-  function getKey()    { return localStorage.getItem(KEY_STORE) || ''; }
-  function todayStr()  { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-
-  // ── Key setup UI ─────────────────────────────────────────────────
-  function refreshKeyUI() {
-    const has = !!getKey();
-    $('macroKeySetup').hidden =  has;
-    $('macroScanArea').hidden  = !has;
+  function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
-  refreshKeyUI();
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
 
-  $('macroApiKeySave').addEventListener('click', () => {
-    const k = ($('macroApiKeyInput').value || '').trim();
-    if (!k.startsWith('sk-ant-')) { alert('Key should start with sk-ant-'); return; }
-    localStorage.setItem(KEY_STORE, k);
-    $('macroApiKeyInput').value = '';
-    refreshKeyUI();
-  });
-  $('macroApiKeyInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('macroApiKeySave').click(); });
+  // ── State ─────────────────────────────────────────────────────────
+  let pendingProduct = null;
+  let servingCount   = 1;
+  let html5QrInst    = null;
 
-  $('macroClearKey').addEventListener('click', () => {
-    if (!confirm('Remove saved API key?')) return;
-    localStorage.removeItem(KEY_STORE);
-    refreshKeyUI();
-  });
+  // ── Barcode scanner ───────────────────────────────────────────────
+  $('macroBarcodeBtn').addEventListener('click', openScanner);
+  $('scannerClose').addEventListener('click', closeScanner);
 
-  // ── File picker ──────────────────────────────────────────────────
-  $('macroScanTrigger').addEventListener('click', () => {
-    const inp = document.createElement('input');
-    inp.type = 'file';
-    inp.accept = 'image/*';
-    inp.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;';
-    document.body.appendChild(inp);
-    inp.addEventListener('change', () => {
-      const file = inp.files[0];
-      document.body.removeChild(inp);
-      if (file) handleFile(file);
+  function openScanner() {
+    $('scannerModal').hidden = false;
+    $('scannerStatus').textContent = 'Starting camera…';
+    if (typeof Html5Qrcode === 'undefined') {
+      $('scannerStatus').textContent = 'Scanner not loaded — check internet connection.';
+      return;
+    }
+    html5QrInst = new Html5Qrcode('scannerReader');
+    html5QrInst.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 240, height: 120 } },
+      onBarcodeDetected,
+      () => {}
+    ).then(() => {
+      $('scannerStatus').textContent = 'Scanning for barcodes…';
+    }).catch(err => {
+      $('scannerStatus').textContent = 'Camera error: ' + (err.message || err);
     });
-    // Small timeout keeps user-gesture flag alive in Safari
-    setTimeout(() => inp.click(), 0);
-  });
+  }
 
-  // ── Image pipeline ───────────────────────────────────────────────
-  async function handleFile(file) {
-    setBtnLoading(true);
-    $('macroScanCard').hidden = true;
+  function closeScanner() {
+    const cleanup = () => { $('scannerModal').hidden = true; $('scannerStatus').textContent = ''; };
+    if (html5QrInst) {
+      html5QrInst.stop().catch(() => {}).finally(() => {
+        if (html5QrInst) { html5QrInst.clear(); html5QrInst = null; }
+        cleanup();
+      });
+    } else {
+      cleanup();
+    }
+  }
+
+  async function onBarcodeDetected(barcode) {
+    closeScanner();
+    const btn = $('macroBarcodeBtn');
+    btn.disabled = true;
+    btn.lastElementChild.textContent = 'Looking up…';
     try {
-      const { base64, mime, objectUrl } = await prepareImage(file);
-      const result = await callClaude(base64, mime);
-      pendingScan = result;
-      showCard(objectUrl, result);
-    } catch (err) {
-      setBtnLoading(false);
-      alert('Scan failed: ' + (err.message || 'Unknown error'));
+      const product = await fetchByBarcode(barcode);
+      if (product) showConfirm(product);
+      else alert('Product not found in Open Food Facts.\nTry searching by name instead.');
+    } catch(e) {
+      alert('Lookup failed: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.lastElementChild.textContent = 'Scan Barcode';
     }
   }
 
-  async function prepareImage(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = reject;
-      reader.onload = () => {
-        const img = new Image();
-        img.onerror = reject;
-        img.onload = () => {
-          const MAX = 1280;
-          let w = img.width, h = img.height;
-          if (w > MAX || h > MAX) {
-            const r = Math.min(MAX/w, MAX/h);
-            w = Math.round(w*r); h = Math.round(h*r);
-          }
-          const canvas = document.createElement('canvas');
-          canvas.width = w; canvas.height = h;
-          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-          resolve({ base64: dataUrl.split(',')[1], mime: 'image/jpeg', objectUrl: dataUrl });
-        };
-        img.src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  async function callClaude(base64, mime) {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': getKey(),
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1024,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: mime, data: base64 } },
-            { type: 'text', text: `Analyze this food photo and estimate the nutritional content for the visible portion. Return ONLY a raw JSON object — no markdown, no code fences, no explanation. Use this exact structure:
-{
-  "name": "descriptive food name",
-  "serving_note": "estimated portion, e.g. 1 plate ~450g",
-  "calories": 0,
-  "protein_g": 0,
-  "carbs_g": 0,
-  "fat_g": 0,
-  "nutrients": ["top highlight nutrient 1", "top highlight nutrient 2", "top highlight nutrient 3", "top highlight nutrient 4"],
-  "nutrient_amounts": {
-    "vit_a": 0, "vit_b1": 0, "vit_b2": 0, "vit_b3": 0, "vit_b5": 0,
-    "vit_b6": 0, "vit_b7": 0, "vit_b9": 0, "vit_b12": 0,
-    "vit_c": 0, "vit_d": 0, "vit_e": 0, "vit_k": 0,
-    "calcium": 0, "iron": 0, "magnesium": 0, "zinc": 0, "potassium": 0,
-    "sodium": 0, "phosphorus": 0, "selenium": 0, "iodine": 0,
-    "chromium": 0, "omega3": 0, "fiber": 0
-  },
-  "advice": "2-3 sentences of practical, specific dietary advice about this meal in the context of fitness, body composition, and health."
-}
-For nutrient_amounts use natural units (mcg for vit_a/vit_d/vit_b7/vit_b9/vit_b12/selenium/iodine/chromium, g for omega3/fiber, mg for all others). Set 0 for negligible. Estimate the full visible plate.` }
-          ]
-        }]
-      })
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error((err.error && err.error.message) || ('API error ' + res.status));
-    }
-    const data = await res.json();
-    const text = data.content[0].text.trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
-    return JSON.parse(text);
-  }
-
-  // ── Result card ──────────────────────────────────────────────────
-  function showCard(objectUrl, r) {
-    $('macroScanThumb').src = objectUrl;
-    $('macroScanFoodName').textContent = r.name || 'Unknown food';
-    $('macroScanServing').textContent  = r.serving_note || '';
-    $('macroScanCal').textContent  = (r.calories   || 0) + ' kcal';
-    $('macroScanProt').textContent = (r.protein_g  || 0) + 'g protein';
-    $('macroScanCarb').textContent = (r.carbs_g    || 0) + 'g carbs';
-    $('macroScanFat').textContent  = (r.fat_g      || 0) + 'g fat';
-    const nutrEl = $('macroScanNutrients');
-    nutrEl.innerHTML = '';
-    (r.nutrients || []).forEach(n => {
-      const t = document.createElement('span');
-      t.className = 'macro-scan-nutrient-tag';
-      t.textContent = n;
-      nutrEl.appendChild(t);
-    });
-    $('macroScanAdvice').textContent = r.advice || '';
-    $('macroScanNote').value = '';
-    $('macroScanCard').hidden = false;
-    setBtnLoading(false);
-    $('macroScanCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  $('macroScanDismiss').addEventListener('click', () => {
-    $('macroScanCard').hidden = true;
-    $('macroScanNote').value = '';
-    pendingScan = null;
+  // ── Text search ───────────────────────────────────────────────────
+  $('macroSearchToggle').addEventListener('click', () => {
+    const panel = $('macroSearchPanel');
+    panel.hidden = !panel.hidden;
+    if (!panel.hidden) setTimeout(() => $('macroSearchInput').focus(), 60);
   });
 
-  $('macroScanUse').addEventListener('click', () => {
-    if (!pendingScan) return;
-    const r    = pendingScan;
-    const note = ($('macroScanNote').value || '').trim();
+  $('macroSearchBtn').addEventListener('click', doSearch);
+  $('macroSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+  async function doSearch() {
+    const q = ($('macroSearchInput').value || '').trim();
+    if (!q) return;
+    const list = $('macroResultsList');
+    list.innerHTML = '<div class="macro-result-loading">Searching…</div>';
+    try {
+      const url = 'https://world.openfoodfacts.org/cgi/search.pl?search_terms=' +
+        encodeURIComponent(q) +
+        '&search_simple=1&action=process&json=1&page_size=10' +
+        '&fields=product_name,brands,nutriments,serving_size,serving_quantity';
+      const res  = await fetch(url);
+      const json = await res.json();
+      renderResults(json.products || []);
+    } catch(e) {
+      list.innerHTML = '<div class="macro-result-loading">Search failed — check your connection.</div>';
+    }
+  }
+
+  function renderResults(products) {
+    const list = $('macroResultsList');
+    list.innerHTML = '';
+    const valid = products.filter(p => {
+      const n = p.nutriments || {};
+      return p.product_name && (n['energy-kcal_100g'] || n['proteins_100g']);
+    });
+    if (!valid.length) {
+      list.innerHTML = '<div class="macro-result-loading">No results with nutrition data.</div>';
+      return;
+    }
+    valid.forEach(p => {
+      const n   = p.nutriments || {};
+      const cal = Math.round(n['energy-kcal_100g'] || 0);
+      const btn = document.createElement('button');
+      btn.className = 'macro-result-item';
+      btn.innerHTML =
+        '<div class="macro-result-main">' +
+          '<span class="macro-result-name">' + escHtml(p.product_name) + '</span>' +
+          (p.brands ? '<span class="macro-result-brand">' + escHtml(p.brands.split(',')[0]) + '</span>' : '') +
+        '</div>' +
+        '<span class="macro-result-cal">' + cal + ' kcal/100g</span>';
+      btn.addEventListener('click', () => {
+        $('macroSearchPanel').hidden = true;
+        $('macroSearchInput').value  = '';
+        list.innerHTML = '';
+        showConfirm(parseProduct(p));
+      });
+      list.appendChild(btn);
+    });
+  }
+
+  // ── Open Food Facts helpers ───────────────────────────────────────
+  async function fetchByBarcode(code) {
+    const res  = await fetch('https://world.openfoodfacts.org/api/v0/product/' + encodeURIComponent(code) + '.json');
+    const json = await res.json();
+    if (json.status !== 1 || !json.product) return null;
+    return parseProduct(json.product);
+  }
+
+  function parseProduct(p) {
+    const n       = p.nutriments || {};
+    const cal100  = Math.round(n['energy-kcal_100g'] || (n['energy_100g'] || 0) / 4.184);
+    const prot100 = +(n['proteins_100g']      || 0);
+    const carb100 = +(n['carbohydrates_100g'] || 0);
+    const fat100  = +(n['fat_100g']           || 0);
+    let serving_g = parseFloat(p.serving_quantity || '') || 0;
+    if (!serving_g && p.serving_size) {
+      const m = p.serving_size.match(/[\d.]+/);
+      serving_g = m ? parseFloat(m[0]) : 100;
+    }
+    if (!serving_g || serving_g > 2000) serving_g = 100;
+    return {
+      name:       p.product_name || 'Unknown',
+      brand:      (p.brands || '').split(',')[0].trim(),
+      serving_g,
+      servingLbl: p.serving_size || (serving_g + 'g'),
+      per100:     { cal: cal100, prot: prot100, carb: carb100, fat: fat100 },
+      nutr100:    n,
+    };
+  }
+
+  // ── Confirm card ──────────────────────────────────────────────────
+  function showConfirm(product) {
+    pendingProduct = product;
+    servingCount   = 1;
+    $('macroConfirmName').textContent  = product.name;
+    $('macroConfirmBrand').textContent = product.brand || '';
+    updateConfirmCard();
+    $('macroConfirmNote').value = '';
+    $('macroConfirmCard').hidden = false;
+    $('macroConfirmCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function updateConfirmCard() {
+    if (!pendingProduct) return;
+    const s    = pendingProduct.serving_g * servingCount / 100;
+    const m    = pendingProduct.per100;
+    const cal  = Math.round(m.cal  * s);
+    const prot = Math.round(m.prot * s * 10) / 10;
+    const carb = Math.round(m.carb * s * 10) / 10;
+    const fat  = Math.round(m.fat  * s * 10) / 10;
+    $('macroConfirmCal').textContent  = cal  + ' kcal';
+    $('macroConfirmProt').textContent = prot + 'g protein';
+    $('macroConfirmCarb').textContent = carb + 'g carbs';
+    $('macroConfirmFat').textContent  = fat  + 'g fat';
+    $('macroConfirmServingLbl').textContent = servingCount + ' × ' + pendingProduct.servingLbl;
+    $('macroServingCount').textContent = servingCount;
+  }
+
+  $('macroServingMinus').addEventListener('click', () => {
+    if (servingCount > 0.5) {
+      servingCount = Math.round((servingCount - 0.5) * 10) / 10;
+      updateConfirmCard();
+    }
+  });
+  $('macroServingPlus').addEventListener('click', () => {
+    servingCount = Math.round((servingCount + 0.5) * 10) / 10;
+    updateConfirmCard();
+  });
+
+  $('macroConfirmDismiss').addEventListener('click', () => {
+    $('macroConfirmCard').hidden = true;
+    pendingProduct = null;
+    servingCount   = 1;
+  });
+
+  $('macroConfirmAdd').addEventListener('click', () => {
+    if (!pendingProduct) return;
+    const s    = pendingProduct.serving_g * servingCount / 100;
+    const m    = pendingProduct.per100;
+    const note = ($('macroConfirmNote').value || '').trim();
     const key  = 'macro:meals:' + todayStr();
     let meals  = [];
     try { meals = JSON.parse(localStorage.getItem(key)) || []; } catch(e) {}
     meals.push({
-      name: r.name || 'Scanned meal',
-      cal:  Number(r.calories)  || 0,
-      prot: Number(r.protein_g) || 0,
-      carb: Number(r.carbs_g)   || 0,
-      fat:  Number(r.fat_g)     || 0,
+      name: pendingProduct.name,
+      cal:  Math.round(m.cal  * s),
+      prot: Math.round(m.prot * s * 10) / 10,
+      carb: Math.round(m.carb * s * 10) / 10,
+      fat:  Math.round(m.fat  * s * 10) / 10,
       note: note || undefined,
     });
     localStorage.setItem(key, JSON.stringify(meals));
-    if (r.nutrient_amounts && typeof window.applyNutrientAmounts === 'function') {
-      window.applyNutrientAmounts(r.nutrient_amounts);
+
+    if (typeof window.applyNutrientAmounts === 'function') {
+      const n = pendingProduct.nutr100;
+      window.applyNutrientAmounts({
+        vit_a:      Math.round((n['vitamin-a_100g']        || 0) * s * 1e6) / 1e3,
+        vit_b1:     Math.round((n['vitamin-b1_100g']       || 0) * s * 1e3) / 10,
+        vit_b2:     Math.round((n['vitamin-b2_100g']       || 0) * s * 1e3) / 10,
+        vit_b3:     Math.round((n['vitamin-b3_100g']       || 0) * s * 1e3) / 10,
+        vit_b5:     Math.round((n['pantothenic-acid_100g'] || 0) * s * 1e3) / 10,
+        vit_b6:     Math.round((n['vitamin-b6_100g']       || 0) * s * 1e3) / 10,
+        vit_b9:     Math.round((n['folates_100g'] || n['folic-acid_100g'] || 0) * s * 1e6) / 1e3,
+        vit_b12:    Math.round((n['vitamin-b12_100g']      || 0) * s * 1e9) / 1e3,
+        vit_c:      Math.round((n['vitamin-c_100g']        || 0) * s * 1e3) / 10,
+        vit_d:      Math.round((n['vitamin-d_100g']        || 0) * s * 1e6) / 1e3,
+        vit_e:      Math.round((n['vitamin-e_100g']        || 0) * s * 1e3) / 10,
+        vit_k:      Math.round((n['vitamin-k_100g']        || 0) * s * 1e6) / 1e3,
+        calcium:    Math.round((n['calcium_100g']          || 0) * s * 1e3) / 10,
+        iron:       Math.round((n['iron_100g']             || 0) * s * 1e3) / 10,
+        magnesium:  Math.round((n['magnesium_100g']        || 0) * s * 1e3) / 10,
+        zinc:       Math.round((n['zinc_100g']             || 0) * s * 1e3) / 10,
+        potassium:  Math.round((n['potassium_100g']        || 0) * s * 1e3) / 10,
+        sodium:     Math.round((n['sodium_100g']           || 0) * s * 1e3) / 10,
+        phosphorus: Math.round((n['phosphorus_100g']       || 0) * s * 1e3) / 10,
+        selenium:   Math.round((n['selenium_100g']         || 0) * s * 1e6) / 1e3,
+        iodine:     Math.round((n['iodine_100g']           || 0) * s * 1e6) / 1e3,
+        chromium:   Math.round((n['chromium_100g']         || 0) * s * 1e6) / 1e3,
+        omega3:     Math.round((n['omega-3-fat_100g']      || 0) * s * 10)  / 10,
+        fiber:      Math.round((n['fiber_100g']            || 0) * s * 10)  / 10,
+      });
     }
-    $('macroScanCard').hidden = true;
-    $('macroScanNote').value = '';
-    pendingScan = null;
+
+    $('macroConfirmCard').hidden = true;
+    $('macroConfirmNote').value  = '';
+    pendingProduct = null;
+    servingCount   = 1;
     window.dispatchEvent(new Event('storage'));
   });
-
-  function setBtnLoading(on) {
-    const btn = $('macroScanTrigger');
-    if (!btn) return;
-    btn.classList.toggle('loading', on);
-    $('macroScanBtnIcon').textContent = on ? '⏳' : '📷';
-    $('macroScanBtnText').textContent = on ? 'Analysing…' : 'Scan food photo';
-  }
 })();
 </script>
 
