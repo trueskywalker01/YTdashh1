@@ -111,6 +111,30 @@
 body.has-bottombar {
   padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important;
 }
+@media (min-width: 769px) {
+  .bottombar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0; right: auto;
+    width: 72px;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 64px 0 16px;
+    border-top: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .bottombar-tab {
+    flex: 0;
+    width: 100%;
+    padding: 14px 0;
+    gap: 4px;
+  }
+  .bottombar-tab-icon { font-size: 22px; }
+  body.has-bottombar {
+    padding-bottom: 0 !important;
+    padding-left: 72px !important;
+  }
+}
 @media (max-width: 480px) {
   .topbar { padding-left: 10px; padding-right: 10px; gap: 6px; }
   .topbar-water-pill { padding: 8px 11px; gap: 6px; }
