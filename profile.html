@@ -502,7 +502,7 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cur
     const stackTaken  = ls(`stack:taken:${today}`) || {};
     if (stackItems.length) {
       const total  = stackItems.length;
-      const taken  = stackItems.filter(item => stackTaken[item.name]).length;
+      const taken  = stackItems.filter(item => stackTaken[item.id]).length;
       const pct    = Math.round(taken / total * 100);
       const cls    = pct >= 100 ? 'bar-green' : pct >= 50 ? 'bar-yellow' : 'bar-red';
       rows.push({
