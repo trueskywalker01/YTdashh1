@@ -682,7 +682,76 @@ main {
 .macro-meal-del:hover { color: #FF6B6B; }
 .macro-empty { font-size: 12px; color: var(--text-quaternary); font-style: italic; padding: 6px 10px; }
 .macro-add-wrap { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-soft); }
-.macro-add-row { display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr 1fr auto; gap: 6px; align-items: center; }
+.macro-or-manual {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-quaternary); margin: 12px 0 10px; display: flex; align-items: center; gap: 8px;
+}
+.macro-or-manual::before, .macro-or-manual::after { content: ''; flex: 1; height: 1px; background: var(--border-soft); }
+.macro-add-name-wrap { margin-bottom: 6px; }
+.macro-add-name-wrap .stack-input { width: 100%; }
+.macro-add-nums { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 6px; align-items: center; }
+/* ── Nutrient tracker ── */
+.nutr-wrap { margin-bottom: 28px; }
+.nutr-card {
+  background: var(--bg-card); border-radius: 16px; padding: 22px;
+  backdrop-filter: blur(24px) saturate(1.2); -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+}
+.nutr-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.nutr-tabs {
+  display: flex; gap: 4px; padding: 3px; margin-bottom: 14px;
+  background: rgba(255,255,255,0.04); border-radius: 10px; border: 1px solid var(--border-soft);
+}
+.nutr-tab {
+  flex: 1; padding: 7px; border-radius: 8px; border: none;
+  background: transparent; color: var(--text-tertiary);
+  font-size: 12px; font-weight: 700; font-family: inherit;
+  cursor: pointer; transition: all 0.15s; letter-spacing: 0.02em;
+}
+.nutr-tab.active { background: rgba(255,255,255,0.09); color: var(--text-primary); }
+.nutr-row { padding: 9px 0; border-bottom: 1px solid var(--border-soft); }
+.nutr-row:last-child { border-bottom: none; }
+.nutr-row-top { display: grid; grid-template-columns: 16px 1fr auto 28px; gap: 8px; align-items: center; margin-bottom: 5px; }
+.nutr-dot { width: 7px; height: 7px; border-radius: 50%; justify-self: center; flex-shrink: 0; }
+.nutr-name { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.nutr-amt { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nutr-add-btn {
+  background: rgba(255,255,255,0.06); border: 1px solid var(--border-strong);
+  color: var(--text-secondary); font-size: 15px; font-weight: 700; font-family: inherit;
+  border-radius: 6px; width: 26px; height: 26px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; line-height: 1;
+  transition: background 0.15s, color 0.15s;
+}
+.nutr-add-btn:hover { background: rgba(255,255,255,0.12); color: var(--text-primary); }
+.nutr-bar-indent { margin-left: 24px; }
+.nutr-bar-track { height: 4px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; }
+.nutr-bar-fill { height: 100%; border-radius: 999px; max-width: 100%; transition: width 0.5s cubic-bezier(0.22,1,0.36,1); }
+.nutr-log-row {
+  display: flex; gap: 6px; align-items: center;
+  margin-top: 7px; margin-left: 24px; animation: macro-fade-in 0.18s ease both;
+}
+.nutr-log-row[hidden] { display: none; }
+.nutr-log-input {
+  width: 72px; padding: 5px 8px; border-radius: 8px;
+  background: rgba(255,255,255,0.06); border: 1px solid var(--border-strong);
+  color: var(--text-primary); font-family: var(--font-mono); font-size: 13px;
+  text-align: center; outline: none;
+}
+.nutr-log-input:focus { border-color: rgba(255,255,255,0.3); }
+.nutr-log-unit { font-size: 11px; color: var(--text-tertiary); min-width: 28px; }
+.nutr-log-ok {
+  background: rgba(255,255,255,0.1); border: 1px solid var(--border-strong);
+  color: var(--text-primary); font-size: 12px; font-weight: 700;
+  padding: 4px 10px; border-radius: 8px; cursor: pointer; font-family: inherit;
+  transition: background 0.15s;
+}
+.nutr-log-ok:hover { background: rgba(255,255,255,0.18); }
+.nutr-log-cancel {
+  background: transparent; border: none; color: var(--text-quaternary);
+  font-size: 13px; cursor: pointer; padding: 2px 5px; font-family: inherit;
+  border-radius: 6px; transition: color 0.15s;
+}
+.nutr-log-cancel:hover { color: #FF6B6B; }
 .macro-scan-btn {
   display: flex; align-items: center; justify-content: center; gap: 6px;
   padding: 9px 16px; border-radius: 10px; flex-shrink: 0;
@@ -764,9 +833,10 @@ main {
 .macro-modal-save { padding: 9px 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.85); background: linear-gradient(180deg,#FFFFFF 0%,#E8E5DD 100%); color: #0A0A0B; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 4px 14px rgba(0,0,0,0.3); }
 @media (max-width: 600px) {
   .macro-overview { grid-template-columns: 1fr; justify-items: center; }
-  .macro-add-row { grid-template-columns: 1fr 1fr 1fr; }
-  .macro-add-row > *:first-child { grid-column: 1 / -1; }
-  .macro-add-row > *:last-child { grid-column: 1 / -1; }
+  .macro-add-nums { grid-template-columns: 1fr 1fr; }
+  .macro-add-nums > *:last-child { grid-column: 1 / -1; }
+  .nutr-row-top { grid-template-columns: 14px 1fr auto 26px; gap: 6px; }
+  .nutr-name { font-size: 12px; }
 }
 
 ::selection { background: rgba(224, 118, 88, 0.3); color: var(--text-primary); }
@@ -1028,8 +1098,11 @@ main {
           </div>
         </div>
 
-        <div class="macro-add-row">
+        <div class="macro-or-manual">or enter manually</div>
+        <div class="macro-add-name-wrap">
           <input id="macroAddName" type="text" class="stack-input" placeholder="Food / meal name" autocomplete="off" spellcheck="false" />
+        </div>
+        <div class="macro-add-nums">
           <input id="macroAddCal"  type="number" class="stack-input" placeholder="kcal" min="0" />
           <input id="macroAddProt" type="number" class="stack-input" placeholder="Protein g" min="0" />
           <input id="macroAddCarb" type="number" class="stack-input" placeholder="Carbs g" min="0" />
@@ -1037,6 +1110,25 @@ main {
           <button id="macroAddBtn" class="macro-scan-btn">+ Add</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ── NUTRIENTS & MINERALS ── -->
+  <div class="section-title">Nutrients &amp; Minerals</div>
+  <div class="nutr-wrap">
+    <div class="nutr-card">
+      <div class="nutr-header">
+        <div>
+          <div class="sf-eyebrow">Daily micronutrients</div>
+          <div class="sf-title" id="nutrDateLbl"></div>
+        </div>
+        <button class="macro-goals-btn" id="nutrResetBtn">↺ Reset</button>
+      </div>
+      <div class="nutr-tabs" role="tablist">
+        <button class="nutr-tab active" data-tab="vitamins" role="tab">Vitamins</button>
+        <button class="nutr-tab" data-tab="minerals" role="tab">Minerals &amp; Other</button>
+      </div>
+      <div id="nutrPanel" class="nutr-panel" role="tabpanel"></div>
     </div>
   </div>
 
@@ -1696,8 +1788,8 @@ document.addEventListener('DOMContentLoaded', function () {
   if (typeof initCloudSync !== 'function') return;
   initCloudSync({
     appKey: 'health',
-    syncedKeys: ['stack:items', 'stack:version', 'stack:low', 'po_water_v1', 'macro:goals'],
-    syncedPrefixes: ['stack:taken:', 'macro:meals:'],
+    syncedKeys: ['stack:items', 'stack:version', 'stack:low', 'po_water_v1', 'macro:goals', 'nutrients:goals'],
+    syncedPrefixes: ['stack:taken:', 'macro:meals:', 'nutrients:log:'],
     onApplied: function () { window.dispatchEvent(new Event('storage')); }
   });
 });
@@ -2169,10 +2261,18 @@ document.addEventListener('DOMContentLoaded', function () {
   "protein_g": 0,
   "carbs_g": 0,
   "fat_g": 0,
-  "nutrients": ["vitamin/mineral 1 with brief note", "vitamin/mineral 2", "vitamin/mineral 3", "vitamin/mineral 4"],
+  "nutrients": ["top highlight nutrient 1", "top highlight nutrient 2", "top highlight nutrient 3", "top highlight nutrient 4"],
+  "nutrient_amounts": {
+    "vit_a": 0, "vit_b1": 0, "vit_b2": 0, "vit_b3": 0, "vit_b5": 0,
+    "vit_b6": 0, "vit_b7": 0, "vit_b9": 0, "vit_b12": 0,
+    "vit_c": 0, "vit_d": 0, "vit_e": 0, "vit_k": 0,
+    "calcium": 0, "iron": 0, "magnesium": 0, "zinc": 0, "potassium": 0,
+    "sodium": 0, "phosphorus": 0, "selenium": 0, "iodine": 0,
+    "chromium": 0, "omega3": 0, "fiber": 0
+  },
   "advice": "2-3 sentences of practical, specific dietary advice about this meal in the context of fitness, body composition, and health."
 }
-Be realistic with estimates. If multiple foods visible, estimate the total plate.` }
+For nutrient_amounts: use each field's natural unit (mcg for vit_a/vit_d/vit_b7/vit_b9/vit_b12/selenium/iodine/chromium, g for omega3/fiber, mg for everything else). Set 0 for negligible amounts. Be realistic — only non-trivial amounts. If multiple foods visible, estimate the full plate total.` }
           ]
         }]
       })
@@ -2226,6 +2326,9 @@ Be realistic with estimates. If multiple foods visible, estimate the total plate
     $('macroAddProt').value = r.protein_g  || '';
     $('macroAddCarb').value = r.carbs_g    || '';
     $('macroAddFat').value  = r.fat_g      || '';
+    if (r.nutrient_amounts && typeof window.applyNutrientAmounts === 'function') {
+      window.applyNutrientAmounts(r.nutrient_amounts);
+    }
     scanCard.hidden = true;
     pendingScan = null;
     $('macroAddBtn').click();
@@ -2235,6 +2338,195 @@ Be realistic with estimates. If multiple foods visible, estimate the total plate
     triggerBtn.classList.toggle('loading', on);
     $('macroScanBtnIcon').textContent = on ? '⏳' : '📷';
     $('macroScanBtnText').textContent = on ? 'Analysing photo…' : 'Scan food photo';
+  }
+})();
+</script>
+
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const NUTR_LOG_PFX = 'nutrients:log:';
+
+  function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function loadNutrLog()   { try { return JSON.parse(localStorage.getItem(NUTR_LOG_PFX + todayStr())) || {}; } catch(e) { return {}; } }
+  function saveNutrLog(l)  { localStorage.setItem(NUTR_LOG_PFX + todayStr(), JSON.stringify(l)); }
+
+  const NUTR_DB = [
+    // Vitamins (unit in parentheses matches nutrient_amounts keys from Claude)
+    { id:'vit_a',   name:'Vitamin A',      unit:'mcg', rda:900,   tab:'vitamins', color:'#FF9F0A' },
+    { id:'vit_b1',  name:'B1 Thiamine',    unit:'mg',  rda:1.2,   tab:'vitamins', color:'#FFD60A' },
+    { id:'vit_b2',  name:'B2 Riboflavin',  unit:'mg',  rda:1.3,   tab:'vitamins', color:'#FFD60A' },
+    { id:'vit_b3',  name:'B3 Niacin',      unit:'mg',  rda:16,    tab:'vitamins', color:'#FF9F0A' },
+    { id:'vit_b5',  name:'B5 Pantothenic', unit:'mg',  rda:5,     tab:'vitamins', color:'#FF9F0A' },
+    { id:'vit_b6',  name:'Vitamin B6',     unit:'mg',  rda:1.7,   tab:'vitamins', color:'#FF9F0A' },
+    { id:'vit_b7',  name:'B7 Biotin',      unit:'mcg', rda:30,    tab:'vitamins', color:'#FFD60A' },
+    { id:'vit_b9',  name:'B9 Folate',      unit:'mcg', rda:400,   tab:'vitamins', color:'#FFD60A' },
+    { id:'vit_b12', name:'Vitamin B12',    unit:'mcg', rda:2.4,   tab:'vitamins', color:'#30D158' },
+    { id:'vit_c',   name:'Vitamin C',      unit:'mg',  rda:90,    tab:'vitamins', color:'#30D158' },
+    { id:'vit_d',   name:'Vitamin D',      unit:'mcg', rda:20,    tab:'vitamins', color:'#FFD60A' },
+    { id:'vit_e',   name:'Vitamin E',      unit:'mg',  rda:15,    tab:'vitamins', color:'#FF9F0A' },
+    { id:'vit_k',   name:'Vitamin K',      unit:'mcg', rda:120,   tab:'vitamins', color:'#30D158' },
+    // Minerals & other
+    { id:'calcium',    name:'Calcium',     unit:'mg',  rda:1000,  tab:'minerals', color:'#64D2FF' },
+    { id:'iron',       name:'Iron',        unit:'mg',  rda:8,     tab:'minerals', color:'#FF6B6B' },
+    { id:'magnesium',  name:'Magnesium',   unit:'mg',  rda:420,   tab:'minerals', color:'#BF5AF2' },
+    { id:'zinc',       name:'Zinc',        unit:'mg',  rda:11,    tab:'minerals', color:'#64D2FF' },
+    { id:'potassium',  name:'Potassium',   unit:'mg',  rda:3500,  tab:'minerals', color:'#30D158' },
+    { id:'sodium',     name:'Sodium',      unit:'mg',  rda:2300,  tab:'minerals', color:'#FF6B6B' },
+    { id:'phosphorus', name:'Phosphorus',  unit:'mg',  rda:700,   tab:'minerals', color:'#64D2FF' },
+    { id:'selenium',   name:'Selenium',    unit:'mcg', rda:55,    tab:'minerals', color:'#FFD60A' },
+    { id:'iodine',     name:'Iodine',      unit:'mcg', rda:150,   tab:'minerals', color:'#64D2FF' },
+    { id:'chromium',   name:'Chromium',    unit:'mcg', rda:35,    tab:'minerals', color:'#64D2FF' },
+    { id:'omega3',     name:'Omega-3',     unit:'g',   rda:1.6,   tab:'minerals', color:'#30D158' },
+    { id:'fiber',      name:'Fiber',       unit:'g',   rda:38,    tab:'minerals', color:'#30D158' },
+  ];
+
+  let nutrActiveTab = 'vitamins';
+
+  function fmt(val) {
+    if (!val || val === 0) return '0';
+    if (val >= 1000) return val.toLocaleString('en', {maximumFractionDigits:0});
+    if (val < 0.1) return parseFloat(val.toFixed(2)).toString();
+    if (val < 10)  return parseFloat(val.toFixed(1)).toString();
+    return Math.round(val).toString();
+  }
+
+  function renderNutr() {
+    const log = loadNutrLog();
+    const d = new Date();
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const lbl = $('nutrDateLbl');
+    if (lbl) lbl.textContent = days[d.getDay()] + ', ' + d.getDate();
+
+    const panel = $('nutrPanel');
+    if (!panel) return;
+
+    const openIds = new Set();
+    panel.querySelectorAll('.nutr-log-row:not([hidden])').forEach(r => openIds.add(r.dataset.id));
+
+    panel.innerHTML = '';
+
+    NUTR_DB.filter(n => n.tab === nutrActiveTab).forEach(n => {
+      const logged = Number(log[n.id]) || 0;
+      const p = n.rda > 0 ? Math.min(100, Math.round(logged / n.rda * 100)) : 0;
+      const dotColor = logged === 0
+        ? 'rgba(255,255,255,0.12)'
+        : p >= 100 ? '#30D158'
+        : p >= 50  ? n.color
+        : '#FF9F0A';
+
+      const row = document.createElement('div');
+      row.className = 'nutr-row';
+      row.dataset.id = n.id;
+      row.innerHTML =
+        '<div class="nutr-row-top">' +
+          '<div class="nutr-dot" style="background:' + dotColor + '"></div>' +
+          '<div class="nutr-name">' + n.name + '</div>' +
+          '<div class="nutr-amt">' + fmt(logged) + ' / ' + fmt(n.rda) + ' ' + n.unit + '</div>' +
+          '<button class="nutr-add-btn" data-id="' + n.id + '" aria-label="Log ' + n.name + '">+</button>' +
+        '</div>' +
+        '<div class="nutr-bar-indent">' +
+          '<div class="nutr-bar-track"><div class="nutr-bar-fill" style="width:' + p + '%;background:' + n.color + '"></div></div>' +
+        '</div>' +
+        '<div class="nutr-log-row" id="nutrLog_' + n.id + '"' + (openIds.has(n.id) ? '' : ' hidden') + ' data-id="' + n.id + '">' +
+          '<input type="number" class="nutr-log-input" id="nutrLogInput_' + n.id + '" placeholder="0" min="0" step="any" />' +
+          '<span class="nutr-log-unit">' + n.unit + '</span>' +
+          '<button class="nutr-log-ok" data-id="' + n.id + '">✓ Add</button>' +
+          '<button class="nutr-log-cancel" data-id="' + n.id + '" aria-label="Cancel">✕</button>' +
+        '</div>';
+      panel.appendChild(row);
+
+      if (openIds.has(n.id)) {
+        const inp = $('nutrLogInput_' + n.id);
+        if (inp) setTimeout(() => inp.focus(), 0);
+      }
+    });
+  }
+
+  function initNutr() {
+    document.querySelectorAll('.nutr-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        nutrActiveTab = tab.dataset.tab;
+        document.querySelectorAll('.nutr-tab').forEach(t => t.classList.toggle('active', t === tab));
+        renderNutr();
+      });
+    });
+
+    const panel = $('nutrPanel');
+    if (panel) {
+      panel.addEventListener('click', e => {
+        const addBtn = e.target.closest('.nutr-add-btn');
+        if (addBtn) {
+          const id = addBtn.dataset.id;
+          panel.querySelectorAll('.nutr-log-row:not([hidden])').forEach(r => {
+            if (r.dataset.id !== id) r.hidden = true;
+          });
+          const logRow = $('nutrLog_' + id);
+          if (logRow) {
+            const wasHidden = logRow.hidden;
+            logRow.hidden = false;
+            if (wasHidden) { const inp = $('nutrLogInput_' + id); if (inp) { inp.value = ''; inp.focus(); } }
+          }
+          return;
+        }
+        const okBtn = e.target.closest('.nutr-log-ok');
+        if (okBtn) {
+          const id = okBtn.dataset.id;
+          const input = $('nutrLogInput_' + id);
+          const val = parseFloat(input.value);
+          if (val > 0) {
+            const log = loadNutrLog();
+            log[id] = (Number(log[id]) || 0) + val;
+            saveNutrLog(log);
+          }
+          renderNutr();
+          return;
+        }
+        const cancelBtn = e.target.closest('.nutr-log-cancel');
+        if (cancelBtn) {
+          const logRow = $('nutrLog_' + cancelBtn.dataset.id);
+          if (logRow) logRow.hidden = true;
+        }
+      });
+
+      panel.addEventListener('keydown', e => {
+        const input = e.target.closest('.nutr-log-input');
+        if (!input) return;
+        const id = input.id.replace('nutrLogInput_', '');
+        if (e.key === 'Enter') { const ok = panel.querySelector('.nutr-log-ok[data-id="' + id + '"]'); if (ok) ok.click(); }
+        if (e.key === 'Escape') { const row = $('nutrLog_' + id); if (row) row.hidden = true; }
+      });
+    }
+
+    const resetBtn = $('nutrResetBtn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (confirm('Clear today\'s nutrient log?')) { saveNutrLog({}); renderNutr(); }
+      });
+    }
+
+    window.addEventListener('storage', renderNutr);
+    renderNutr();
+  }
+
+  window.applyNutrientAmounts = function (amounts) {
+    const log = loadNutrLog();
+    Object.entries(amounts).forEach(([id, val]) => {
+      const v = Number(val);
+      if (v > 0) log[id] = (Number(log[id]) || 0) + v;
+    });
+    saveNutrLog(log);
+    renderNutr();
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNutr);
+  } else {
+    initNutr();
   }
 })();
 </script>
