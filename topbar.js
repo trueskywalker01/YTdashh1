@@ -125,21 +125,23 @@ body.has-bottombar {
     padding: 72px 14px 20px;
     border-top: none;
     border-right: 1px solid rgba(255, 255, 255, 0.07);
+    justify-content: space-evenly;
   }
   .bottombar-tab {
-    flex: 0;
+    flex: 1;
     width: 100%;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    padding: 14px 18px;
+    padding: 0 18px;
     gap: 15px;
     position: relative;
     font-size: 15px;
     font-weight: 600;
     letter-spacing: 0;
     border-radius: 12px;
-    margin-bottom: 4px;
+    margin-bottom: 0;
+    max-height: 64px;
   }
   .bottombar-tab-icon { font-size: 21px; flex-shrink: 0; }
   body.has-bottombar {
