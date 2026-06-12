@@ -1478,10 +1478,12 @@ main {
       storeSet('stack:version', TEMPLATE_VERSION);
       return fresh;
     }
-    storeSet('stack:version', TEMPLATE_VERSION);
     return stored;
   }
-  function setItems(items) { storeSet('stack:items', items); }
+  function setItems(items) {
+    storeSet('stack:items', items);
+    storeSet('stack:version', TEMPLATE_VERSION);
+  }
   function getTaken() { return storeGet(todayKey) || {}; }
   function setTaken(map) { storeSet(todayKey, map); }
   function getLow() { return storeGet('stack:low') || []; }

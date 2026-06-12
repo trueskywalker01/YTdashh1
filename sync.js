@@ -17,7 +17,7 @@
     if (!SUPABASE_URL || !SUPABASE_KEY) return;
     if (SUPABASE_URL.indexOf('PASTE-') === 0 || SUPABASE_KEY.indexOf('PASTE-') === 0) return;
 
-    let supa = null, pushTimer = null, suppressSync = false, lastSyncedJson = null;
+    let supa = null, pushTimer = null, suppressSync = false, lastSyncedJson = null, prevSyncedKeys = null;
 
     function matches(k) {
       if (!k) return false;
@@ -65,9 +65,17 @@
           const local = localStorage.getItem(k);
           if (local !== incoming) { try { origSet(k, incoming); changed = true; } catch (e) {} }
         }
-        for (const k of listAllKeys()) {
-          if (!(k in remote)) { try { origRemove(k); changed = true; } catch (e) {} }
+        // Only delete a local key if it existed in the PREVIOUS sync snapshot AND is
+        // now absent from remote — meaning it was intentionally removed on another device.
+        // Never delete locally-created keys that haven't been pushed yet.
+        if (prevSyncedKeys) {
+          for (const k of listAllKeys()) {
+            if (!(k in remote) && prevSyncedKeys.has(k)) {
+              try { origRemove(k); changed = true; } catch (e) {}
+            }
+          }
         }
+        prevSyncedKeys = new Set(Object.keys(remote).filter(k => matches(k)));
       } finally { suppressSync = false; }
       if (changed && typeof onApplied === 'function') { try { onApplied(); } catch (e) {} }
       return changed;
