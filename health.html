@@ -691,6 +691,163 @@ main {
 }
 .macro-scan-note-input::placeholder { color: var(--text-quaternary); }
 .macro-scan-note-input:focus { border-color: rgba(255,255,255,0.22); }
+/* ── AI Calorie Tracker ── */
+.macro-add-wrap { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-soft); }
+.macro-key-setup {
+  border-radius: 14px; padding: 18px 16px; text-align: center;
+  background: rgba(100,210,255,0.03); border: 1px solid rgba(100,210,255,0.12);
+}
+.macro-key-icon { font-size: 24px; margin-bottom: 8px; }
+.macro-key-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.macro-key-desc { font-size: 12px; color: var(--text-tertiary); line-height: 1.55; margin-bottom: 14px; }
+.macro-key-row { display: flex; gap: 8px; }
+.macro-key-row .stack-input { flex: 1; }
+.macro-change-key {
+  display: block; margin: 9px auto 0; background: none; border: none;
+  color: var(--text-quaternary); font-size: 11px; cursor: pointer;
+  font-family: inherit; text-decoration: underline; padding: 2px;
+}
+.macro-change-key:hover { color: var(--text-tertiary); }
+.macro-actions-row { display: flex; gap: 8px; align-items: center; }
+.macro-capture-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 13px; border-radius: 12px;
+  border: 1px dashed rgba(255,255,255,0.15);
+  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(100,210,255,0.04) 100%);
+  color: var(--text-secondary); font-size: 13px; font-family: inherit;
+  font-weight: 700; cursor: pointer; letter-spacing: 0.01em;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+}
+.macro-capture-btn:hover { border-color: rgba(100,210,255,0.35); color: #64D2FF; background: rgba(100,210,255,0.06); }
+.macro-capture-btn:active { transform: scale(0.98); }
+.macro-capture-btn:disabled { opacity: 0.5; pointer-events: none; }
+.macro-history-btn {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04);
+  color: var(--text-secondary); font-size: 17px; cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+.macro-history-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: var(--text-primary); }
+.macro-loading-card {
+  margin-top: 14px; border-radius: 14px; padding: 24px 20px; text-align: center;
+  border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.02);
+}
+.macro-loading-shimmer {
+  height: 8px; border-radius: 999px; margin: 0 auto 10px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: aiShimmer 1.4s infinite;
+}
+@keyframes aiShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.macro-loading-text { font-size: 12px; color: var(--text-quaternary); margin-top: 4px; }
+@keyframes macro-fade-in { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+.macro-result-card {
+  margin-top: 14px; border-radius: 14px; overflow: hidden;
+  border: 1px solid rgba(100,210,255,0.18); background: rgba(100,210,255,0.03);
+  animation: macro-fade-in 0.25s ease both;
+}
+.macro-result-card[hidden] { display: none; }
+.macro-result-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px 11px; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.macro-result-title { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.macro-result-dismiss {
+  background: none; border: none; color: var(--text-quaternary); font-size: 15px;
+  cursor: pointer; font-family: inherit; padding: 2px 5px; border-radius: 4px;
+  transition: color 0.15s;
+}
+.macro-result-dismiss:hover { color: #FF6B6B; }
+.macro-result-items { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.macro-result-footer { padding: 2px 12px 14px; }
+.macro-result-footer button { width: 100%; }
+.macro-food-item { border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.025); overflow: hidden; }
+.macro-food-item-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 11px 12px 0; gap: 8px; }
+.macro-food-name { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+.macro-food-portion { font-size: 10.5px; color: var(--text-quaternary); font-family: var(--font-mono); }
+.macro-confidence {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 999px; border: 1px solid; flex-shrink: 0; margin-top: 2px;
+}
+.macro-confidence.high   { color: #30D158; border-color: rgba(48,209,88,.35); background: rgba(48,209,88,.07); }
+.macro-confidence.medium { color: #FF9F0A; border-color: rgba(255,159,10,.35); background: rgba(255,159,10,.07); }
+.macro-confidence.low    { color: #FF6B6B; border-color: rgba(255,107,107,.35); background: rgba(255,107,107,.07); }
+.macro-food-macros { display: flex; flex-wrap: wrap; gap: 5px; padding: 9px 12px; }
+.macro-food-pill {
+  font-family: var(--font-mono); font-size: 10px; font-variant-numeric: tabular-nums;
+  padding: 2px 7px; border-radius: 5px; border: 1px solid; font-weight: 600;
+}
+.macro-food-pill.cal  { color: #FAFAFA; border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.06); }
+.macro-food-pill.prot { color: #FF9F0A; border-color: rgba(255,159,10,.3); background: rgba(255,159,10,.07); }
+.macro-food-pill.carb { color: #30D158; border-color: rgba(48,209,88,.3); background: rgba(48,209,88,.07); }
+.macro-food-pill.fat  { color: #64D2FF; border-color: rgba(100,210,255,.3); background: rgba(100,210,255,.07); }
+.macro-food-pill.fiber{ color: #BF5AF2; border-color: rgba(191,90,242,.3); background: rgba(191,90,242,.07); }
+.macro-food-expand {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 7px 12px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  border-bottom: none; border-left: none; border-right: none;
+  background: none; color: var(--text-quaternary); font-size: 10.5px; cursor: pointer;
+  font-family: inherit; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  transition: color 0.15s, background 0.15s;
+}
+.macro-food-expand:hover { color: var(--text-tertiary); background: rgba(255,255,255,.03); }
+.macro-food-micros { border-top: 1px solid rgba(255,255,255,.06); padding: 10px 12px 12px; }
+.macro-food-micros[hidden] { display: none; }
+.macro-micro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 6px; margin-bottom: 10px; }
+.macro-micro-item {
+  font-size: 10.5px; display: flex; justify-content: space-between; gap: 4px;
+  padding: 3px 6px; border-radius: 5px; background: rgba(255,255,255,.025);
+}
+.macro-micro-name { color: var(--text-quaternary); }
+.macro-micro-val { color: var(--text-secondary); font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.macro-nutr-link {
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  width: 100%; padding: 8px 12px; border-radius: 8px;
+  background: rgba(100,210,255,.06); border: 1px solid rgba(100,210,255,.15);
+  color: #64D2FF; font-size: 11.5px; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: background 0.15s;
+}
+.macro-nutr-link:hover { background: rgba(100,210,255,.12); }
+/* History modal */
+.history-modal { position: fixed; inset: 0; z-index: 200; background: #050506; display: flex; flex-direction: column; }
+.history-modal[hidden] { display: none; }
+.history-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: max(24px,env(safe-area-inset-top)) 20px 14px;
+  border-bottom: 1px solid var(--border-soft); flex-shrink: 0;
+}
+.history-modal-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.history-date-nav {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px; border-bottom: 1px solid var(--border-soft); flex-shrink: 0;
+}
+.history-nav-btn {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04);
+  color: var(--text-primary); font-size: 18px; cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.history-nav-btn:hover { background: rgba(255,255,255,.08); }
+.history-nav-btn:disabled { opacity: 0.35; pointer-events: none; }
+.history-date-lbl { flex: 1; text-align: center; font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.history-content { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.history-day-total {
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary);
+  padding: 10px 12px; border-radius: 10px;
+  background: rgba(100,210,255,.04); border: 1px solid rgba(100,210,255,.1);
+  margin-bottom: 8px;
+}
+.history-entry {
+  padding: 9px 12px; border-radius: 8px; display: flex; align-items: baseline;
+  justify-content: space-between; gap: 10px;
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06);
+}
+.history-entry-name { font-size: 13px; font-weight: 600; color: var(--text-primary); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.history-entry-stats { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-tertiary); flex-shrink: 0; }
+.history-empty { font-size: 13px; color: var(--text-quaternary); text-align: center; padding: 48px 0; }
 /* ── Nutrient tracker ── */
 .nutr-wrap { margin-bottom: 28px; }
 .nutr-card {
@@ -994,6 +1151,50 @@ main {
         <div id="macroMealsList"></div>
       </div>
 
+      <div class="macro-add-wrap">
+        <!-- API key setup — visible until key is saved -->
+        <div id="macroKeySetup" class="macro-key-setup">
+          <div class="macro-key-icon">🤖</div>
+          <div class="macro-key-title">AI Food Scanner</div>
+          <div class="macro-key-desc">Paste your Anthropic API key once to enable instant photo meal analysis. Stored locally — never committed to git.</div>
+          <div class="macro-key-row">
+            <input id="macroApiKeyInput" type="password" class="stack-input" placeholder="sk-ant-api03-…" autocomplete="off" spellcheck="false" />
+            <button id="macroApiKeySave" class="macro-modal-save">Save</button>
+          </div>
+        </div>
+
+        <!-- Scan area — visible once key is saved -->
+        <div id="macroScanArea" hidden>
+          <div class="macro-actions-row">
+            <button id="macroCaptureTrigger" class="macro-capture-btn">
+              <span>📷</span><span>Log meal</span>
+            </button>
+            <button id="macroHistoryBtn" class="macro-history-btn" title="Meal history">🗂</button>
+          </div>
+          <button id="macroClearKey" class="macro-change-key">Change API key</button>
+        </div>
+
+        <!-- Loading skeleton -->
+        <div id="macroLoadingCard" class="macro-loading-card" hidden>
+          <div class="macro-loading-shimmer" style="width:55%"></div>
+          <div class="macro-loading-shimmer" style="width:80%"></div>
+          <div class="macro-loading-shimmer" style="width:42%"></div>
+          <div class="macro-loading-text">Analysing your meal…</div>
+        </div>
+
+        <!-- AI result card -->
+        <div id="macroResultCard" class="macro-result-card" hidden>
+          <div class="macro-result-header">
+            <span class="macro-result-title" id="macroResultTitle">Meal analysis</span>
+            <button class="macro-result-dismiss" id="macroResultDismiss">✕</button>
+          </div>
+          <div id="macroResultItems" class="macro-result-items"></div>
+          <div class="macro-result-footer">
+            <button id="macroResultAdd" class="macro-modal-save">Add all to log</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -1065,6 +1266,20 @@ main {
 
   <div class="attribution">// editable template · all data stays in your browser</div>
 </main>
+
+<!-- Meal history fullscreen modal -->
+<div id="historyModal" class="history-modal" hidden>
+  <div class="history-modal-header">
+    <span class="history-modal-title">Meal History</span>
+    <button id="historyClose" class="macro-result-dismiss" style="font-size:18px;padding:4px 8px;">✕</button>
+  </div>
+  <div class="history-date-nav">
+    <button id="historyPrev" class="history-nav-btn">‹</button>
+    <span id="historyDateLbl" class="history-date-lbl"></span>
+    <button id="historyNext" class="history-nav-btn">›</button>
+  </div>
+  <div id="historyContent" class="history-content"></div>
+</div>
 
 <!-- Macro Goals Modal -->
 <div class="macro-modal-bg" id="macroModalBg" hidden>
@@ -2013,6 +2228,312 @@ document.addEventListener('DOMContentLoaded', function () {
 
   window.addEventListener('storage', render);
   render();
+})();
+</script>
+
+<script>
+/* ── AI Calorie Tracker ── */
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const KEY_STORE = 'anthropic_api_key';
+
+  function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function dateStr(d) {
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function formatDateLabel(str) {
+    const today = todayStr();
+    if (str === today) return 'Today';
+    const yest = dateStr(new Date(Date.now() - 86400000));
+    if (str === yest) return 'Yesterday';
+    const d = new Date(str + 'T12:00:00');
+    return d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+  }
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function loadMeals(key) {
+    try { return JSON.parse(localStorage.getItem('macro:meals:' + key)) || []; } catch(e) { return []; }
+  }
+  function saveMeals(key, meals) {
+    localStorage.setItem('macro:meals:' + key, JSON.stringify(meals));
+  }
+
+  // ── API key UI ────────────────────────────────────────────────────
+  function getKey() { return localStorage.getItem(KEY_STORE) || ''; }
+  function refreshKeyUI() {
+    const has = !!getKey();
+    $('macroKeySetup').hidden = has;
+    $('macroScanArea').hidden = !has;
+  }
+  refreshKeyUI();
+
+  $('macroApiKeySave').addEventListener('click', () => {
+    const k = ($('macroApiKeyInput').value || '').trim();
+    if (!k.startsWith('sk-ant-')) { alert('Key should start with sk-ant-'); return; }
+    localStorage.setItem(KEY_STORE, k);
+    $('macroApiKeyInput').value = '';
+    refreshKeyUI();
+  });
+  $('macroApiKeyInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('macroApiKeySave').click(); });
+  $('macroClearKey').addEventListener('click', () => {
+    if (!confirm('Remove saved API key?')) return;
+    localStorage.removeItem(KEY_STORE);
+    refreshKeyUI();
+  });
+
+  // ── Photo capture ─────────────────────────────────────────────────
+  let pendingItems = null;
+
+  $('macroCaptureTrigger').addEventListener('click', () => {
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = 'image/*';
+    inp.capture = 'environment';
+    inp.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+    document.body.appendChild(inp);
+    inp.addEventListener('change', () => {
+      const file = inp.files[0];
+      document.body.removeChild(inp);
+      if (file) analysePhoto(file);
+    });
+    setTimeout(() => inp.click(), 0);
+  });
+
+  async function analysePhoto(file) {
+    setLoadingState(true);
+    $('macroResultCard').hidden = true;
+    pendingItems = null;
+    try {
+      const { base64, mime } = await prepareImage(file);
+      const result = await callClaude(base64, mime);
+      pendingItems = result.items || [];
+      renderResultCard(result);
+    } catch(err) {
+      setLoadingState(false);
+      alert('Analysis failed: ' + (err.message || 'Unknown error'));
+    }
+  }
+
+  function prepareImage(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = reject;
+        img.onload = () => {
+          const MAX = 1280;
+          let w = img.width, h = img.height;
+          if (w > MAX || h > MAX) { const r = Math.min(MAX/w, MAX/h); w = Math.round(w*r); h = Math.round(h*r); }
+          const cv = document.createElement('canvas');
+          cv.width = w; cv.height = h;
+          cv.getContext('2d').drawImage(img, 0, 0, w, h);
+          const du = cv.toDataURL('image/jpeg', 0.85);
+          resolve({ base64: du.split(',')[1], mime: 'image/jpeg' });
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function callClaude(base64, mime) {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': getKey(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: mime, data: base64 } },
+          { type: 'text', text: `Identify every food item visible in this photo and estimate nutrition. Return ONLY a raw JSON object — no markdown, no code fences.
+
+{"items":[{"name":"food name","portion":"~Xg","confidence":"high|medium|low","cal":0,"protein_g":0,"carbs_g":0,"fat_g":0,"fiber_g":0,"nutrients":{"calcium":0,"iron":0,"magnesium":0,"zinc":0,"potassium":0,"sodium":0,"vit_c":0,"vit_d":0,"vit_a":0,"vit_b12":0,"omega3":0}}]}
+
+Rules:
+- One object per distinct food item
+- confidence: high=clearly identifiable, medium=uncertain portion, low=blurry/unclear
+- nutrients: only include keys with non-zero values; units: mg for calcium/iron/magnesium/zinc/potassium/sodium/vit_c/vit_e; mcg for vit_d/vit_a/vit_b12; g for omega3/fiber
+- Be specific about portions ("~180g grilled chicken", "1 medium banana ~120g")
+- Estimate the full visible portion` }
+        ]}]
+      })
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error((e.error && e.error.message) || 'API error ' + res.status);
+    }
+    const data = await res.json();
+    const text = data.content[0].text.trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
+    return JSON.parse(text);
+  }
+
+  // ── Result card ───────────────────────────────────────────────────
+  const NUTR_META = {
+    calcium:'Calcium',iron:'Iron',magnesium:'Magnesium',zinc:'Zinc',
+    potassium:'Potassium',sodium:'Sodium',vit_c:'Vitamin C',vit_d:'Vitamin D',
+    vit_a:'Vitamin A',vit_b12:'Vitamin B12',omega3:'Omega-3',fiber:'Fibre',
+  };
+  const NUTR_UNIT = { vit_d:'mcg', vit_a:'mcg', vit_b12:'mcg', omega3:'g', fiber:'g' };
+
+  function renderResultCard(result) {
+    const items = result.items || [];
+    $('macroResultTitle').textContent = items.length === 1 ? items[0].name : items.length + ' items detected';
+    const container = $('macroResultItems');
+    container.innerHTML = '';
+
+    items.forEach((item, idx) => {
+      const conf = (item.confidence || 'medium').toLowerCase();
+      const nutrEntries = Object.entries(item.nutrients || {}).filter(([,v]) => v > 0);
+      const el = document.createElement('div');
+      el.className = 'macro-food-item';
+      el.innerHTML =
+        '<div class="macro-food-item-header">' +
+          '<div><div class="macro-food-name">' + escHtml(item.name) + '</div>' +
+          '<div class="macro-food-portion">' + escHtml(item.portion || '') + '</div></div>' +
+          '<span class="macro-confidence ' + conf + '">' + conf.charAt(0).toUpperCase() + conf.slice(1) + '</span>' +
+        '</div>' +
+        '<div class="macro-food-macros">' +
+          '<span class="macro-food-pill cal">'  + (item.cal||0) + ' kcal</span>' +
+          '<span class="macro-food-pill prot">' + (item.protein_g||0) + 'g protein</span>' +
+          '<span class="macro-food-pill carb">' + (item.carbs_g||0) + 'g carbs</span>' +
+          '<span class="macro-food-pill fat">'  + (item.fat_g||0) + 'g fat</span>' +
+          (item.fiber_g ? '<span class="macro-food-pill fiber">' + item.fiber_g + 'g fibre</span>' : '') +
+        '</div>' +
+        (nutrEntries.length ?
+          '<button class="macro-food-expand" data-open="false">Micronutrients <span>↓</span></button>' +
+          '<div class="macro-food-micros" hidden>' +
+            '<div class="macro-micro-grid">' +
+              nutrEntries.map(([k,v]) =>
+                '<div class="macro-micro-item">' +
+                  '<span class="macro-micro-name">' + (NUTR_META[k]||k) + '</span>' +
+                  '<span class="macro-micro-val">' + v + (NUTR_UNIT[k]||'mg') + '</span>' +
+                '</div>'
+              ).join('') +
+            '</div>' +
+            '<button class="macro-nutr-link" data-idx="' + idx + '">View in Nutrients &amp; Minerals →</button>' +
+          '</div>'
+        : '');
+      container.appendChild(el);
+    });
+
+    container.querySelectorAll('.macro-food-expand').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const open = btn.dataset.open === 'true';
+        btn.dataset.open = String(!open);
+        btn.nextElementSibling.hidden = open;
+        btn.querySelector('span').textContent = open ? '↓' : '↑';
+      });
+    });
+
+    container.querySelectorAll('.macro-nutr-link').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = items[parseInt(btn.dataset.idx, 10)];
+        if (item && item.nutrients && typeof window.applyNutrientAmounts === 'function') {
+          window.applyNutrientAmounts(item.nutrients);
+        }
+        document.querySelector('.nutr-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    setLoadingState(false);
+    $('macroResultCard').hidden = false;
+    $('macroResultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  $('macroResultDismiss').addEventListener('click', () => {
+    $('macroResultCard').hidden = true;
+    pendingItems = null;
+  });
+
+  $('macroResultAdd').addEventListener('click', () => {
+    if (!pendingItems || !pendingItems.length) return;
+    const key = todayStr();
+    const meals = loadMeals(key);
+    pendingItems.forEach(item => {
+      meals.push({
+        name: item.name + (item.portion ? ' (' + item.portion + ')' : ''),
+        cal:  Number(item.cal)       || 0,
+        prot: Number(item.protein_g) || 0,
+        carb: Number(item.carbs_g)   || 0,
+        fat:  Number(item.fat_g)     || 0,
+        note: item.fiber_g ? item.fiber_g + 'g fibre' : undefined,
+      });
+      if (item.nutrients && typeof window.applyNutrientAmounts === 'function') {
+        window.applyNutrientAmounts(item.nutrients);
+      }
+    });
+    saveMeals(key, meals);
+    $('macroResultCard').hidden = true;
+    pendingItems = null;
+    window.dispatchEvent(new Event('storage'));
+  });
+
+  function setLoadingState(on) {
+    $('macroLoadingCard').hidden = !on;
+    const btn = $('macroCaptureTrigger');
+    btn.disabled = on;
+    btn.lastElementChild.textContent = on ? 'Analysing…' : 'Log meal';
+  }
+
+  // ── History view ──────────────────────────────────────────────────
+  let historyDate = todayStr();
+
+  $('macroHistoryBtn').addEventListener('click', () => {
+    historyDate = todayStr();
+    renderHistory();
+    $('historyModal').hidden = false;
+  });
+  $('historyClose').addEventListener('click', () => { $('historyModal').hidden = true; });
+
+  $('historyPrev').addEventListener('click', () => {
+    const d = new Date(historyDate + 'T12:00:00');
+    d.setDate(d.getDate() - 1);
+    historyDate = dateStr(d);
+    renderHistory();
+  });
+  $('historyNext').addEventListener('click', () => {
+    if (historyDate >= todayStr()) return;
+    const d = new Date(historyDate + 'T12:00:00');
+    d.setDate(d.getDate() + 1);
+    historyDate = dateStr(d);
+    renderHistory();
+  });
+
+  function renderHistory() {
+    $('historyDateLbl').textContent = formatDateLabel(historyDate);
+    $('historyNext').disabled = historyDate >= todayStr();
+    const meals = loadMeals(historyDate);
+    const content = $('historyContent');
+    content.innerHTML = '';
+    if (!meals.length) {
+      content.innerHTML = '<div class="history-empty">No meals logged for this day.</div>';
+      return;
+    }
+    const t = meals.reduce((a, m) => ({ cal: a.cal+(m.cal||0), prot: a.prot+(m.prot||0), carb: a.carb+(m.carb||0), fat: a.fat+(m.fat||0) }), {cal:0,prot:0,carb:0,fat:0});
+    const totalEl = document.createElement('div');
+    totalEl.className = 'history-day-total';
+    totalEl.textContent = t.cal + ' kcal · ' + t.prot.toFixed(1) + 'g protein · ' + t.carb.toFixed(1) + 'g carbs · ' + t.fat.toFixed(1) + 'g fat';
+    content.appendChild(totalEl);
+    meals.forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'history-entry';
+      row.innerHTML =
+        '<span class="history-entry-name">' + escHtml(m.name) + '</span>' +
+        '<span class="history-entry-stats">' + (m.cal||0) + ' kcal · ' + (m.prot||0) + 'p</span>';
+      content.appendChild(row);
+    });
+  }
 })();
 </script>
 
