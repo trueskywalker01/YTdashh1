@@ -1268,6 +1268,10 @@ main {
 <div class="macro-modal-bg" id="macroModalBg" hidden>
   <div class="macro-modal" role="dialog" aria-modal="true" aria-labelledby="macroModalTitle">
     <div class="macro-modal-title" id="macroModalTitle">Daily Goals</div>
+    <div id="macroProfileHint" style="display:none;margin-bottom:12px;padding:10px 12px;background:rgba(255,255,255,0.04);border-radius:10px;font-size:12px;color:var(--text-secondary);line-height:1.5;">
+      <div id="macroProfileHintText"></div>
+      <button id="macroProfileFillBtn" style="margin-top:8px;padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:var(--text-primary);font-size:11px;font-family:inherit;cursor:pointer;">Use suggested values</button>
+    </div>
     <div class="macro-modal-grid">
       <div class="macro-modal-field">
         <label for="goalCal">Calories (kcal)</label>
@@ -2153,7 +2157,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const list = $('macroMealsList');
     list.innerHTML = '';
     if (!meals.length) {
-      list.innerHTML = '<div class="macro-empty">Scan a food photo to log your first meal</div>';
+      list.innerHTML = '<div class="macro-empty">Search for a food above to log your first meal</div>';
     } else {
       meals.forEach((m, i) => {
         const row = document.createElement('div');
@@ -2185,12 +2189,50 @@ document.addEventListener('DOMContentLoaded', function () {
   // goals modal
   const modalBg = $('macroModalBg');
 
+  function profileSuggestion() {
+    try {
+      const p = JSON.parse(localStorage.getItem('profile:data')) || {};
+      const wKg = parseFloat(p.weightKg);
+      const gKg = parseFloat(p.goalWeightKg);
+      if (!wKg) return null;
+      // TDEE estimate: bodyweight (kg) × 33 (moderate activity)
+      const tdee = Math.round(wKg * 33);
+      const cutting = gKg && gKg < wKg;
+      const bulking  = gKg && gKg > wKg;
+      const cal  = cutting ? Math.max(1200, tdee - 400) : bulking ? tdee + 300 : tdee;
+      const prot = Math.round(wKg * 2.2);           // 2.2g per kg
+      const fat  = Math.round(cal * 0.25 / 9);     // 25% from fat
+      const carb = Math.round((cal - prot * 4 - fat * 9) / 4);
+      const mode = cutting ? 'cut (−400 kcal deficit)' : bulking ? 'bulk (+300 kcal surplus)' : 'maintenance';
+      return { cal, prot, carb: Math.max(0, carb), fat, mode, wKg, gKg };
+    } catch { return null; }
+  }
+
   $('macroGoalsBtn').addEventListener('click', () => {
     const g = loadGoals();
     $('goalCal').value  = g.cal  || '';
     $('goalProt').value = g.prot || '';
     $('goalCarb').value = g.carb || '';
     $('goalFat').value  = g.fat  || '';
+
+    const sug = profileSuggestion();
+    const hint = $('macroProfileHint');
+    if (sug) {
+      $('macroProfileHintText').textContent =
+        'From your profile (' + sug.wKg + ' kg' + (sug.gKg ? ' → goal ' + sug.gKg + ' kg' : '') +
+        ', ' + sug.mode + '): ' +
+        sug.cal + ' kcal · ' + sug.prot + 'g protein · ' + sug.carb + 'g carbs · ' + sug.fat + 'g fat';
+      hint.style.display = '';
+      $('macroProfileFillBtn').onclick = () => {
+        $('goalCal').value  = sug.cal;
+        $('goalProt').value = sug.prot;
+        $('goalCarb').value = sug.carb;
+        $('goalFat').value  = sug.fat;
+      };
+    } else {
+      hint.style.display = 'none';
+    }
+
     modalBg.hidden = false;
     $('goalCal').focus();
   });

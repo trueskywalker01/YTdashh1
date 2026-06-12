@@ -593,6 +593,19 @@ body::after {
   .gm-card { padding: 16px; }
   .gm-progress-num { font-size: 36px; }
 }
+
+/* health snapshot */
+.health-snap { display: flex; flex-direction: column; gap: 7px; margin-bottom: 22px; }
+.health-snap-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-card); border-radius: 12px;
+  padding: 10px 14px;
+}
+.health-snap-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+.health-snap-label { font-size: 12px; color: var(--text-tertiary); width: 82px; flex-shrink: 0; }
+.health-snap-bar-wrap { flex: 1; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+.health-snap-bar { height: 4px; border-radius: 2px; transition: width 0.5s; }
+.health-snap-val { font-size: 12px; color: var(--text-secondary); text-align: right; flex-shrink: 0; min-width: 72px; }
 </style>
 </head>
 <body>
@@ -638,6 +651,8 @@ body::after {
       <div class="day-ring-hours" id="dayRingHours">—</div>
     </div>
   </div>
+
+  <div class="health-snap" id="healthSnap" style="display:none;"></div>
 
   <div class="section">
     <div class="section-title">To Do List</div>
@@ -1329,6 +1344,62 @@ body::after {
     loadTomorrow
   );
 
+  // ---------- Health snapshot ----------
+  function renderHealthSnap() {
+    const snap = document.getElementById('healthSnap');
+    if (!snap) return;
+    const today = getActiveDateString();
+    const meals  = storeGet('macro:meals:' + today) || [];
+    const goals  = storeGet('macro:goals') || {};
+    const items  = storeGet('stack:items') || [];
+    const taken  = storeGet('stack:taken:' + today) || {};
+
+    const tot = meals.reduce((a, m) => ({
+      cal:  a.cal  + (Number(m.cal)  || 0),
+      prot: a.prot + (Number(m.prot) || 0),
+    }), { cal: 0, prot: 0 });
+
+    const rows = [];
+
+    if (meals.length || goals.cal) {
+      const calGoal = Number(goals.cal) || 0;
+      const calPct  = calGoal ? Math.min(100, Math.round(tot.cal / calGoal * 100)) : null;
+      const color   = calPct == null ? '#888' : calPct >= 100 ? '#FF6B6B' : '#5B8DEF';
+      rows.push({ icon: '🔥', label: 'Calories',
+        val: calGoal ? tot.cal.toLocaleString() + ' / ' + calGoal.toLocaleString() + ' kcal'
+                     : tot.cal.toLocaleString() + ' kcal',
+        pct: calPct, color });
+    }
+
+    if ((meals.length || goals.prot) && goals.prot) {
+      const prot    = Math.round(tot.prot);
+      const protGoal = Number(goals.prot);
+      const pPct    = Math.min(100, Math.round(prot / protGoal * 100));
+      rows.push({ icon: '🥩', label: 'Protein',
+        val: prot + ' / ' + protGoal + 'g', pct: pPct, color: '#FF9F0A' });
+    }
+
+    if (items.length) {
+      const takenN = items.filter(it => taken[it.name]).length;
+      const sPct   = Math.round(takenN / items.length * 100);
+      rows.push({ icon: '💊', label: 'Supplements',
+        val: takenN + ' / ' + items.length + ' taken', pct: sPct,
+        color: sPct === 100 ? '#30D158' : sPct >= 50 ? '#FF9F0A' : '#FF6B6B' });
+    }
+
+    snap.style.display = rows.length ? '' : 'none';
+    snap.innerHTML = rows.map(r =>
+      '<div class="health-snap-row">' +
+        '<span class="health-snap-icon">' + r.icon + '</span>' +
+        '<span class="health-snap-label">' + r.label + '</span>' +
+        '<div class="health-snap-bar-wrap">' +
+          (r.pct != null ? '<div class="health-snap-bar" style="width:' + r.pct + '%;background:' + r.color + '"></div>' : '') +
+        '</div>' +
+        '<span class="health-snap-val">' + r.val + '</span>' +
+      '</div>'
+    ).join('');
+  }
+
   // ---------- Boot ----------
   rollover();
   processStreak();
@@ -1336,12 +1407,14 @@ body::after {
   loadTomorrow();
   renderStreak();
   updateDayRing();
+  renderHealthSnap();
   setInterval(updateDayRing, 60 * 1000);
   startTicker();
 
   // Re-render when storage changes from another tab (or our bridged parent).
   window.addEventListener('storage', () => {
     loadToday(); loadTomorrow(); renderStreak();
+    renderHealthSnap();
     // Re-read bedtime/wake from profile if it changed
     const updated = getSleepHours();
     SLEEP_HOUR = updated.sleepHour;
