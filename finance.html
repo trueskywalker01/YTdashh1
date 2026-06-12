@@ -1753,10 +1753,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         <option value="CNY">CNY</option>
         <option value="INR">INR</option>
       </select>
-      <select id="subPeriod" style="padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);max-width:100px">
-        <option value="monthly">Monthly</option>
-        <option value="yearly">Yearly</option>
+      <select id="subPeriod" style="padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);max-width:110px">
+        <option value="daily">Daily</option>
         <option value="weekly">Weekly</option>
+        <option value="fortnightly">Fortnightly</option>
+        <option value="monthly" selected>Monthly</option>
+        <option value="yearly">Yearly</option>
       </select>
       <label class="date-field" title="Next renewal date" style="min-width:150px"><span class="date-emoji" aria-hidden="true">📅</span><input type="date" id="subRenewal" /></label>
       <select id="subFromCat" title="Which net worth account to deduct from" style="padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);min-width:130px">
@@ -2434,8 +2436,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
   function monthlyEquivalent(item) {
     const a = Number(item.amount) || 0;
-    if (item.period === 'yearly') return a / 12;
-    if (item.period === 'weekly') return a * 4.345;
+    if (item.period === 'daily')       return a * 30.4375;
+    if (item.period === 'weekly')      return a * 4.345;
+    if (item.period === 'fortnightly') return a * 2.1725;
+    if (item.period === 'yearly')      return a / 12;
     return a;
   }
   function escapeHtml(s) {
@@ -2627,9 +2631,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
           it.lastDeductedAt = renewalMs;
           changed = true;
         }
-        if (it.period === 'weekly') renewalDate.setDate(renewalDate.getDate() + 7);
-        else if (it.period === 'yearly') renewalDate.setFullYear(renewalDate.getFullYear() + 1);
-        else renewalDate.setMonth(renewalDate.getMonth() + 1);
+        if (it.period === 'daily')            renewalDate.setDate(renewalDate.getDate() + 1);
+        else if (it.period === 'weekly')      renewalDate.setDate(renewalDate.getDate() + 7);
+        else if (it.period === 'fortnightly') renewalDate.setDate(renewalDate.getDate() + 14);
+        else if (it.period === 'yearly')      renewalDate.setFullYear(renewalDate.getFullYear() + 1);
+        else                                  renewalDate.setMonth(renewalDate.getMonth() + 1);
       }
       const newRenewal = renewalDate.getFullYear() + '-' + String(renewalDate.getMonth() + 1).padStart(2, '0') + '-' + String(renewalDate.getDate()).padStart(2, '0');
       if (newRenewal !== it.renewal) {
@@ -2650,7 +2656,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     if (!row) return;
     const enteredCcy = it.entered_currency || 'AUD';
     const enteredAmt = it.entered_amount != null ? it.entered_amount : it.amount;
-    const periodOpts = ['monthly','yearly','weekly'].map(p =>
+    const periodOpts = ['daily','weekly','fortnightly','monthly','yearly'].map(p =>
       '<option value="' + p + '"' + (p === it.period ? ' selected' : '') + '>' + p.charAt(0).toUpperCase() + p.slice(1) + '</option>'
     ).join('');
     const ccyOpts = ['AUD','USD','CNY','INR'].map(c =>
