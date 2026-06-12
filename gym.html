@@ -1262,6 +1262,41 @@ img, video, canvas, svg { max-width: 100%; }
 }
 
 .hidden { display: none !important; }
+
+/* ── Muscle Map ─────────────────────────────────────── */
+.mm-wrap {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 18px 0 6px;
+}
+.mm-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.mm-svg { width: 100px; height: 218px; overflow: visible; }
+.mm-label {
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+}
+/* default: dim white */
+.mm-muscle { fill: rgba(255,255,255,0.17); transition: fill .35s, filter .35s; }
+.mm-neutral { fill: rgba(255,255,255,0.10); }
+/* need to train */
+.mm-planned {
+  fill: rgba(110,231,183,0.82);
+  filter: drop-shadow(0 0 5px rgba(110,231,183,0.55));
+}
+/* already trained */
+.mm-done {
+  fill: rgba(255,90,90,0.85);
+  filter: drop-shadow(0 0 5px rgba(255,90,90,0.55));
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1574,6 +1609,118 @@ img, video, canvas, svg { max-width: 100%; }
         <ul class="po-tw-list" id="poTwList"></ul>
         <div class="po-tw-empty" id="poTwEmpty">No sets logged today — log one above and it'll appear here.</div>
       </div>
+
+      <!-- Muscle Map -->
+      <div class="mm-wrap" id="muscleMap">
+
+        <!-- FRONT -->
+        <div class="mm-figure">
+          <svg class="mm-svg" viewBox="0 0 90 200" xmlns="http://www.w3.org/2000/svg">
+            <!-- head -->
+            <ellipse cx="45" cy="12" rx="11" ry="12" class="mm-neutral"/>
+            <!-- neck -->
+            <rect x="41" y="22" width="8" height="9" rx="3" class="mm-neutral"/>
+            <!-- left front deltoid -->
+            <ellipse data-muscle="front-delt" cx="17" cy="44" rx="9" ry="12" transform="rotate(-18,17,44)" class="mm-muscle"/>
+            <!-- right front deltoid -->
+            <ellipse data-muscle="front-delt" cx="73" cy="44" rx="9" ry="12" transform="rotate(18,73,44)" class="mm-muscle"/>
+            <!-- left pec -->
+            <path data-muscle="chest" d="M27,38 Q37,34 45,41 Q44,56 39,62 Q31,64 26,57 Q23,50 25,43 Z" class="mm-muscle"/>
+            <!-- right pec -->
+            <path data-muscle="chest" d="M63,38 Q53,34 45,41 Q46,56 51,62 Q59,64 64,57 Q67,50 65,43 Z" class="mm-muscle"/>
+            <!-- left bicep -->
+            <ellipse data-muscle="bicep" cx="11" cy="62" rx="6" ry="14" class="mm-muscle"/>
+            <!-- right bicep -->
+            <ellipse data-muscle="bicep" cx="79" cy="62" rx="6" ry="14" class="mm-muscle"/>
+            <!-- left forearm -->
+            <ellipse cx="10" cy="84" rx="5" ry="12" class="mm-neutral"/>
+            <!-- right forearm -->
+            <ellipse cx="80" cy="84" rx="5" ry="12" class="mm-neutral"/>
+            <!-- left hand -->
+            <ellipse cx="9" cy="100" rx="4.5" ry="7" class="mm-neutral"/>
+            <!-- right hand -->
+            <ellipse cx="81" cy="100" rx="4.5" ry="7" class="mm-neutral"/>
+            <!-- abs — 6 rects -->
+            <rect data-muscle="abs" x="32" y="63" width="11" height="9" rx="2" class="mm-muscle"/>
+            <rect data-muscle="abs" x="47" y="63" width="11" height="9" rx="2" class="mm-muscle"/>
+            <rect data-muscle="abs" x="32" y="74" width="11" height="9" rx="2" class="mm-muscle"/>
+            <rect data-muscle="abs" x="47" y="74" width="11" height="9" rx="2" class="mm-muscle"/>
+            <rect data-muscle="abs" x="33" y="85" width="10" height="8" rx="2" class="mm-muscle"/>
+            <rect data-muscle="abs" x="47" y="85" width="10" height="8" rx="2" class="mm-muscle"/>
+            <!-- hip -->
+            <rect x="28" y="95" width="34" height="11" rx="4" class="mm-neutral"/>
+            <!-- left quad -->
+            <ellipse data-muscle="quad" cx="33" cy="122" rx="13" ry="22" class="mm-muscle"/>
+            <!-- right quad -->
+            <ellipse data-muscle="quad" cx="57" cy="122" rx="13" ry="22" class="mm-muscle"/>
+            <!-- knees -->
+            <ellipse cx="33" cy="147" rx="10" ry="7" class="mm-neutral"/>
+            <ellipse cx="57" cy="147" rx="10" ry="7" class="mm-neutral"/>
+            <!-- left calf -->
+            <ellipse data-muscle="calf" cx="32" cy="165" rx="9" ry="13" class="mm-muscle"/>
+            <!-- right calf -->
+            <ellipse data-muscle="calf" cx="58" cy="165" rx="9" ry="13" class="mm-muscle"/>
+            <!-- feet -->
+            <ellipse cx="31" cy="182" rx="9" ry="4" class="mm-neutral"/>
+            <ellipse cx="59" cy="182" rx="9" ry="4" class="mm-neutral"/>
+          </svg>
+          <div class="mm-label">Front</div>
+        </div>
+
+        <!-- BACK -->
+        <div class="mm-figure">
+          <svg class="mm-svg" viewBox="0 0 90 200" xmlns="http://www.w3.org/2000/svg">
+            <!-- head -->
+            <ellipse cx="45" cy="12" rx="11" ry="12" class="mm-neutral"/>
+            <!-- neck -->
+            <rect x="41" y="22" width="8" height="9" rx="3" class="mm-neutral"/>
+            <!-- traps -->
+            <path data-muscle="trap" d="M41,24 Q45,19 49,24 Q61,28 68,38 Q58,47 45,49 Q32,47 22,38 Q29,28 41,24 Z" class="mm-muscle"/>
+            <!-- left rear deltoid -->
+            <ellipse data-muscle="rear-delt" cx="16" cy="47" rx="9" ry="12" transform="rotate(20,16,47)" class="mm-muscle"/>
+            <!-- right rear deltoid -->
+            <ellipse data-muscle="rear-delt" cx="74" cy="47" rx="9" ry="12" transform="rotate(-20,74,47)" class="mm-muscle"/>
+            <!-- left lat -->
+            <path data-muscle="lat" d="M29,52 Q18,63 14,79 Q12,93 19,103 Q25,108 31,104 Q35,92 34,74 Q33,58 31,52 Z" class="mm-muscle"/>
+            <!-- right lat -->
+            <path data-muscle="lat" d="M61,52 Q72,63 76,79 Q78,93 71,103 Q65,108 59,104 Q55,92 56,74 Q57,58 59,52 Z" class="mm-muscle"/>
+            <!-- left tricep -->
+            <ellipse data-muscle="tricep" cx="10" cy="64" rx="6" ry="14" class="mm-muscle"/>
+            <!-- right tricep -->
+            <ellipse data-muscle="tricep" cx="80" cy="64" rx="6" ry="14" class="mm-muscle"/>
+            <!-- left forearm -->
+            <ellipse cx="9" cy="86" rx="5" ry="12" class="mm-neutral"/>
+            <!-- right forearm -->
+            <ellipse cx="81" cy="86" rx="5" ry="12" class="mm-neutral"/>
+            <!-- left hand -->
+            <ellipse cx="8" cy="102" rx="4.5" ry="7" class="mm-neutral"/>
+            <!-- right hand -->
+            <ellipse cx="82" cy="102" rx="4.5" ry="7" class="mm-neutral"/>
+            <!-- lower back -->
+            <rect x="31" y="80" width="28" height="22" rx="3" class="mm-neutral"/>
+            <!-- left glute -->
+            <ellipse data-muscle="glute" cx="33" cy="108" rx="15" ry="13" class="mm-muscle"/>
+            <!-- right glute -->
+            <ellipse data-muscle="glute" cx="57" cy="108" rx="15" ry="13" class="mm-muscle"/>
+            <!-- left hamstring -->
+            <ellipse data-muscle="hamstring" cx="33" cy="135" rx="13" ry="22" class="mm-muscle"/>
+            <!-- right hamstring -->
+            <ellipse data-muscle="hamstring" cx="57" cy="135" rx="13" ry="22" class="mm-muscle"/>
+            <!-- knees -->
+            <ellipse cx="33" cy="160" rx="10" ry="7" class="mm-neutral"/>
+            <ellipse cx="57" cy="160" rx="10" ry="7" class="mm-neutral"/>
+            <!-- left calf back -->
+            <ellipse data-muscle="calf" cx="32" cy="175" rx="9" ry="11" class="mm-muscle"/>
+            <!-- right calf back -->
+            <ellipse data-muscle="calf" cx="58" cy="175" rx="9" ry="11" class="mm-muscle"/>
+            <!-- feet -->
+            <ellipse cx="31" cy="189" rx="9" ry="4" class="mm-neutral"/>
+            <ellipse cx="59" cy="189" rx="9" ry="4" class="mm-neutral"/>
+          </svg>
+          <div class="mm-label">Back</div>
+        </div>
+
+      </div><!-- end muscle map -->
 
       <button type="button" class="po-tw-past-toggle" id="poTwPastToggle" aria-expanded="false">
         <span>Past workouts <span class="po-tw-past-count" id="poTwPastCount">0</span></span>
@@ -2130,6 +2277,40 @@ img, video, canvas, svg { max-width: 100%; }
     return { perEx, totalSets, totalVol };
   }
 
+  // day-name → muscle groups that appear in the SVG
+  const MM_DAY_MUSCLES = {
+    push: ['chest', 'front-delt', 'tricep'],
+    pull:  ['lat', 'trap', 'rear-delt', 'bicep'],
+    legs:  ['quad', 'hamstring', 'glute', 'calf'],
+  };
+
+  function renderMuscleMap() {
+    const map = document.getElementById('muscleMap');
+    if (!map) return;
+
+    const todayKey = wtDateKey(new Date());
+    const todaySets = (logsByDay()[todayKey] || []);
+
+    // Muscles already trained today — logsByDay returns {ex, log} pairs
+    const done = new Set();
+    todaySets.forEach(({ex}) => {
+      (MM_DAY_MUSCLES[(ex.day || '').toLowerCase()] || []).forEach(m => done.add(m));
+    });
+
+    // Muscles planned for today's split (not yet done)
+    const splitName = todaySplit().name.toLowerCase();
+    const planned = new Set(
+      (MM_DAY_MUSCLES[splitName] || []).filter(m => !done.has(m))
+    );
+
+    map.querySelectorAll('[data-muscle]').forEach(el => {
+      const m = el.dataset.muscle;
+      el.classList.remove('mm-planned', 'mm-done');
+      if (done.has(m))    el.classList.add('mm-done');
+      else if (planned.has(m)) el.classList.add('mm-planned');
+    });
+  }
+
   function renderTodaysWorkout() {
     const todayKey = wtDateKey(new Date());
     const all = logsByDay();
@@ -2174,6 +2355,8 @@ img, video, canvas, svg { max-width: 100%; }
     btn.classList.toggle('is-done', isDone);
     btn.disabled = sum.totalSets === 0 && !isDone;
     btn.style.opacity = btn.disabled ? '0.4' : '';
+
+    renderMuscleMap();
   }
 
   function renderPastWorkouts() {
