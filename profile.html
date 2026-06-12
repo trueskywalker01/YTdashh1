@@ -22,11 +22,8 @@
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
-  background: #050506;
-  color: var(--text-secondary);
-  font-family: var(--font);
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
+  background: #050506; color: var(--text-secondary);
+  font-family: var(--font); -webkit-font-smoothing: antialiased; min-height: 100vh;
 }
 body {
   padding: max(28px, env(safe-area-inset-top))
@@ -36,16 +33,13 @@ body {
 }
 main { max-width: 500px; margin: 0 auto; padding-top: 32px; display: flex; flex-direction: column; gap: 16px; }
 
-/* ── Page header ── */
 .page-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-quaternary); margin-bottom: 6px; }
-.page-title   { font-size: 26px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; margin-bottom: 4px; }
+.page-title   { font-size: 26px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; }
 
-/* ── Section card ── */
+/* ── Card ── */
 .section-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-soft);
-  border-radius: 18px;
-  padding: 20px;
+  background: var(--bg-card); border: 1px solid var(--border-soft);
+  border-radius: 18px; padding: 20px;
 }
 .section-heading {
   font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
@@ -53,12 +47,12 @@ main { max-width: 500px; margin: 0 auto; padding-top: 32px; display: flex; flex-
 }
 
 /* ── Unit toggle ── */
-.unit-row { display: flex; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+.unit-row { display: flex; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
 .unit-group { display: flex; align-items: center; gap: 8px; }
 .unit-group-label { font-size: 12px; color: var(--text-tertiary); font-weight: 600; }
 .unit-toggle { display: flex; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.10); }
 .unit-btn {
-  padding: 5px 12px; font-size: 12px; font-weight: 700; font-family: var(--font);
+  padding: 5px 11px; font-size: 12px; font-weight: 700; font-family: var(--font);
   background: none; border: none; color: var(--text-quaternary); cursor: pointer;
   transition: background 0.12s, color 0.12s;
 }
@@ -71,41 +65,59 @@ main { max-width: 500px; margin: 0 auto; padding-top: 32px; display: flex; flex-
 .field-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
 .field-hint { font-size: 11px; color: var(--text-quaternary); font-family: var(--font-mono); }
 .field-input {
-  width: 100%;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 12px;
-  padding: 12px 15px;
-  color: var(--text-primary);
+  width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 12px; padding: 12px 15px; color: var(--text-primary);
   font-size: 16px; font-weight: 600; font-family: var(--font-mono);
-  outline: none;
-  transition: border-color 0.15s, background 0.15s;
-  -webkit-appearance: none;
+  outline: none; transition: border-color 0.15s, background 0.15s; -webkit-appearance: none;
+  color-scheme: dark;
 }
 .field-input:focus { border-color: rgba(232,121,249,0.45); background: rgba(255,255,255,0.06); }
 .field-input::placeholder { color: var(--text-quaternary); font-weight: 400; }
+input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
 
-/* ── Time-to-goal display (inline, below weekly rate) ── */
-.time-to-goal {
-  margin-top: 14px; padding: 14px 16px; border-radius: 12px;
-  background: rgba(232,121,249,0.05); border: 1px solid rgba(232,121,249,0.15);
-  display: flex; align-items: center; gap: 12px;
+/* ── Timeframe row ── */
+.timeframe-row { display: flex; gap: 10px; align-items: stretch; }
+.timeframe-row .field-input { flex: 1; }
+.timeframe-unit-toggle { display: flex; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.10); flex-shrink: 0; }
+.timeframe-unit-toggle .unit-btn { padding: 0 14px; font-size: 12px; }
+
+/* ── Difficulty badge ── */
+.difficulty-box {
+  margin-top: 12px; padding: 13px 16px; border-radius: 12px;
+  display: flex; align-items: flex-start; gap: 12px;
 }
-.ttg-icon { font-size: 20px; flex-shrink: 0; }
-.ttg-text { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
-.ttg-text strong { color: var(--text-primary); font-weight: 700; }
-.time-to-goal[hidden] { display: none; }
+.difficulty-box[hidden] { display: none; }
+.diff-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.diff-body { flex: 1; }
+.diff-rate  { font-size: 12px; color: var(--text-tertiary); font-family: var(--font-mono); margin-bottom: 3px; }
+.diff-label { font-size: 14px; font-weight: 700; }
+.diff-desc  { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; line-height: 1.4; }
+.diff-easy     { background: rgba(48,209,88,0.07);   border: 1px solid rgba(48,209,88,0.2); }
+.diff-moderate { background: rgba(255,214,10,0.07);  border: 1px solid rgba(255,214,10,0.2); }
+.diff-hard     { background: rgba(255,159,10,0.07);  border: 1px solid rgba(255,159,10,0.2); }
+.diff-veryhard { background: rgba(255,107,107,0.07); border: 1px solid rgba(255,107,107,0.2); }
+.diff-extreme  { background: rgba(255,50,50,0.09);   border: 1px solid rgba(255,50,50,0.25); }
+.diff-easy     .diff-label { color: #30D158; }
+.diff-moderate .diff-label { color: #FFD60A; }
+.diff-hard     .diff-label { color: #FF9F0A; }
+.diff-veryhard .diff-label { color: #FF6B6B; }
+.diff-extreme  .diff-label { color: #FF3B30; }
 
-/* ── Divider ── */
-.card-divider { height: 1px; background: var(--border-soft); margin: 18px 0; }
+/* ── Sleep wake display ── */
+.wake-display {
+  margin-top: 10px; padding: 11px 15px; border-radius: 11px;
+  background: rgba(125,211,252,0.06); border: 1px solid rgba(125,211,252,0.15);
+  font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;
+}
+.wake-display[hidden] { display: none; }
+.wake-display strong { color: #7DD3FC; }
 
-/* ── Save button ── */
+/* ── Save ── */
 .save-btn {
   width: 100%; padding: 14px; border-radius: 14px; border: none;
   background: rgba(232,121,249,0.12); color: var(--accent);
   font-size: 15px; font-weight: 700; font-family: var(--font);
-  cursor: pointer; transition: background 0.15s, transform 0.10s;
-  letter-spacing: -0.01em;
+  cursor: pointer; transition: background 0.15s, transform 0.10s; letter-spacing: -0.01em;
 }
 .save-btn:hover  { background: rgba(232,121,249,0.20); }
 .save-btn:active { transform: scale(0.98); }
@@ -113,20 +125,35 @@ main { max-width: 500px; margin: 0 auto; padding-top: 32px; display: flex; flex-
 
 /* ── Stats grid ── */
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.stat-card {
-  background: var(--bg-card); border: 1px solid var(--border-soft);
-  border-radius: 14px; padding: 16px; text-align: center;
-}
-.stat-value {
-  font-size: 20px; font-weight: 800; color: var(--text-primary);
-  letter-spacing: -0.03em; font-family: var(--font-mono); line-height: 1;
-}
+.stat-card { background: var(--bg-card); border: 1px solid var(--border-soft); border-radius: 14px; padding: 16px; text-align: center; }
+.stat-value { font-size: 20px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; font-family: var(--font-mono); line-height: 1; }
 .stat-label { font-size: 10px; color: var(--text-tertiary); margin-top: 5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
 .stat-value.green  { color: #30D158; }
-.stat-value.yellow { color: #FF9F0A; }
+.stat-value.yellow { color: #FFD60A; }
+.stat-value.orange { color: #FF9F0A; }
 .stat-value.red    { color: #FF6B6B; }
 .stat-value.blue   { color: #7DD3FC; }
 .stat-value.purple { color: var(--accent); }
+
+/* ── Connected insights ── */
+.insight-row {
+  display: flex; align-items: center; gap: 12px; padding: 11px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.insight-row:last-child { border-bottom: none; padding-bottom: 0; }
+.insight-icon { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+.insight-body { flex: 1; min-width: 0; }
+.insight-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.insight-sub   { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+.insight-value { font-family: var(--font-mono); font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.insight-bar-wrap { height: 4px; background: rgba(255,255,255,0.07); border-radius: 99px; margin-top: 5px; }
+.insight-bar { height: 4px; border-radius: 99px; transition: width 0.4s; }
+.bar-green  { background: #30D158; }
+.bar-yellow { background: #FFD60A; }
+.bar-orange { background: #FF9F0A; }
+.bar-red    { background: #FF6B6B; }
+.bar-blue   { background: #7DD3FC; }
+.bar-purple { background: var(--accent); }
 </style>
 </head>
 <body>
@@ -139,7 +166,6 @@ main { max-width: 500px; margin: 0 auto; padding-top: 32px; display: flex; flex-
   <!-- ── Body ── -->
   <div class="section-card">
     <div class="section-heading">Body</div>
-
     <div class="unit-row">
       <div class="unit-group">
         <span class="unit-group-label">Weight</span>
@@ -158,26 +184,15 @@ main { max-width: 500px; margin: 0 auto; padding-top: 32px; display: flex; flex-
     </div>
 
     <div class="field">
-      <div class="field-row">
-        <span class="field-name">Age</span>
-        <span class="field-hint">years</span>
-      </div>
+      <div class="field-row"><span class="field-name">Age</span><span class="field-hint">years</span></div>
       <input id="fieldAge" class="field-input" type="number" min="1" max="120" step="1" placeholder="e.g. 24" inputmode="numeric" />
     </div>
-
     <div class="field">
-      <div class="field-row">
-        <span class="field-name">Weight</span>
-        <span class="field-hint" id="hintWeight">kg</span>
-      </div>
+      <div class="field-row"><span class="field-name">Weight</span><span class="field-hint" id="hintWeight">kg</span></div>
       <input id="fieldWeight" class="field-input" type="number" min="1" max="700" step="0.1" placeholder="e.g. 80" inputmode="decimal" />
     </div>
-
     <div class="field">
-      <div class="field-row">
-        <span class="field-name">Height</span>
-        <span class="field-hint" id="hintHeight">cm</span>
-      </div>
+      <div class="field-row"><span class="field-name">Height</span><span class="field-hint" id="hintHeight">cm</span></div>
       <input id="fieldHeight" class="field-input" type="number" min="1" max="120" step="0.1" placeholder="e.g. 178" inputmode="decimal" />
     </div>
   </div>
@@ -185,47 +200,44 @@ main { max-width: 500px; margin: 0 auto; padding-top: 32px; display: flex; flex-
   <!-- ── Weight Goal ── -->
   <div class="section-card">
     <div class="section-heading">Weight Goal</div>
-
     <div class="field">
-      <div class="field-row">
-        <span class="field-name">Goal weight</span>
-        <span class="field-hint" id="hintGoalWeight">kg</span>
-      </div>
+      <div class="field-row"><span class="field-name">Goal weight</span><span class="field-hint" id="hintGoalWeight">kg</span></div>
       <input id="fieldGoalWeight" class="field-input" type="number" min="1" max="700" step="0.1" placeholder="e.g. 75" inputmode="decimal" />
     </div>
-
     <div class="field" style="margin-top:14px">
-      <div class="field-row">
-        <span class="field-name">Weekly target</span>
-        <span class="field-hint" id="hintWeeklyRate">kg / week</span>
+      <div class="field-row"><span class="field-name">Time to reach goal</span><span class="field-hint" id="hintTimeframe">weeks</span></div>
+      <div class="timeframe-row">
+        <input id="fieldTimeframe" class="field-input" type="number" min="1" max="520" step="1" placeholder="e.g. 12" inputmode="numeric" />
+        <div class="timeframe-unit-toggle unit-toggle">
+          <button class="unit-btn active" data-unit-group="timeframe" data-unit="weeks">wks</button>
+          <button class="unit-btn"        data-unit-group="timeframe" data-unit="months">mo</button>
+        </div>
       </div>
-      <input id="fieldWeeklyRate" class="field-input" type="number" min="0.1" max="5" step="0.1" placeholder="e.g. 0.5" inputmode="decimal" />
     </div>
-
-    <div id="timeToGoal" class="time-to-goal" hidden>
-      <span class="ttg-icon">🎯</span>
-      <span class="ttg-text" id="timeToGoalText"></span>
+    <div id="difficultyBox" class="difficulty-box" hidden>
+      <span class="diff-icon" id="diffIcon"></span>
+      <div class="diff-body">
+        <div class="diff-rate"  id="diffRate"></div>
+        <div class="diff-label" id="diffLabel"></div>
+        <div class="diff-desc"  id="diffDesc"></div>
+      </div>
     </div>
   </div>
 
   <!-- ── Sleep ── -->
   <div class="section-card">
     <div class="section-heading">Sleep</div>
-
     <div class="field">
-      <div class="field-row">
-        <span class="field-name">Sleep goal</span>
-        <span class="field-hint">hrs / night</span>
-      </div>
+      <div class="field-row"><span class="field-name">Sleep goal</span><span class="field-hint">hrs / night</span></div>
       <input id="fieldSleepGoal" class="field-input" type="number" min="1" max="24" step="0.5" placeholder="e.g. 8" inputmode="decimal" />
     </div>
-
     <div class="field">
-      <div class="field-row">
-        <span class="field-name">Current avg sleep</span>
-        <span class="field-hint">hrs / night</span>
-      </div>
-      <input id="fieldSleepCurrent" class="field-input" type="number" min="1" max="24" step="0.5" placeholder="e.g. 6.5" inputmode="decimal" />
+      <div class="field-row"><span class="field-name">Bedtime</span><span class="field-hint">time you go to bed</span></div>
+      <input id="fieldBedtime" class="field-input" type="time" />
+    </div>
+    <div id="wakeDisplay" class="wake-display" hidden>
+      <span>😴</span>
+      <span id="wakeText"></span>
     </div>
   </div>
 
@@ -233,196 +245,342 @@ main { max-width: 500px; margin: 0 auto; padding-top: 32px; display: flex; flex-
 
   <!-- ── Stats ── -->
   <div id="statsGrid" class="stats-grid" style="display:none"></div>
+
+  <!-- ── Connected insights ── -->
+  <div id="insightsCard" class="section-card" style="display:none">
+    <div class="section-heading">Today at a glance</div>
+    <div id="insightsBody"></div>
+  </div>
 </main>
 
 <script>
 (function () {
   const STORE_KEY = 'profile:data';
-
   const $ = id => document.getElementById(id);
+
   const f = {
     age:         $('fieldAge'),
     weight:      $('fieldWeight'),
     height:      $('fieldHeight'),
     goalWeight:  $('fieldGoalWeight'),
-    weeklyRate:  $('fieldWeeklyRate'),
+    timeframe:   $('fieldTimeframe'),
     sleepGoal:   $('fieldSleepGoal'),
-    sleepCurrent:$('fieldSleepCurrent'),
+    bedtime:     $('fieldBedtime'),
   };
 
-  let units = { weight: 'kg', height: 'cm' };
+  let units = { weight: 'kg', height: 'cm', timeframe: 'weeks' };
 
   // ── Conversions ──────────────────────────────────────────────────
-  const KG_TO_LBS = 2.20462;
-  const CM_TO_IN  = 0.393701;
+  const KG_TO_LBS = 2.20462, CM_TO_IN = 0.393701;
+  const toKg   = (v, u) => u === 'lbs' ? v / KG_TO_LBS : v;
+  const fromKg = (v, u) => u === 'lbs' ? v * KG_TO_LBS : v;
+  const toCm   = (v, u) => u === 'in'  ? v / CM_TO_IN  : v;
+  const fromCm = (v, u) => u === 'in'  ? v * CM_TO_IN  : v;
+  const fmt    = (v, d) => parseFloat(v.toFixed(d));
 
-  function toKg(v, u)  { return u === 'lbs' ? v / KG_TO_LBS : v; }
-  function fromKg(v, u){ return u === 'lbs' ? v * KG_TO_LBS : v; }
-  function toCm(v, u)  { return u === 'in'  ? v / CM_TO_IN  : v; }
-  function fromCm(v, u){ return u === 'in'  ? v * CM_TO_IN  : v; }
-  function fmt(v, decimals) { return v == null ? '' : parseFloat(v.toFixed(decimals)); }
+  function toWeeks(val, unit) { return unit === 'months' ? val * 4.33 : val; }
 
-  // ── Unit toggle ───────────────────────────────────────────────────
-  function updateUnitHints() {
-    $('hintWeight').textContent    = units.weight;
-    $('hintGoalWeight').textContent= units.weight;
-    $('hintWeeklyRate').textContent= units.weight + ' / week';
-    $('hintHeight').textContent    = units.height;
+  // ── Helpers ──────────────────────────────────────────────────────
+  function todayKey() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function ls(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
+
+  function fmt12(hhmm) {
+    if (!hhmm) return '';
+    const [h, m] = hhmm.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    return `${h % 12 || 12}:${String(m).padStart(2,'0')} ${ampm}`;
+  }
+  function addHoursToTime(hhmm, hrs) {
+    const [h, m] = hhmm.split(':').map(Number);
+    const total = h * 60 + m + Math.round(hrs * 60);
+    const wh = Math.floor(total / 60) % 24;
+    const wm = total % 60;
+    return String(wh).padStart(2,'0') + ':' + String(wm).padStart(2,'0');
+  }
+
+  // ── Unit toggles ─────────────────────────────────────────────────
+  function updateHints() {
+    $('hintWeight').textContent     = units.weight;
+    $('hintGoalWeight').textContent = units.weight;
+    $('hintHeight').textContent     = units.height;
+    $('hintTimeframe').textContent  = units.timeframe;
   }
 
   document.querySelectorAll('.unit-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const group   = btn.dataset.unitGroup;
-      const newUnit = btn.dataset.unit;
-      const oldUnit = units[group];
-      if (newUnit === oldUnit) return;
-
-      // Convert displayed values before switching unit
+      const group = btn.dataset.unitGroup, newU = btn.dataset.unit, oldU = units[group];
+      if (newU === oldU) return;
       if (group === 'weight') {
-        const oldKg = toKg(parseFloat(f.weight.value), oldUnit);
-        const oldGoalKg = toKg(parseFloat(f.goalWeight.value), oldUnit);
-        const oldRateKg = toKg(parseFloat(f.weeklyRate.value), oldUnit);
-        if (!isNaN(oldKg))     f.weight.value     = fmt(fromKg(oldKg, newUnit), 1);
-        if (!isNaN(oldGoalKg)) f.goalWeight.value  = fmt(fromKg(oldGoalKg, newUnit), 1);
-        if (!isNaN(oldRateKg)) f.weeklyRate.value  = fmt(fromKg(oldRateKg, newUnit), 2);
-      } else {
-        const oldCm = toCm(parseFloat(f.height.value), oldUnit);
-        if (!isNaN(oldCm)) f.height.value = fmt(fromCm(oldCm, newUnit), 1);
+        const conv = v => { const kg = toKg(parseFloat(v), oldU); return isNaN(kg) ? '' : fmt(fromKg(kg, newU), 1); };
+        if (f.weight.value)     f.weight.value     = conv(f.weight.value);
+        if (f.goalWeight.value) f.goalWeight.value = conv(f.goalWeight.value);
+      } else if (group === 'height') {
+        const cm = toCm(parseFloat(f.height.value), oldU);
+        if (!isNaN(cm)) f.height.value = fmt(fromCm(cm, newU), 1);
       }
-
-      units[group] = newUnit;
-      // Update active button
-      document.querySelectorAll(`[data-unit-group="${group}"]`).forEach(b => b.classList.toggle('active', b.dataset.unit === newUnit));
-      updateUnitHints();
+      units[group] = newU;
+      document.querySelectorAll(`[data-unit-group="${group}"]`).forEach(b => b.classList.toggle('active', b.dataset.unit === newU));
+      updateHints();
       recalc();
     });
   });
 
-  // ── Recalculate derived stats ────────────────────────────────────
+  // ── Recalculate ───────────────────────────────────────────────────
   function recalc() {
-    const wRaw  = parseFloat(f.weight.value);
-    const hRaw  = parseFloat(f.height.value);
-    const gRaw  = parseFloat(f.goalWeight.value);
-    const rRaw  = parseFloat(f.weeklyRate.value);
-    const sg    = parseFloat(f.sleepGoal.value);
-    const sc    = parseFloat(f.sleepCurrent.value);
-
-    const wKg   = isNaN(wRaw) ? null : toKg(wRaw, units.weight);
-    const hCm   = isNaN(hRaw) ? null : toCm(hRaw, units.height);
-    const gKg   = isNaN(gRaw) ? null : toKg(gRaw, units.weight);
-    const rKg   = isNaN(rRaw) ? null : toKg(rRaw, units.weight);
-
-    // Time to goal
-    const ttg = $('timeToGoal');
-    if (wKg && gKg && rKg && rKg > 0) {
-      const diffKg = wKg - gKg;
-      if (Math.abs(diffKg) < 0.1) {
-        $('timeToGoalText').innerHTML = '<strong>You\'re at your goal weight!</strong> 🎉';
-      } else {
-        const weeks = Math.abs(diffKg) / rKg;
-        const months = weeks / 4.33;
-        const direction = diffKg > 0 ? 'lose' : 'gain';
-        const wLabel = units.weight === 'lbs'
-          ? `${fmt(Math.abs(fromKg(diffKg, 'lbs')), 1)} lbs`
-          : `${fmt(Math.abs(diffKg), 1)} kg`;
-        $('timeToGoalText').innerHTML =
-          `<strong>~${Math.ceil(weeks)} weeks</strong> (${months.toFixed(1)} months) to ${direction} ${wLabel}`;
-      }
-      ttg.hidden = false;
-    } else {
-      ttg.hidden = true;
-    }
-
-    // Stats grid
-    const statsGrid = $('statsGrid');
-    const cards = [];
-
-    if (wKg && hCm) {
-      const bmi = wKg / ((hCm / 100) ** 2);
-      let cls = 'green';
-      if (bmi < 18.5 || bmi > 30) cls = 'red';
-      else if (bmi > 25) cls = 'yellow';
-      cards.push(`<div class="stat-card"><div class="stat-value ${cls}">${bmi.toFixed(1)}</div><div class="stat-label">BMI</div></div>`);
-    }
-
-    if (wKg && gKg) {
-      const diffDisplay = units.weight === 'lbs'
-        ? fmt(fromKg(wKg - gKg, 'lbs'), 1)
-        : fmt(wKg - gKg, 1);
-      const sign = (wKg - gKg) > 0 ? '−' : '+';
-      const absDiff = Math.abs(diffDisplay);
-      const cls = absDiff < 0.5 ? 'green' : (absDiff < 5 ? 'yellow' : 'red');
-      cards.push(`<div class="stat-card"><div class="stat-value ${cls}">${sign}${absDiff} ${units.weight}</div><div class="stat-label">To goal</div></div>`);
-    }
-
-    if (!isNaN(sg) && !isNaN(sc)) {
-      const diff = (sc - sg).toFixed(1);
-      const cls  = diff >= 0 ? 'green' : (Math.abs(diff) < 1 ? 'yellow' : 'red');
-      const sign = diff >= 0 ? '+' : '';
-      cards.push(`<div class="stat-card"><div class="stat-value ${cls}">${sign}${diff}h</div><div class="stat-label">Sleep gap</div></div>`);
-    }
-
-    if (!isNaN(sg)) {
-      cards.push(`<div class="stat-card"><div class="stat-value blue">${sg}h</div><div class="stat-label">Sleep goal</div></div>`);
-    }
-
-    if (cards.length) {
-      statsGrid.innerHTML = cards.join('');
-      statsGrid.style.display = 'grid';
-      statsGrid.style.gridTemplateColumns = cards.length === 1 ? '1fr' : '1fr 1fr';
-    } else {
-      statsGrid.style.display = 'none';
-    }
-  }
-
-  // ── Persistence ───────────────────────────────────────────────────
-  function load() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; }
-  }
-  function saveData() {
     const wRaw = parseFloat(f.weight.value);
     const hRaw = parseFloat(f.height.value);
     const gRaw = parseFloat(f.goalWeight.value);
-    const rRaw = parseFloat(f.weeklyRate.value);
+    const tRaw = parseFloat(f.timeframe.value);
+    const sg   = parseFloat(f.sleepGoal.value);
+    const bed  = f.bedtime.value;
+
+    const wKg  = isNaN(wRaw) ? null : toKg(wRaw, units.weight);
+    const hCm  = isNaN(hRaw) ? null : toCm(hRaw, units.height);
+    const gKg  = isNaN(gRaw) ? null : toKg(gRaw, units.weight);
+
+    // ── Difficulty ──
+    const diffBox = $('difficultyBox');
+    if (wKg && gKg && !isNaN(tRaw) && tRaw > 0) {
+      const weeks   = toWeeks(tRaw, units.timeframe);
+      const diffKg  = wKg - gKg;
+      const rateKg  = Math.abs(diffKg) / weeks;
+      const rateDisp = units.weight === 'lbs' ? fmt(fromKg(rateKg, 'lbs'), 2) : fmt(rateKg, 2);
+      $('diffRate').textContent = `${rateDisp} ${units.weight}/week required`;
+
+      let cls, icon, label, desc;
+      if (Math.abs(diffKg) < 0.3) {
+        cls = 'diff-easy'; icon = '🎯'; label = "You're already there!"; desc = 'You\'re within range of your goal weight.';
+      } else if (rateKg <= 0.25) {
+        cls = 'diff-easy'; icon = '🟢'; label = 'Easy'; desc = 'Gentle and very sustainable — minimal lifestyle change needed.';
+      } else if (rateKg <= 0.5) {
+        cls = 'diff-moderate'; icon = '🟡'; label = 'Moderate'; desc = 'A healthy, sustainable pace — the recommended range.';
+      } else if (rateKg <= 0.75) {
+        cls = 'diff-hard'; icon = '🟠'; label = 'Hard'; desc = 'Challenging — requires consistent discipline with diet and training.';
+      } else if (rateKg <= 1.0) {
+        cls = 'diff-veryhard'; icon = '🔴'; label = 'Very Hard'; desc = 'Aggressive deficit needed — consider extending your timeline.';
+      } else {
+        cls = 'diff-extreme'; icon = '⚠️'; label = 'Extreme'; desc = 'Not recommended — high risk of muscle loss and fatigue. Extend your timeline.';
+      }
+
+      diffBox.className = 'difficulty-box ' + cls;
+      $('diffIcon').textContent  = icon;
+      $('diffLabel').textContent = label;
+      $('diffDesc').textContent  = desc;
+      diffBox.hidden = false;
+    } else {
+      diffBox.hidden = true;
+    }
+
+    // ── Wake time ──
+    const wakeDisp = $('wakeDisplay');
+    if (bed && !isNaN(sg) && sg > 0) {
+      const wake = addHoursToTime(bed, sg);
+      $('wakeText').innerHTML = `Bedtime <strong>${fmt12(bed)}</strong> → wake up <strong>${fmt12(wake)}</strong>`;
+      wakeDisp.hidden = false;
+    } else {
+      wakeDisp.hidden = true;
+    }
+
+    // ── Stats grid ──
+    const cards = [];
+    if (wKg && hCm) {
+      const bmi = wKg / ((hCm / 100) ** 2);
+      const cls = bmi < 18.5 || bmi > 30 ? 'red' : bmi > 25 ? 'orange' : 'green';
+      cards.push(`<div class="stat-card"><div class="stat-value ${cls}">${bmi.toFixed(1)}</div><div class="stat-label">BMI</div></div>`);
+    }
+    if (wKg && gKg) {
+      const diffDisp = units.weight === 'lbs' ? fmt(fromKg(wKg - gKg, 'lbs'), 1) : fmt(wKg - gKg, 1);
+      const abs = Math.abs(diffDisp), sign = diffDisp > 0 ? '−' : '+';
+      const cls = abs < 0.5 ? 'green' : abs < 5 ? 'yellow' : 'orange';
+      cards.push(`<div class="stat-card"><div class="stat-value ${cls}">${sign}${abs} ${units.weight}</div><div class="stat-label">To goal</div></div>`);
+    }
+    if (!isNaN(sg)) {
+      cards.push(`<div class="stat-card"><div class="stat-value blue">${sg}h</div><div class="stat-label">Sleep goal</div></div>`);
+    }
+    if (bed) {
+      cards.push(`<div class="stat-card"><div class="stat-value purple">${fmt12(bed)}</div><div class="stat-label">Bedtime</div></div>`);
+    }
+
+    const grid = $('statsGrid');
+    if (cards.length) {
+      grid.innerHTML = cards.join('');
+      grid.style.display = 'grid';
+      grid.style.gridTemplateColumns = '1fr 1fr';
+    } else {
+      grid.style.display = 'none';
+    }
+
+    // ── Connected insights ──
+    renderInsights(wKg, gKg, sg, bed);
+  }
+
+  // ── Connected insights — reads all tabs ──────────────────────────
+  function renderInsights(wKg, gKg, sgHrs, bedtime) {
+    const today = todayKey();
+    const rows = [];
+
+    // Calories (health.html)
+    const meals = ls(`macro:meals:${today}`) || [];
+    const goals = ls('macro:goals') || {};
+    if (meals.length || goals.cal) {
+      const eaten = meals.reduce((s, m) => s + (m.cal || 0), 0);
+      const goal  = goals.cal || 0;
+      const pct   = goal ? Math.min(100, Math.round(eaten / goal * 100)) : null;
+      const cls   = !pct ? 'bar-blue' : pct >= 90 ? 'bar-green' : pct >= 60 ? 'bar-yellow' : 'bar-orange';
+      const valCls = !pct ? 'blue' : pct >= 90 ? 'green' : pct >= 60 ? 'yellow' : 'orange';
+      rows.push({
+        icon: '🔥', title: 'Calories',
+        sub: goal ? `${eaten.toLocaleString()} / ${goal.toLocaleString()} kcal` : `${eaten.toLocaleString()} kcal logged`,
+        value: pct != null ? `${pct}%` : '', valueCls: valCls,
+        bar: pct, barCls: cls,
+      });
+    }
+
+    // Protein (health.html)
+    if (meals.length && goals.prot) {
+      const eaten = +meals.reduce((s, m) => s + (m.prot || 0), 0).toFixed(1);
+      const goal  = goals.prot;
+      const pct   = Math.min(100, Math.round(eaten / goal * 100));
+      const cls   = pct >= 90 ? 'bar-orange' : pct >= 60 ? 'bar-yellow' : 'bar-red';
+      rows.push({
+        icon: '🥩', title: 'Protein',
+        sub: `${eaten}g / ${goal}g`,
+        value: `${pct}%`, valueCls: pct >= 90 ? 'green' : 'orange',
+        bar: pct, barCls: cls,
+      });
+    }
+
+    // Water (health.html / po-water.html)
+    const waterState = ls('po_water_v1');
+    if (waterState) {
+      const done  = (waterState.logs || {})[today] || 0;
+      const unitVol = waterState.unit === 'glass' ? (waterState.glassMl || 250)
+                    : waterState.unit === 'oz'    ? 30
+                    : waterState.unit === 'ml'    ? 1
+                    : (waterState.bottleMl || 500);
+      const p     = waterState.profile || {};
+      const wKgW  = waterState.weightUnit === 'lb' ? (p.weightKg || 0) / 2.20462 : (p.weightKg || 0);
+      const base  = wKgW * 35;
+      const totalMl = base + ((p.activityHrsPerWeek || 0) / 7 * 500);
+      const total = Math.max(1, Math.ceil(totalMl / unitVol));
+      const pct   = Math.min(100, Math.round(done / total * 100));
+      const cls   = pct >= 100 ? 'bar-green' : pct >= 60 ? 'bar-blue' : 'bar-red';
+      rows.push({
+        icon: '💧', title: 'Water',
+        sub: `${done} / ${total} ${waterState.unit || 'bottle'}s`,
+        value: `${pct}%`, valueCls: pct >= 100 ? 'green' : 'blue',
+        bar: pct, barCls: cls,
+      });
+    }
+
+    // Supplements (health.html)
+    const stackItems  = ls('stack:items') || [];
+    const stackTaken  = ls(`stack:taken:${today}`) || {};
+    if (stackItems.length) {
+      const total  = stackItems.length;
+      const taken  = stackItems.filter(item => stackTaken[item.name]).length;
+      const pct    = Math.round(taken / total * 100);
+      const cls    = pct >= 100 ? 'bar-green' : pct >= 50 ? 'bar-yellow' : 'bar-red';
+      rows.push({
+        icon: '💊', title: 'Supplements',
+        sub: `${taken} / ${total} taken today`,
+        value: `${pct}%`, valueCls: pct >= 100 ? 'green' : pct >= 50 ? 'yellow' : 'red',
+        bar: pct, barCls: cls,
+      });
+    }
+
+    // Workout done today (gym.html)
+    const workoutDone = ls('po_coach_workout_done') || {};
+    const didWorkout  = !!workoutDone[today];
+    const program     = ls('po_coach_v1');
+    if (program) {
+      rows.push({
+        icon: '💪', title: 'Workout',
+        sub: didWorkout ? 'Session logged today' : 'No session logged yet',
+        value: didWorkout ? 'Done' : '—', valueCls: didWorkout ? 'green' : 'red',
+        bar: null,
+      });
+    }
+
+    // Weight toward goal
+    if (wKg && gKg) {
+      const weights = ls('po_coach_weights') || [];
+      const latest  = weights.length ? weights[weights.length - 1] : null;
+      const disp    = units.weight === 'lbs' ? fmt(fromKg(wKg, 'lbs'), 1) + ' lbs' : wKg + ' kg';
+      const goalDisp = units.weight === 'lbs' ? fmt(fromKg(gKg, 'lbs'), 1) + ' lbs' : gKg + ' kg';
+      rows.push({
+        icon: '⚖️', title: 'Weight progress',
+        sub: `${disp} → goal ${goalDisp}${latest ? ' · last logged ' + (latest.date || '') : ''}`,
+        value: '', valueCls: '',
+        bar: null,
+      });
+    }
+
+    // Sleep
+    if (sgHrs && bedtime) {
+      const wake = addHoursToTime(bedtime, sgHrs);
+      rows.push({
+        icon: '😴', title: 'Sleep',
+        sub: `Bed ${fmt12(bedtime)} → wake ${fmt12(wake)} · goal ${sgHrs}h`,
+        value: '', valueCls: '',
+        bar: null,
+      });
+    }
+
+    const card = $('insightsCard');
+    if (!rows.length) { card.style.display = 'none'; return; }
+
+    $('insightsBody').innerHTML = rows.map(r => `
+      <div class="insight-row">
+        <div class="insight-icon">${r.icon}</div>
+        <div class="insight-body">
+          <div class="insight-title">${r.title}</div>
+          <div class="insight-sub">${r.sub}</div>
+          ${r.bar != null ? `<div class="insight-bar-wrap"><div class="insight-bar ${r.barCls}" style="width:${r.bar}%"></div></div>` : ''}
+        </div>
+        ${r.value ? `<div class="insight-value ${r.valueCls}">${r.value}</div>` : ''}
+      </div>`).join('');
+    card.style.display = 'block';
+  }
+
+  // ── Persistence ───────────────────────────────────────────────────
+  function load() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; } }
+
+  function doSave() {
     const data = {
-      weightUnit:   units.weight,
-      heightUnit:   units.height,
-      age:          parseFloat(f.age.value)          || null,
-      weight:       isNaN(wRaw) ? null : wRaw,
-      height:       isNaN(hRaw) ? null : hRaw,
-      goalWeight:   isNaN(gRaw) ? null : gRaw,
-      weeklyRate:   isNaN(rRaw) ? null : rRaw,
-      sleepGoal:    parseFloat(f.sleepGoal.value)    || null,
-      sleepCurrent: parseFloat(f.sleepCurrent.value) || null,
+      weightUnit: units.weight, heightUnit: units.height, timeframeUnit: units.timeframe,
+      age:         parseFloat(f.age.value)         || null,
+      weight:      parseFloat(f.weight.value)      || null,
+      height:      parseFloat(f.height.value)      || null,
+      goalWeight:  parseFloat(f.goalWeight.value)  || null,
+      timeframe:   parseFloat(f.timeframe.value)   || null,
+      sleepGoal:   parseFloat(f.sleepGoal.value)   || null,
+      bedtime:     f.bedtime.value                 || null,
     };
     localStorage.setItem(STORE_KEY, JSON.stringify(data));
-    return data;
   }
 
   function init() {
-    const data = load();
-    if (data.weightUnit) {
-      units.weight = data.weightUnit;
-      document.querySelectorAll('[data-unit-group="weight"]').forEach(b => b.classList.toggle('active', b.dataset.unit === data.weightUnit));
-    }
-    if (data.heightUnit) {
-      units.height = data.heightUnit;
-      document.querySelectorAll('[data-unit-group="height"]').forEach(b => b.classList.toggle('active', b.dataset.unit === data.heightUnit));
-    }
-    updateUnitHints();
-    if (data.age)          f.age.value          = data.age;
-    if (data.weight)       f.weight.value        = data.weight;
-    if (data.height)       f.height.value        = data.height;
-    if (data.goalWeight)   f.goalWeight.value    = data.goalWeight;
-    if (data.weeklyRate)   f.weeklyRate.value    = data.weeklyRate;
-    if (data.sleepGoal)    f.sleepGoal.value     = data.sleepGoal;
-    if (data.sleepCurrent) f.sleepCurrent.value  = data.sleepCurrent;
+    const d = load();
+    if (d.weightUnit)    { units.weight    = d.weightUnit;    document.querySelectorAll('[data-unit-group="weight"]').forEach(b => b.classList.toggle('active', b.dataset.unit === d.weightUnit)); }
+    if (d.heightUnit)    { units.height    = d.heightUnit;    document.querySelectorAll('[data-unit-group="height"]').forEach(b => b.classList.toggle('active', b.dataset.unit === d.heightUnit)); }
+    if (d.timeframeUnit) { units.timeframe = d.timeframeUnit; document.querySelectorAll('[data-unit-group="timeframe"]').forEach(b => b.classList.toggle('active', b.dataset.unit === d.timeframeUnit)); }
+    updateHints();
+    if (d.age)        f.age.value       = d.age;
+    if (d.weight)     f.weight.value    = d.weight;
+    if (d.height)     f.height.value    = d.height;
+    if (d.goalWeight) f.goalWeight.value= d.goalWeight;
+    if (d.timeframe)  f.timeframe.value = d.timeframe;
+    if (d.sleepGoal)  f.sleepGoal.value = d.sleepGoal;
+    if (d.bedtime)    f.bedtime.value   = d.bedtime;
     recalc();
   }
 
-  // ── Save button ───────────────────────────────────────────────────
   $('saveBtn').addEventListener('click', () => {
-    saveData();
+    doSave();
     recalc();
     const btn = $('saveBtn');
     btn.textContent = 'Saved ✓';
@@ -430,9 +588,16 @@ main { max-width: 500px; margin: 0 auto; padding-top: 32px; display: flex; flex-
     setTimeout(() => { btn.textContent = 'Save profile'; btn.classList.remove('saved'); }, 1800);
   });
 
-  // Live recalc on any input change
-  Object.values(f).forEach(el => el.addEventListener('input', recalc));
-  Object.values(f).forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') $('saveBtn').click(); }));
+  Object.values(f).forEach(el => {
+    el.addEventListener('input', recalc);
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') $('saveBtn').click(); });
+  });
+
+  // Refresh insights when other tabs update localStorage
+  window.addEventListener('storage', () => {
+    const d = load();
+    recalc();
+  });
 
   init();
 })();
