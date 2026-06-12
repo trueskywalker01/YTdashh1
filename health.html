@@ -813,10 +813,21 @@ main {
   border-top: 1px solid var(--border-soft); padding-top: 12px; margin-bottom: 14px;
 }
 .macro-scan-actions { display: flex; gap: 8px; justify-content: flex-end; }
-.macro-apikey-wrap { margin-bottom: 12px; }
-.macro-apikey-label { font-size: 11.5px; color: var(--text-tertiary); margin-bottom: 7px; line-height: 1.5; }
-.macro-apikey-row { display: flex; gap: 8px; }
-.macro-apikey-row .stack-input { flex: 1; }
+.macro-key-setup {
+  border-radius: 14px; padding: 20px 18px; text-align: center;
+  background: rgba(255,214,10,0.05); border: 1px solid rgba(255,214,10,0.15);
+}
+.macro-key-icon { font-size: 26px; margin-bottom: 8px; }
+.macro-key-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; letter-spacing: -0.01em; }
+.macro-key-desc { font-size: 12px; color: var(--text-tertiary); line-height: 1.55; margin-bottom: 14px; }
+.macro-key-row { display: flex; gap: 8px; }
+.macro-key-row .stack-input { flex: 1; }
+.macro-change-key {
+  display: block; margin: 9px auto 0; background: none; border: none;
+  color: var(--text-quaternary); font-size: 11px; cursor: pointer;
+  font-family: inherit; text-decoration: underline; padding: 2px;
+}
+.macro-change-key:hover { color: var(--text-tertiary); }
 .macro-modal-bg {
   position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.75);
   display: flex; align-items: center; justify-content: center;
@@ -1059,16 +1070,24 @@ main {
       </div>
 
       <div class="macro-add-wrap">
-        <button id="macroScanTrigger" class="macro-scan-trigger-btn">
-          <span id="macroScanBtnIcon">📷</span>
-          <span id="macroScanBtnText">Scan food photo</span>
-        </button>
-        <div id="macroApiKeyWrap" class="macro-apikey-wrap" hidden>
-          <div class="macro-apikey-label">Paste your Anthropic API key to enable photo scanning</div>
-          <div class="macro-apikey-row">
+        <!-- Key setup — visible until key is saved -->
+        <div id="macroKeySetup" class="macro-key-setup">
+          <div class="macro-key-icon">🔑</div>
+          <div class="macro-key-title">Connect AI Scanner</div>
+          <div class="macro-key-desc">Paste your Anthropic API key once to enable food photo scanning</div>
+          <div class="macro-key-row">
             <input id="macroApiKeyInput" type="password" class="stack-input" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false" />
-            <button id="macroApiKeySave" class="macro-scan-btn">Save</button>
+            <button id="macroApiKeySave" class="macro-modal-save">Save</button>
           </div>
+        </div>
+
+        <!-- Scan button — visible once key is saved -->
+        <div id="macroScanArea" hidden>
+          <button id="macroScanTrigger" class="macro-scan-trigger-btn">
+            <span id="macroScanBtnIcon">📷</span>
+            <span id="macroScanBtnText">Scan food photo</span>
+          </button>
+          <button id="macroClearKey" class="macro-change-key">Change API key</button>
         </div>
 
         <div id="macroScanCard" class="macro-scan-card" hidden>
@@ -2129,56 +2148,56 @@ document.addEventListener('DOMContentLoaded', function () {
 (function () {
   'use strict';
   const $ = id => document.getElementById(id);
-  const API_KEY_STORE = 'anthropic_api_key';
-
-  const triggerBtn   = $('macroScanTrigger');
-  const scanCard     = $('macroScanCard');
-  const apiKeyWrap   = $('macroApiKeyWrap');
-  const apiKeyInput  = $('macroApiKeyInput');
-  const apiKeySave   = $('macroApiKeySave');
+  const KEY_STORE = 'anthropic_api_key';
 
   let pendingScan = null;
 
-  function getKey() { return localStorage.getItem(API_KEY_STORE) || ''; }
+  function getKey()    { return localStorage.getItem(KEY_STORE) || ''; }
+  function todayStr()  { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
-  function checkKey() {
-    if (getKey()) {
-      apiKeyWrap.hidden = true;
-    } else {
-      apiKeyWrap.hidden = false;
-    }
+  // ── Key setup UI ─────────────────────────────────────────────────
+  function refreshKeyUI() {
+    const has = !!getKey();
+    $('macroKeySetup').hidden =  has;
+    $('macroScanArea').hidden  = !has;
   }
-  checkKey();
+  refreshKeyUI();
 
-  apiKeySave.addEventListener('click', () => {
-    const k = apiKeyInput.value.trim();
-    if (!k.startsWith('sk-ant-')) { alert('That doesn\'t look like an Anthropic API key (should start with sk-ant-).'); return; }
-    localStorage.setItem(API_KEY_STORE, k);
-    apiKeyInput.value = '';
-    apiKeyWrap.hidden = true;
+  $('macroApiKeySave').addEventListener('click', () => {
+    const k = ($('macroApiKeyInput').value || '').trim();
+    if (!k.startsWith('sk-ant-')) { alert('Key should start with sk-ant-'); return; }
+    localStorage.setItem(KEY_STORE, k);
+    $('macroApiKeyInput').value = '';
+    refreshKeyUI();
+  });
+  $('macroApiKeyInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('macroApiKeySave').click(); });
+
+  $('macroClearKey').addEventListener('click', () => {
+    if (!confirm('Remove saved API key?')) return;
+    localStorage.removeItem(KEY_STORE);
+    refreshKeyUI();
   });
 
-  triggerBtn.addEventListener('click', () => {
-    if (!getKey()) { apiKeyWrap.hidden = false; apiKeyInput.focus(); return; }
-
-    // Create a fresh input each click — iOS Safari won't fire on display:none inputs
+  // ── File picker ──────────────────────────────────────────────────
+  $('macroScanTrigger').addEventListener('click', () => {
     const inp = document.createElement('input');
     inp.type = 'file';
     inp.accept = 'image/*';
-    inp.style.cssText = 'position:fixed;top:-200px;left:-200px;opacity:0;';
+    inp.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;';
     document.body.appendChild(inp);
     inp.addEventListener('change', () => {
       const file = inp.files[0];
       document.body.removeChild(inp);
       if (file) handleFile(file);
     });
-    inp.click();
+    // Small timeout keeps user-gesture flag alive in Safari
+    setTimeout(() => inp.click(), 0);
   });
 
+  // ── Image pipeline ───────────────────────────────────────────────
   async function handleFile(file) {
     setBtnLoading(true);
-    scanCard.hidden = true;
-
+    $('macroScanCard').hidden = true;
     try {
       const { base64, mime, objectUrl } = await prepareImage(file);
       const result = await callClaude(base64, mime);
@@ -2201,16 +2220,14 @@ document.addEventListener('DOMContentLoaded', function () {
           const MAX = 1280;
           let w = img.width, h = img.height;
           if (w > MAX || h > MAX) {
-            const ratio = Math.min(MAX / w, MAX / h);
-            w = Math.round(w * ratio);
-            h = Math.round(h * ratio);
+            const r = Math.min(MAX/w, MAX/h);
+            w = Math.round(w*r); h = Math.round(h*r);
           }
           const canvas = document.createElement('canvas');
           canvas.width = w; canvas.height = h;
           canvas.getContext('2d').drawImage(img, 0, 0, w, h);
           const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-          const base64  = dataUrl.split(',')[1];
-          resolve({ base64, mime: 'image/jpeg', objectUrl: dataUrl });
+          resolve({ base64: dataUrl.split(',')[1], mime: 'image/jpeg', objectUrl: dataUrl });
         };
         img.src = reader.result;
       };
@@ -2253,58 +2270,57 @@ document.addEventListener('DOMContentLoaded', function () {
   },
   "advice": "2-3 sentences of practical, specific dietary advice about this meal in the context of fitness, body composition, and health."
 }
-For nutrient_amounts: use each field's natural unit (mcg for vit_a/vit_d/vit_b7/vit_b9/vit_b12/selenium/iodine/chromium, g for omega3/fiber, mg for everything else). Set 0 for negligible amounts. Be realistic — only non-trivial amounts. If multiple foods visible, estimate the full plate total.` }
+For nutrient_amounts use natural units (mcg for vit_a/vit_d/vit_b7/vit_b9/vit_b12/selenium/iodine/chromium, g for omega3/fiber, mg for all others). Set 0 for negligible. Estimate the full visible plate.` }
           ]
         }]
       })
     });
-
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || 'API error ' + res.status);
+      throw new Error((err.error && err.error.message) || ('API error ' + res.status));
     }
-
     const data = await res.json();
-    const text = data.content[0].text.trim();
-    const jsonStr = text.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
-    return JSON.parse(jsonStr);
+    const text = data.content[0].text.trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
+    return JSON.parse(text);
   }
 
+  // ── Result card ──────────────────────────────────────────────────
   function showCard(objectUrl, r) {
-    $('macroScanThumb').src      = objectUrl;
+    $('macroScanThumb').src = objectUrl;
     $('macroScanFoodName').textContent = r.name || 'Unknown food';
     $('macroScanServing').textContent  = r.serving_note || '';
-    $('macroScanCal').textContent  = (r.calories    || 0) + ' kcal';
-    $('macroScanProt').textContent = (r.protein_g   || 0) + 'g protein';
-    $('macroScanCarb').textContent = (r.carbs_g     || 0) + 'g carbs';
-    $('macroScanFat').textContent  = (r.fat_g       || 0) + 'g fat';
-
-    const nutrients = $('macroScanNutrients');
-    nutrients.innerHTML = '';
+    $('macroScanCal').textContent  = (r.calories   || 0) + ' kcal';
+    $('macroScanProt').textContent = (r.protein_g  || 0) + 'g protein';
+    $('macroScanCarb').textContent = (r.carbs_g    || 0) + 'g carbs';
+    $('macroScanFat').textContent  = (r.fat_g      || 0) + 'g fat';
+    const nutrEl = $('macroScanNutrients');
+    nutrEl.innerHTML = '';
     (r.nutrients || []).forEach(n => {
-      const tag = document.createElement('span');
-      tag.className = 'macro-scan-nutrient-tag';
-      tag.textContent = n;
-      nutrients.appendChild(tag);
+      const t = document.createElement('span');
+      t.className = 'macro-scan-nutrient-tag';
+      t.textContent = n;
+      nutrEl.appendChild(t);
     });
-
     $('macroScanAdvice').textContent = r.advice || '';
-    scanCard.hidden = false;
+    $('macroScanNote').value = '';
+    $('macroScanCard').hidden = false;
     setBtnLoading(false);
-    scanCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    $('macroScanCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   $('macroScanDismiss').addEventListener('click', () => {
-    scanCard.hidden = true;
+    $('macroScanCard').hidden = true;
     $('macroScanNote').value = '';
     pendingScan = null;
   });
 
   $('macroScanUse').addEventListener('click', () => {
     if (!pendingScan) return;
-    const r = pendingScan;
+    const r    = pendingScan;
     const note = ($('macroScanNote').value || '').trim();
-    const meals = (function() { try { return JSON.parse(localStorage.getItem('macro:meals:' + (function(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }())) || []; } catch(e) { return []; } })();
+    const key  = 'macro:meals:' + todayStr();
+    let meals  = [];
+    try { meals = JSON.parse(localStorage.getItem(key)) || []; } catch(e) {}
     meals.push({
       name: r.name || 'Scanned meal',
       cal:  Number(r.calories)  || 0,
@@ -2313,20 +2329,22 @@ For nutrient_amounts: use each field's natural unit (mcg for vit_a/vit_d/vit_b7/
       fat:  Number(r.fat_g)     || 0,
       note: note || undefined,
     });
-    localStorage.setItem('macro:meals:' + (function(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }()), JSON.stringify(meals));
+    localStorage.setItem(key, JSON.stringify(meals));
     if (r.nutrient_amounts && typeof window.applyNutrientAmounts === 'function') {
       window.applyNutrientAmounts(r.nutrient_amounts);
     }
-    scanCard.hidden = true;
+    $('macroScanCard').hidden = true;
     $('macroScanNote').value = '';
     pendingScan = null;
     window.dispatchEvent(new Event('storage'));
   });
 
   function setBtnLoading(on) {
-    triggerBtn.classList.toggle('loading', on);
+    const btn = $('macroScanTrigger');
+    if (!btn) return;
+    btn.classList.toggle('loading', on);
     $('macroScanBtnIcon').textContent = on ? '⏳' : '📷';
-    $('macroScanBtnText').textContent = on ? 'Analysing photo…' : 'Scan food photo';
+    $('macroScanBtnText').textContent = on ? 'Analysing…' : 'Scan food photo';
   }
 })();
 </script>
