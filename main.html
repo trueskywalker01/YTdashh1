@@ -703,14 +703,9 @@ body::after {
   function getSleepHours() {
     try {
       const p = JSON.parse(localStorage.getItem('profile:data')) || {};
-      const bedtime   = p.bedtime;   // "HH:MM"
-      const sleepGoal = p.sleepGoal; // hours
-      const sleepHour = bedtime
-        ? parseInt(bedtime.split(':')[0]) + parseInt(bedtime.split(':')[1]) / 60
-        : 24;
-      const wakeHour = (sleepGoal && bedtime)
-        ? (sleepHour + sleepGoal) % 24
-        : 8;
+      const toH = t => t ? parseInt(t.split(':')[0]) + parseInt(t.split(':')[1]) / 60 : null;
+      const sleepHour = toH(p.bedtime)  ?? 24;
+      const wakeHour  = toH(p.wakeTime) ?? 8;
       return { sleepHour, wakeHour };
     } catch { return { sleepHour: 24, wakeHour: 8 }; }
   }

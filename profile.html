@@ -226,18 +226,20 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cur
 
   <!-- ── Sleep ── -->
   <div class="section-card">
-    <div class="section-heading">Sleep</div>
-    <div class="field">
-      <div class="field-row"><span class="field-name">Sleep goal</span><span class="field-hint">hrs / night</span></div>
-      <input id="fieldSleepGoal" class="field-input" type="number" min="1" max="24" step="0.5" placeholder="e.g. 8" inputmode="decimal" />
+    <div class="section-heading">Sleep Schedule</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="field" style="margin-bottom:0">
+        <div class="field-row"><span class="field-name">🌙 Bedtime</span></div>
+        <input id="fieldBedtime" class="field-input" type="time" />
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <div class="field-row"><span class="field-name">☀️ Wake time</span></div>
+        <input id="fieldWakeTime" class="field-input" type="time" />
+      </div>
     </div>
-    <div class="field">
-      <div class="field-row"><span class="field-name">Bedtime</span><span class="field-hint">time you go to bed</span></div>
-      <input id="fieldBedtime" class="field-input" type="time" />
-    </div>
-    <div id="wakeDisplay" class="wake-display" hidden>
+    <div id="sleepSummary" class="wake-display" hidden>
       <span>😴</span>
-      <span id="wakeText"></span>
+      <span id="sleepSummaryText"></span>
     </div>
   </div>
 
@@ -259,13 +261,13 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cur
   const $ = id => document.getElementById(id);
 
   const f = {
-    age:         $('fieldAge'),
-    weight:      $('fieldWeight'),
-    height:      $('fieldHeight'),
-    goalWeight:  $('fieldGoalWeight'),
-    timeframe:   $('fieldTimeframe'),
-    sleepGoal:   $('fieldSleepGoal'),
-    bedtime:     $('fieldBedtime'),
+    age:        $('fieldAge'),
+    weight:     $('fieldWeight'),
+    height:     $('fieldHeight'),
+    goalWeight: $('fieldGoalWeight'),
+    timeframe:  $('fieldTimeframe'),
+    bedtime:    $('fieldBedtime'),
+    wakeTime:   $('fieldWakeTime'),
   };
 
   let units = { weight: 'kg', height: 'cm', timeframe: 'weeks' };
@@ -279,6 +281,14 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cur
   const fmt    = (v, d) => parseFloat(v.toFixed(d));
 
   function toWeeks(val, unit) { return unit === 'months' ? val * 4.33 : val; }
+
+  function sleepDuration(bedtime, wakeTime) {
+    // returns hours; handles crossing midnight
+    const toH = t => parseInt(t.split(':')[0]) + parseInt(t.split(':')[1]) / 60;
+    let dur = toH(wakeTime) - toH(bedtime);
+    if (dur <= 0) dur += 24;
+    return dur;
+  }
 
   // ── Helpers ──────────────────────────────────────────────────────
   function todayKey() {
@@ -334,8 +344,9 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cur
     const hRaw = parseFloat(f.height.value);
     const gRaw = parseFloat(f.goalWeight.value);
     const tRaw = parseFloat(f.timeframe.value);
-    const sg   = parseFloat(f.sleepGoal.value);
     const bed  = f.bedtime.value;
+    const wake = f.wakeTime.value;
+    const sg   = (bed && wake) ? sleepDuration(bed, wake) : null;
 
     const wKg  = isNaN(wRaw) ? null : toKg(wRaw, units.weight);
     const hCm  = isNaN(hRaw) ? null : toCm(hRaw, units.height);
@@ -374,14 +385,18 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cur
       diffBox.hidden = true;
     }
 
-    // ── Wake time ──
-    const wakeDisp = $('wakeDisplay');
-    if (bed && !isNaN(sg) && sg > 0) {
-      const wake = addHoursToTime(bed, sg);
-      $('wakeText').innerHTML = `Bedtime <strong>${fmt12(bed)}</strong> → wake up <strong>${fmt12(wake)}</strong>`;
-      wakeDisp.hidden = false;
+    // ── Sleep summary ──
+    const sleepSum = $('sleepSummary');
+    if (bed && wake) {
+      const dur = sleepDuration(bed, wake);
+      const hrs = Math.floor(dur), mins = Math.round((dur % 1) * 60);
+      const durStr = mins ? `${hrs}h ${mins}m` : `${hrs}h`;
+      const quality = dur >= 8 ? '✅ Great' : dur >= 7 ? '👍 Good' : dur >= 6 ? '⚠️ Short' : '❌ Too short';
+      $('sleepSummaryText').innerHTML =
+        `<strong>${fmt12(bed)}</strong> → <strong>${fmt12(wake)}</strong> · <strong>${durStr}</strong> sleep · ${quality}`;
+      sleepSum.hidden = false;
     } else {
-      wakeDisp.hidden = true;
+      sleepSum.hidden = true;
     }
 
     // ── Stats grid ──
@@ -397,11 +412,17 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cur
       const cls = abs < 0.5 ? 'green' : abs < 5 ? 'yellow' : 'orange';
       cards.push(`<div class="stat-card"><div class="stat-value ${cls}">${sign}${abs} ${units.weight}</div><div class="stat-label">To goal</div></div>`);
     }
-    if (!isNaN(sg)) {
-      cards.push(`<div class="stat-card"><div class="stat-value blue">${sg}h</div><div class="stat-label">Sleep goal</div></div>`);
-    }
     if (bed) {
       cards.push(`<div class="stat-card"><div class="stat-value purple">${fmt12(bed)}</div><div class="stat-label">Bedtime</div></div>`);
+    }
+    if (wake) {
+      cards.push(`<div class="stat-card"><div class="stat-value blue">${fmt12(wake)}</div><div class="stat-label">Wake time</div></div>`);
+    }
+    if (sg != null) {
+      const hrs = Math.floor(sg), mins = Math.round((sg % 1) * 60);
+      const durStr = mins ? `${hrs}h ${mins}m` : `${hrs}h`;
+      const cls = sg >= 8 ? 'green' : sg >= 7 ? 'yellow' : 'red';
+      cards.push(`<div class="stat-card"><div class="stat-value ${cls}">${durStr}</div><div class="stat-label">Sleep</div></div>`);
     }
 
     const grid = $('statsGrid');
@@ -414,11 +435,11 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cur
     }
 
     // ── Connected insights ──
-    renderInsights(wKg, gKg, sg, bed);
+    renderInsights(wKg, gKg, sg, bed, wake);
   }
 
   // ── Connected insights — reads all tabs ──────────────────────────
-  function renderInsights(wKg, gKg, sgHrs, bedtime) {
+  function renderInsights(wKg, gKg, sgHrs, bedtime, wakeTime) {
     const today = todayKey();
     const rows = [];
 
@@ -520,12 +541,15 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cur
     }
 
     // Sleep
-    if (sgHrs && bedtime) {
-      const wake = addHoursToTime(bedtime, sgHrs);
+    if (bedtime && wakeTime) {
+      const dur = sleepDuration(bedtime, wakeTime);
+      const hrs = Math.floor(dur), mins = Math.round((dur % 1) * 60);
+      const durStr = mins ? `${hrs}h ${mins}m` : `${hrs}h`;
+      const cls = dur >= 8 ? 'green' : dur >= 7 ? 'yellow' : 'red';
       rows.push({
-        icon: '😴', title: 'Sleep',
-        sub: `Bed ${fmt12(bedtime)} → wake ${fmt12(wake)} · goal ${sgHrs}h`,
-        value: '', valueCls: '',
+        icon: '😴', title: 'Sleep schedule',
+        sub: `Bed ${fmt12(bedtime)} → wake ${fmt12(wakeTime)} · ${durStr}`,
+        value: durStr, valueCls: cls,
         bar: null,
       });
     }
@@ -550,15 +574,18 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cur
   function load() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; } }
 
   function doSave() {
+    const bed  = f.bedtime.value  || null;
+    const wake = f.wakeTime.value || null;
     const data = {
       weightUnit: units.weight, heightUnit: units.height, timeframeUnit: units.timeframe,
-      age:         parseFloat(f.age.value)         || null,
-      weight:      parseFloat(f.weight.value)      || null,
-      height:      parseFloat(f.height.value)      || null,
-      goalWeight:  parseFloat(f.goalWeight.value)  || null,
-      timeframe:   parseFloat(f.timeframe.value)   || null,
-      sleepGoal:   parseFloat(f.sleepGoal.value)   || null,
-      bedtime:     f.bedtime.value                 || null,
+      age:        parseFloat(f.age.value)        || null,
+      weight:     parseFloat(f.weight.value)     || null,
+      height:     parseFloat(f.height.value)     || null,
+      goalWeight: parseFloat(f.goalWeight.value) || null,
+      timeframe:  parseFloat(f.timeframe.value)  || null,
+      bedtime:    bed,
+      wakeTime:   wake,
+      sleepGoal:  (bed && wake) ? sleepDuration(bed, wake) : null,
     };
     localStorage.setItem(STORE_KEY, JSON.stringify(data));
   }
@@ -574,8 +601,8 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cur
     if (d.height)     f.height.value    = d.height;
     if (d.goalWeight) f.goalWeight.value= d.goalWeight;
     if (d.timeframe)  f.timeframe.value = d.timeframe;
-    if (d.sleepGoal)  f.sleepGoal.value = d.sleepGoal;
-    if (d.bedtime)    f.bedtime.value   = d.bedtime;
+    if (d.bedtime)  f.bedtime.value  = d.bedtime;
+    if (d.wakeTime) f.wakeTime.value = d.wakeTime;
     recalc();
   }
 
