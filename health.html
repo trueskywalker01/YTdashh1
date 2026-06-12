@@ -8,7 +8,6 @@
 <title>Daily Stack — Customizable Template</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
   <script src="sync.js" defer></script>
   <script src="topbar.js" defer></script>
 <style>
@@ -684,9 +683,6 @@ main {
 .macro-meal-del { background: transparent; border: none; color: var(--text-quaternary); cursor: pointer; font-size: 14px; padding: 2px 5px; line-height: 1; border-radius: 4px; transition: color 0.15s; font-family: inherit; }
 .macro-meal-del:hover { color: #FF6B6B; }
 .macro-empty { font-size: 12px; color: var(--text-quaternary); font-style: italic; padding: 6px 10px; }
-.macro-add-wrap { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-soft); }
-.macro-scan-note-wrap { margin-top: 12px; }
-.macro-scan-note-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-quaternary); margin-bottom: 6px; }
 .macro-scan-note-input {
   width: 100%; padding: 9px 12px; border-radius: 10px;
   background: rgba(255,255,255,0.04); border: 1px solid var(--border-strong);
@@ -757,82 +753,6 @@ main {
   border-radius: 6px; transition: color 0.15s;
 }
 .nutr-log-cancel:hover { color: #FF6B6B; }
-.macro-scan-btn {
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 9px 16px; border-radius: 10px; flex-shrink: 0;
-  border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05);
-  color: var(--text-secondary); font-size: 12px; font-family: inherit;
-  font-weight: 700; cursor: pointer; letter-spacing: 0.02em;
-  transition: background 0.15s, color 0.15s;
-}
-.macro-scan-btn:hover { background: rgba(255,255,255,0.09); color: var(--text-primary); }
-/* Scan button */
-.macro-action-btn {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; padding: 13px; border-radius: 12px; margin-bottom: 14px;
-  border: 1px dashed rgba(255,255,255,0.15);
-  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(100,210,255,0.04) 100%);
-  color: var(--text-secondary); font-size: 13px; font-family: inherit;
-  font-weight: 700; cursor: pointer; letter-spacing: 0.01em;
-  transition: background 0.18s, border-color 0.18s, color 0.18s;
-}
-.macro-action-btn:hover { border-color: rgba(100,210,255,0.35); color: #64D2FF; background: rgba(100,210,255,0.06); }
-.macro-action-btn:active { transform: scale(0.98); }
-.macro-action-btn:disabled { opacity: 0.5; pointer-events: none; }
-/* Confirm card */
-.macro-scan-card {
-  margin-top: 14px; border-radius: 14px; overflow: hidden;
-  border: 1px solid rgba(100,210,255,0.18);
-  background: rgba(100,210,255,0.04);
-  animation: macro-fade-in 0.25s ease both;
-}
-@keyframes macro-fade-in { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
-.macro-scan-card[hidden] { display: none; }
-.macro-scan-card-inner { padding: 16px; }
-.macro-scan-food-name { font-size: 15px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; margin-bottom: 3px; }
-.macro-scan-serving { font-size: 11px; color: var(--text-tertiary); margin-bottom: 8px; font-family: var(--font-mono); }
-.macro-scan-macros { display: flex; flex-wrap: wrap; gap: 6px; }
-.macro-scan-macro-pill {
-  font-family: var(--font-mono); font-size: 10.5px; font-variant-numeric: tabular-nums;
-  padding: 3px 8px; border-radius: 6px; border: 1px solid; font-weight: 600;
-}
-.macro-scan-macro-pill.cal  { color: #FAFAFA; border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
-.macro-scan-macro-pill.prot { color: #FF9F0A; border-color: rgba(255,159,10,0.3); background: rgba(255,159,10,0.07); }
-.macro-scan-macro-pill.carb { color: #30D158; border-color: rgba(48,209,88,0.3); background: rgba(48,209,88,0.07); }
-.macro-scan-macro-pill.fat  { color: #64D2FF; border-color: rgba(100,210,255,0.3); background: rgba(100,210,255,0.07); }
-.macro-scan-actions { display: flex; gap: 8px; justify-content: flex-end; }
-/* Serving size control */
-.macro-serving-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.macro-serving-step {
-  width: 28px; height: 28px; border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06);
-  color: var(--text-primary); font-size: 16px; font-family: inherit;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s;
-}
-.macro-serving-step:hover { background: rgba(255,255,255,0.12); }
-.macro-serving-count { font-family: var(--font-mono); font-size: 13px; color: var(--text-primary); min-width: 28px; text-align: center; }
-/* Full-screen barcode scanner overlay */
-.scanner-modal {
-  position: fixed; inset: 0; z-index: 200;
-  background: #050506; display: flex; flex-direction: column;
-}
-.scanner-modal[hidden] { display: none; }
-.scanner-modal-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: max(24px, env(safe-area-inset-top)) 20px 14px;
-  border-bottom: 1px solid var(--border-soft); flex-shrink: 0;
-}
-.scanner-modal-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
-.scanner-close-btn {
-  width: 32px; height: 32px; border-radius: 999px;
-  border: 1px solid var(--border-strong); background: rgba(255,255,255,0.06);
-  color: var(--text-secondary); font-size: 14px; cursor: pointer; font-family: inherit;
-}
-#scannerReader { flex: 1; min-height: 0; position: relative; overflow: hidden; }
-#scannerReader video { width: 100% !important; height: 100% !important; object-fit: cover; display: block; }
-#scannerReader canvas { position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; }
-.scanner-status { padding: 12px 20px; padding-bottom: max(12px, env(safe-area-inset-bottom)); font-size: 13px; color: var(--text-tertiary); text-align: center; flex-shrink: 0; }
 .macro-modal-bg {
   position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.75);
   display: flex; align-items: center; justify-content: center;
@@ -1074,40 +994,6 @@ main {
         <div id="macroMealsList"></div>
       </div>
 
-      <div class="macro-add-wrap">
-        <button id="macroBarcodeBtn" class="macro-action-btn">
-          <span>📷</span><span>Scan Barcode</span>
-        </button>
-
-        <div id="macroConfirmCard" class="macro-scan-card" hidden>
-          <div class="macro-scan-card-inner">
-            <div class="macro-scan-food-name" id="macroConfirmName"></div>
-            <div class="macro-scan-serving" id="macroConfirmBrand"></div>
-            <div class="macro-serving-row">
-              <span class="macro-scan-serving" id="macroConfirmServingLbl">1 serving</span>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <button class="macro-serving-step" id="macroServingMinus">−</button>
-                <span class="macro-serving-count" id="macroServingCount">1</span>
-                <button class="macro-serving-step" id="macroServingPlus">+</button>
-              </div>
-            </div>
-            <div class="macro-scan-macros" style="margin-bottom:12px;">
-              <span class="macro-scan-macro-pill cal"  id="macroConfirmCal"></span>
-              <span class="macro-scan-macro-pill prot" id="macroConfirmProt"></span>
-              <span class="macro-scan-macro-pill carb" id="macroConfirmCarb"></span>
-              <span class="macro-scan-macro-pill fat"  id="macroConfirmFat"></span>
-            </div>
-            <div class="macro-scan-note-wrap">
-              <div class="macro-scan-note-lbl">Notes</div>
-              <textarea id="macroConfirmNote" class="macro-scan-note-input" rows="2" placeholder="e.g. chicken salt instead of regular salt, extra olive oil…"></textarea>
-            </div>
-            <div class="macro-scan-actions">
-              <button id="macroConfirmDismiss" class="macro-modal-cancel">Dismiss</button>
-              <button id="macroConfirmAdd" class="macro-modal-save">Add to log</button>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -1179,16 +1065,6 @@ main {
 
   <div class="attribution">// editable template · all data stays in your browser</div>
 </main>
-
-<!-- Barcode scanner fullscreen modal -->
-<div id="scannerModal" class="scanner-modal" hidden>
-  <div class="scanner-modal-header">
-    <span class="scanner-modal-title">Point camera at barcode</span>
-    <button id="scannerClose" class="scanner-close-btn">✕</button>
-  </div>
-  <div id="scannerReader"></div>
-  <div id="scannerStatus" class="scanner-status"></div>
-</div>
 
 <!-- Macro Goals Modal -->
 <div class="macro-modal-bg" id="macroModalBg" hidden>
@@ -2137,232 +2013,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   window.addEventListener('storage', render);
   render();
-})();
-</script>
-
-<script>
-(function () {
-  'use strict';
-  const $ = id => document.getElementById(id);
-
-  function todayStr() {
-    const d = new Date();
-    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-  }
-  function escHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  // ── State ─────────────────────────────────────────────────────────
-  let pendingProduct = null;
-  let servingCount   = 1;
-  let scanning       = false;
-  let detections     = {};
-
-  // ── Barcode scanner (Quagga2) ─────────────────────────────────────
-  $('macroBarcodeBtn').addEventListener('click', openScanner);
-  $('scannerClose').addEventListener('click', closeScanner);
-
-  function handleDetected(result) {
-    if (scanning) return;
-    const code = result && result.codeResult && result.codeResult.code;
-    if (!code) return;
-    detections[code] = (detections[code] || 0) + 1;
-    if (detections[code] < 2) return;
-    scanning = true;
-    closeScanner();
-    onBarcodeDetected(code);
-  }
-
-  function openScanner() {
-    try { Quagga.stop(); } catch(e) {}
-    scanning   = false;
-    detections = {};
-    $('scannerModal').hidden = false;
-    $('scannerStatus').textContent = 'Starting camera…';
-
-    if (typeof Quagga === 'undefined') {
-      $('scannerStatus').textContent = 'Scanner not loaded — check internet connection.';
-      return;
-    }
-
-    Quagga.init({
-      inputStream: {
-        type: 'LiveStream',
-        target: $('scannerReader'),
-        constraints: { facingMode: 'environment' },
-      },
-      locator: { patchSize: 'medium', halfSample: true },
-      numOfWorkers: 0,
-      frequency: 10,
-      decoder: {
-        readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader', 'code_128_reader'],
-        multiple: false,
-      },
-      locate: true,
-    }, function(err) {
-      if (err) {
-        $('scannerStatus').textContent = 'Camera error: ' + (err.message || err);
-        return;
-      }
-      try { Quagga.offDetected(handleDetected); } catch(e) {}
-      Quagga.onDetected(handleDetected);
-      Quagga.start();
-      $('scannerStatus').textContent = 'Hold barcode steady in view…';
-    });
-  }
-
-  function closeScanner() {
-    try { Quagga.offDetected(handleDetected); Quagga.stop(); } catch(e) {}
-    $('scannerModal').hidden = true;
-    $('scannerStatus').textContent = '';
-  }
-
-  async function onBarcodeDetected(barcode) {
-    const btn = $('macroBarcodeBtn');
-    btn.disabled = true;
-    btn.lastElementChild.textContent = 'Looking up…';
-    try {
-      const product = await fetchByBarcode(barcode);
-      if (product) showConfirm(product);
-      else alert('Product not found in Open Food Facts database.');
-    } catch(e) {
-      alert('Lookup failed: ' + e.message);
-    } finally {
-      btn.disabled = false;
-      btn.lastElementChild.textContent = 'Scan Barcode';
-    }
-  }
-
-  // ── Open Food Facts helpers ───────────────────────────────────────
-  async function fetchByBarcode(code) {
-    const res  = await fetch('https://world.openfoodfacts.org/api/v0/product/' + encodeURIComponent(code) + '.json');
-    const json = await res.json();
-    if (json.status !== 1 || !json.product) return null;
-    return parseProduct(json.product);
-  }
-
-  function parseProduct(p) {
-    const n       = p.nutriments || {};
-    const cal100  = Math.round(n['energy-kcal_100g'] || (n['energy_100g'] || 0) / 4.184);
-    const prot100 = +(n['proteins_100g']      || 0);
-    const carb100 = +(n['carbohydrates_100g'] || 0);
-    const fat100  = +(n['fat_100g']           || 0);
-    let serving_g = parseFloat(p.serving_quantity || '') || 0;
-    if (!serving_g && p.serving_size) {
-      const m = p.serving_size.match(/[\d.]+/);
-      serving_g = m ? parseFloat(m[0]) : 100;
-    }
-    if (!serving_g || serving_g > 2000) serving_g = 100;
-    return {
-      name:       p.product_name || 'Unknown',
-      brand:      (p.brands || '').split(',')[0].trim(),
-      serving_g,
-      servingLbl: p.serving_size || (serving_g + 'g'),
-      per100:     { cal: cal100, prot: prot100, carb: carb100, fat: fat100 },
-      nutr100:    n,
-    };
-  }
-
-  // ── Confirm card ──────────────────────────────────────────────────
-  function showConfirm(product) {
-    pendingProduct = product;
-    servingCount   = 1;
-    $('macroConfirmName').textContent  = product.name;
-    $('macroConfirmBrand').textContent = product.brand || '';
-    updateConfirmCard();
-    $('macroConfirmNote').value = '';
-    $('macroConfirmCard').hidden = false;
-    $('macroConfirmCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  function updateConfirmCard() {
-    if (!pendingProduct) return;
-    const s    = pendingProduct.serving_g * servingCount / 100;
-    const m    = pendingProduct.per100;
-    const cal  = Math.round(m.cal  * s);
-    const prot = Math.round(m.prot * s * 10) / 10;
-    const carb = Math.round(m.carb * s * 10) / 10;
-    const fat  = Math.round(m.fat  * s * 10) / 10;
-    $('macroConfirmCal').textContent  = cal  + ' kcal';
-    $('macroConfirmProt').textContent = prot + 'g protein';
-    $('macroConfirmCarb').textContent = carb + 'g carbs';
-    $('macroConfirmFat').textContent  = fat  + 'g fat';
-    $('macroConfirmServingLbl').textContent = servingCount + ' × ' + pendingProduct.servingLbl;
-    $('macroServingCount').textContent = servingCount;
-  }
-
-  $('macroServingMinus').addEventListener('click', () => {
-    if (servingCount > 0.5) {
-      servingCount = Math.round((servingCount - 0.5) * 10) / 10;
-      updateConfirmCard();
-    }
-  });
-  $('macroServingPlus').addEventListener('click', () => {
-    servingCount = Math.round((servingCount + 0.5) * 10) / 10;
-    updateConfirmCard();
-  });
-
-  $('macroConfirmDismiss').addEventListener('click', () => {
-    $('macroConfirmCard').hidden = true;
-    pendingProduct = null;
-    servingCount   = 1;
-  });
-
-  $('macroConfirmAdd').addEventListener('click', () => {
-    if (!pendingProduct) return;
-    const s    = pendingProduct.serving_g * servingCount / 100;
-    const m    = pendingProduct.per100;
-    const note = ($('macroConfirmNote').value || '').trim();
-    const key  = 'macro:meals:' + todayStr();
-    let meals  = [];
-    try { meals = JSON.parse(localStorage.getItem(key)) || []; } catch(e) {}
-    meals.push({
-      name: pendingProduct.name,
-      cal:  Math.round(m.cal  * s),
-      prot: Math.round(m.prot * s * 10) / 10,
-      carb: Math.round(m.carb * s * 10) / 10,
-      fat:  Math.round(m.fat  * s * 10) / 10,
-      note: note || undefined,
-    });
-    localStorage.setItem(key, JSON.stringify(meals));
-
-    if (typeof window.applyNutrientAmounts === 'function') {
-      const n = pendingProduct.nutr100;
-      window.applyNutrientAmounts({
-        vit_a:      Math.round((n['vitamin-a_100g']        || 0) * s * 1e6) / 1e3,
-        vit_b1:     Math.round((n['vitamin-b1_100g']       || 0) * s * 1e3) / 10,
-        vit_b2:     Math.round((n['vitamin-b2_100g']       || 0) * s * 1e3) / 10,
-        vit_b3:     Math.round((n['vitamin-b3_100g']       || 0) * s * 1e3) / 10,
-        vit_b5:     Math.round((n['pantothenic-acid_100g'] || 0) * s * 1e3) / 10,
-        vit_b6:     Math.round((n['vitamin-b6_100g']       || 0) * s * 1e3) / 10,
-        vit_b9:     Math.round((n['folates_100g'] || n['folic-acid_100g'] || 0) * s * 1e6) / 1e3,
-        vit_b12:    Math.round((n['vitamin-b12_100g']      || 0) * s * 1e9) / 1e3,
-        vit_c:      Math.round((n['vitamin-c_100g']        || 0) * s * 1e3) / 10,
-        vit_d:      Math.round((n['vitamin-d_100g']        || 0) * s * 1e6) / 1e3,
-        vit_e:      Math.round((n['vitamin-e_100g']        || 0) * s * 1e3) / 10,
-        vit_k:      Math.round((n['vitamin-k_100g']        || 0) * s * 1e6) / 1e3,
-        calcium:    Math.round((n['calcium_100g']          || 0) * s * 1e3) / 10,
-        iron:       Math.round((n['iron_100g']             || 0) * s * 1e3) / 10,
-        magnesium:  Math.round((n['magnesium_100g']        || 0) * s * 1e3) / 10,
-        zinc:       Math.round((n['zinc_100g']             || 0) * s * 1e3) / 10,
-        potassium:  Math.round((n['potassium_100g']        || 0) * s * 1e3) / 10,
-        sodium:     Math.round((n['sodium_100g']           || 0) * s * 1e3) / 10,
-        phosphorus: Math.round((n['phosphorus_100g']       || 0) * s * 1e3) / 10,
-        selenium:   Math.round((n['selenium_100g']         || 0) * s * 1e6) / 1e3,
-        iodine:     Math.round((n['iodine_100g']           || 0) * s * 1e6) / 1e3,
-        chromium:   Math.round((n['chromium_100g']         || 0) * s * 1e6) / 1e3,
-        omega3:     Math.round((n['omega-3-fat_100g']      || 0) * s * 10)  / 10,
-        fiber:      Math.round((n['fiber_100g']            || 0) * s * 10)  / 10,
-      });
-    }
-
-    $('macroConfirmCard').hidden = true;
-    $('macroConfirmNote').value  = '';
-    pendingProduct = null;
-    servingCount   = 1;
-    window.dispatchEvent(new Event('storage'));
-  });
 })();
 </script>
 
