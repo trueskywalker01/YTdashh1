@@ -1284,9 +1284,9 @@ img, video, canvas, svg { max-width: 100%; }
   text-transform: uppercase;
   color: rgba(255,255,255,0.3);
 }
-/* default: solid white */
-.mm-muscle { fill: #e8e8e8; transition: fill .35s, filter .35s; }
-.mm-neutral { fill: rgba(255,255,255,0.22); }
+/* default: solid white — both muscle groups and body fill */
+.mm-muscle  { fill: #e8e8e8; transition: fill .35s, filter .35s; }
+.mm-neutral { fill: #a8a8a8; }
 /* need to train */
 .mm-planned {
   fill: #6ee7b7;
@@ -1633,13 +1633,13 @@ img, video, canvas, svg { max-width: 100%; }
               d="M85,35 L92,40 C96,46 97,54 95,62 C93,68 86,72 79,70 L74,65 C71,58 71,50 74,43 L80,37 Z"
               class="mm-muscle"/>
 
-            <!-- LEFT PEC: fan — wide at sternum, narrows to armpit -->
+            <!-- LEFT PEC: full fan — sternal head meets centre, lower chest full -->
             <path data-muscle="chest"
-              d="M22,42 L23,37 C30,34 40,34 47,40 L48,48 C49,58 47,67 43,72 L37,73 C30,72 24,67 21,61 L20,52 Z"
+              d="M21,43 L22,37 C29,33 41,33 48,39 L50,47 C51,58 50,68 46,74 L39,76 C31,75 24,69 21,62 L19,52 Z"
               class="mm-muscle"/>
             <!-- RIGHT PEC -->
             <path data-muscle="chest"
-              d="M78,42 L77,37 C70,34 60,34 53,40 L52,48 C51,58 53,67 57,72 L63,73 C70,72 76,67 79,61 L80,52 Z"
+              d="M79,43 L78,37 C71,33 59,33 52,39 L50,47 C49,58 50,68 54,74 L61,76 C69,75 76,69 79,62 L81,52 Z"
               class="mm-muscle"/>
 
             <!-- LEFT BICEP: spindle — narrow at tendons, peak in upper middle -->
@@ -1658,13 +1658,13 @@ img, video, canvas, svg { max-width: 100%; }
             <path d="M6,124 C5,130 6,136 10,138 C14,139 18,136 19,130 L19,124 Z" class="mm-neutral"/>
             <path d="M94,124 C95,130 94,136 90,138 C86,139 82,136 81,130 L81,124 Z" class="mm-neutral"/>
 
-            <!-- ABS: 3 rows × 2 cols, tight gap = defined 6-pack -->
-            <rect data-muscle="abs" x="34" y="74" width="12" height="9" rx="2" class="mm-muscle"/>
-            <rect data-muscle="abs" x="54" y="74" width="12" height="9" rx="2" class="mm-muscle"/>
-            <rect data-muscle="abs" x="34" y="85" width="12" height="9" rx="2" class="mm-muscle"/>
-            <rect data-muscle="abs" x="54" y="85" width="12" height="9" rx="2" class="mm-muscle"/>
-            <rect data-muscle="abs" x="35" y="96" width="11" height="9" rx="2" class="mm-muscle"/>
-            <rect data-muscle="abs" x="54" y="96" width="11" height="9" rx="2" class="mm-muscle"/>
+            <!-- ABS: 3 rows × 2 cols — wider, fuller, columns tight to midline -->
+            <rect data-muscle="abs" x="31" y="77" width="17" height="10" rx="2" class="mm-muscle"/>
+            <rect data-muscle="abs" x="52" y="77" width="17" height="10" rx="2" class="mm-muscle"/>
+            <rect data-muscle="abs" x="31" y="89" width="17" height="10" rx="2" class="mm-muscle"/>
+            <rect data-muscle="abs" x="52" y="89" width="17" height="10" rx="2" class="mm-muscle"/>
+            <rect data-muscle="abs" x="32" y="101" width="16" height="9"  rx="2" class="mm-muscle"/>
+            <rect data-muscle="abs" x="52" y="101" width="16" height="9"  rx="2" class="mm-muscle"/>
 
             <!-- OBLIQUES / side waist (neutral) -->
             <path d="M21,66 L19,76 C18,86 18,96 20,104 C22,109 27,111 30,105 L31,95 C32,83 31,72 29,66 Z" class="mm-neutral"/>
