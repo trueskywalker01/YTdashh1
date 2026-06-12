@@ -848,9 +848,8 @@ main {
   border: 1px solid var(--border-strong); background: rgba(255,255,255,0.06);
   color: var(--text-secondary); font-size: 14px; cursor: pointer; font-family: inherit;
 }
-#scannerReader { flex: 1; min-height: 0; overflow: hidden; }
-#scannerReader video { width: 100% !important; height: 100% !important; object-fit: cover; }
-#scannerReader img { display: none; }
+#scannerReader { flex: 1; min-height: 0; }
+#scannerReader video { width: 100% !important; object-fit: cover; }
 .scanner-status { padding: 12px 20px; padding-bottom: max(12px, env(safe-area-inset-bottom)); font-size: 13px; color: var(--text-tertiary); text-align: center; flex-shrink: 0; }
 .macro-modal-bg {
   position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.75);
@@ -2201,10 +2200,20 @@ document.addEventListener('DOMContentLoaded', function () {
       $('scannerStatus').textContent = 'Scanner not loaded — check internet connection.';
       return;
     }
-    html5QrInst = new Html5Qrcode('scannerReader');
+    html5QrInst = new Html5Qrcode('scannerReader', {
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.QR_CODE,
+      ]
+    });
     html5QrInst.start(
       { facingMode: 'environment' },
-      { fps: 10, qrbox: { width: 240, height: 120 } },
+      { fps: 10, qrbox: { width: 250, height: 150 } },
       onBarcodeDetected,
       () => {}
     ).then(() => {
