@@ -672,24 +672,28 @@ main {
 .macro-meals-list { margin-top: 18px; border-top: 1px solid var(--border-soft); padding-top: 14px; }
 .macro-meals-lbl { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 10px; }
 .macro-meal-row {
-  display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center;
+  display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: start;
   padding: 9px 12px; border-radius: 10px; background: var(--bg-secondary); margin-bottom: 5px; transition: background 0.15s;
 }
 .macro-meal-row:hover { background: rgba(255,255,255,0.05); }
-.macro-meal-name { font-size: 13px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.macro-meal-stats { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.macro-meal-main { min-width: 0; }
+.macro-meal-name { font-size: 13px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+.macro-meal-note { font-size: 11px; color: var(--text-quaternary); font-style: italic; margin-top: 2px; line-height: 1.4; display: block; }
+.macro-meal-stats { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; white-space: nowrap; padding-top: 1px; }
 .macro-meal-del { background: transparent; border: none; color: var(--text-quaternary); cursor: pointer; font-size: 14px; padding: 2px 5px; line-height: 1; border-radius: 4px; transition: color 0.15s; font-family: inherit; }
 .macro-meal-del:hover { color: #FF6B6B; }
 .macro-empty { font-size: 12px; color: var(--text-quaternary); font-style: italic; padding: 6px 10px; }
 .macro-add-wrap { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-soft); }
-.macro-or-manual {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--text-quaternary); margin: 12px 0 10px; display: flex; align-items: center; gap: 8px;
+.macro-scan-note-wrap { margin-top: 12px; }
+.macro-scan-note-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-quaternary); margin-bottom: 6px; }
+.macro-scan-note-input {
+  width: 100%; padding: 9px 12px; border-radius: 10px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border-strong);
+  color: var(--text-secondary); font-size: 13px; font-family: inherit;
+  resize: none; outline: none; line-height: 1.5; display: block;
 }
-.macro-or-manual::before, .macro-or-manual::after { content: ''; flex: 1; height: 1px; background: var(--border-soft); }
-.macro-add-name-wrap { margin-bottom: 6px; }
-.macro-add-name-wrap .stack-input { width: 100%; }
-.macro-add-nums { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 6px; align-items: center; }
+.macro-scan-note-input::placeholder { color: var(--text-quaternary); }
+.macro-scan-note-input:focus { border-color: rgba(255,255,255,0.22); }
 /* ── Nutrient tracker ── */
 .nutr-wrap { margin-bottom: 28px; }
 .nutr-card {
@@ -833,9 +837,7 @@ main {
 .macro-modal-save { padding: 9px 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.85); background: linear-gradient(180deg,#FFFFFF 0%,#E8E5DD 100%); color: #0A0A0B; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 4px 14px rgba(0,0,0,0.3); }
 @media (max-width: 600px) {
   .macro-overview { grid-template-columns: 1fr; justify-items: center; }
-  .macro-add-nums { grid-template-columns: 1fr 1fr; }
-  .macro-add-nums > *:last-child { grid-column: 1 / -1; }
-  .nutr-row-top { grid-template-columns: 14px 1fr auto 26px; gap: 6px; }
+.nutr-row-top { grid-template-columns: 14px 1fr auto 26px; gap: 6px; }
   .nutr-name { font-size: 12px; }
 }
 
@@ -1091,6 +1093,10 @@ main {
               <div id="macroScanNutrients" class="macro-scan-nutrients"></div>
             </div>
             <div class="macro-scan-advice" id="macroScanAdvice"></div>
+            <div class="macro-scan-note-wrap">
+              <div class="macro-scan-note-lbl">Notes</div>
+              <textarea id="macroScanNote" class="macro-scan-note-input" rows="2" placeholder="e.g. chicken salt instead of regular salt, extra olive oil…"></textarea>
+            </div>
             <div class="macro-scan-actions">
               <button id="macroScanDismiss" class="macro-modal-cancel">Dismiss</button>
               <button id="macroScanUse" class="macro-modal-save">Add to log</button>
@@ -1098,17 +1104,6 @@ main {
           </div>
         </div>
 
-        <div class="macro-or-manual">or enter manually</div>
-        <div class="macro-add-name-wrap">
-          <input id="macroAddName" type="text" class="stack-input" placeholder="Food / meal name" autocomplete="off" spellcheck="false" />
-        </div>
-        <div class="macro-add-nums">
-          <input id="macroAddCal"  type="number" class="stack-input" placeholder="kcal" min="0" />
-          <input id="macroAddProt" type="number" class="stack-input" placeholder="Protein g" min="0" />
-          <input id="macroAddCarb" type="number" class="stack-input" placeholder="Carbs g" min="0" />
-          <input id="macroAddFat"  type="number" class="stack-input" placeholder="Fat g" min="0" />
-          <button id="macroAddBtn" class="macro-scan-btn">+ Add</button>
-        </div>
       </div>
     </div>
   </div>
@@ -2071,13 +2066,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const list = $('macroMealsList');
     list.innerHTML = '';
     if (!meals.length) {
-      list.innerHTML = '<div class="macro-empty">No meals logged yet</div>';
+      list.innerHTML = '<div class="macro-empty">Scan a food photo to log your first meal</div>';
     } else {
       meals.forEach((m, i) => {
         const row = document.createElement('div');
         row.className = 'macro-meal-row';
         row.innerHTML =
-          '<span class="macro-meal-name">' + escHtml(m.name) + '</span>' +
+          '<div class="macro-meal-main">' +
+            '<span class="macro-meal-name">' + escHtml(m.name) + '</span>' +
+            (m.note ? '<span class="macro-meal-note">' + escHtml(m.note) + '</span>' : '') +
+          '</div>' +
           '<span class="macro-meal-stats">' + m.cal + ' kcal · ' + m.prot + 'p · ' + m.carb + 'c · ' + m.fat + 'f</span>' +
           '<button class="macro-meal-del" data-i="' + i + '" aria-label="Delete">✕</button>';
         list.appendChild(row);
@@ -2096,28 +2094,6 @@ document.addEventListener('DOMContentLoaded', function () {
   function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
-
-  // add meal
-  $('macroAddBtn').addEventListener('click', () => {
-    const name = $('macroAddName').value.trim();
-    if (!name) { $('macroAddName').focus(); return; }
-    const meals = loadMeals();
-    meals.push({
-      name,
-      cal:  Number($('macroAddCal').value)  || 0,
-      prot: Number($('macroAddProt').value) || 0,
-      carb: Number($('macroAddCarb').value) || 0,
-      fat:  Number($('macroAddFat').value)  || 0,
-    });
-    saveMeals(meals);
-    ['macroAddName','macroAddCal','macroAddProt','macroAddCarb','macroAddFat'].forEach(id => $(id).value = '');
-    render();
-  });
-
-  // enter key in add row
-  ['macroAddName','macroAddCal','macroAddProt','macroAddCarb','macroAddFat'].forEach(id => {
-    $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('macroAddBtn').click(); });
-  });
 
   // goals modal
   const modalBg = $('macroModalBg');
@@ -2315,23 +2291,31 @@ For nutrient_amounts: use each field's natural unit (mcg for vit_a/vit_d/vit_b7/
 
   $('macroScanDismiss').addEventListener('click', () => {
     scanCard.hidden = true;
+    $('macroScanNote').value = '';
     pendingScan = null;
   });
 
   $('macroScanUse').addEventListener('click', () => {
     if (!pendingScan) return;
     const r = pendingScan;
-    $('macroAddName').value = r.name || '';
-    $('macroAddCal').value  = r.calories   || '';
-    $('macroAddProt').value = r.protein_g  || '';
-    $('macroAddCarb').value = r.carbs_g    || '';
-    $('macroAddFat').value  = r.fat_g      || '';
+    const note = ($('macroScanNote').value || '').trim();
+    const meals = (function() { try { return JSON.parse(localStorage.getItem('macro:meals:' + (function(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }())) || []; } catch(e) { return []; } })();
+    meals.push({
+      name: r.name || 'Scanned meal',
+      cal:  Number(r.calories)  || 0,
+      prot: Number(r.protein_g) || 0,
+      carb: Number(r.carbs_g)   || 0,
+      fat:  Number(r.fat_g)     || 0,
+      note: note || undefined,
+    });
+    localStorage.setItem('macro:meals:' + (function(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }()), JSON.stringify(meals));
     if (r.nutrient_amounts && typeof window.applyNutrientAmounts === 'function') {
       window.applyNutrientAmounts(r.nutrient_amounts);
     }
     scanCard.hidden = true;
+    $('macroScanNote').value = '';
     pendingScan = null;
-    $('macroAddBtn').click();
+    window.dispatchEvent(new Event('storage'));
   });
 
   function setBtnLoading(on) {
