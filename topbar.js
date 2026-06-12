@@ -118,11 +118,11 @@ body.has-bottombar {
   .bottombar {
     position: fixed;
     left: 0; top: 0; bottom: 0; right: auto;
-    width: 210px;
+    width: 250px;
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-    padding: 68px 10px 16px;
+    padding: 72px 14px 20px;
     border-top: none;
     border-right: 1px solid rgba(255, 255, 255, 0.07);
   }
@@ -132,19 +132,19 @@ body.has-bottombar {
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    padding: 12px 14px;
-    gap: 13px;
+    padding: 14px 18px;
+    gap: 15px;
     position: relative;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     letter-spacing: 0;
-    border-radius: 10px;
-    margin-bottom: 2px;
+    border-radius: 12px;
+    margin-bottom: 4px;
   }
-  .bottombar-tab-icon { font-size: 19px; flex-shrink: 0; }
+  .bottombar-tab-icon { font-size: 21px; flex-shrink: 0; }
   body.has-bottombar {
     padding-bottom: 0 !important;
-    padding-left: 210px !important;
+    padding-left: 250px !important;
   }
   /* Active indicator bar */
   .bottombar-tab.active::before {
