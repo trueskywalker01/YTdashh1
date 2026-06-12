@@ -111,6 +111,9 @@
 body.has-bottombar {
   padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important;
 }
+@media (max-width: 768px) {
+  .bottombar-tab-desktop { display: none; }
+}
 @media (min-width: 769px) {
   .bottombar {
     position: fixed;
@@ -144,21 +147,18 @@ body.has-bottombar {
     background: currentColor;
   }
   /* Per-tab colour themes */
-  .bottombar-tab[data-page="main"].active {
-    color: #5B8DEF;
-    background: rgba(91, 141, 239, 0.08);
-  }
-  .bottombar-tab[data-page="main"].active .bottombar-tab-icon { filter: none; opacity: 1; }
-  .bottombar-tab[data-page="health"].active {
-    color: #30D158;
-    background: rgba(48, 209, 88, 0.08);
-  }
-  .bottombar-tab[data-page="health"].active .bottombar-tab-icon { filter: none; opacity: 1; }
-  .bottombar-tab[data-page="fitness"].active {
-    color: #FF9F0A;
-    background: rgba(255, 159, 10, 0.08);
-  }
+  .bottombar-tab[data-page="main"].active    { color: #5B8DEF; background: rgba(91,141,239,0.08); }
+  .bottombar-tab[data-page="main"].active    .bottombar-tab-icon { filter: none; opacity: 1; }
+  .bottombar-tab[data-page="fitness"].active { color: #FF9F0A; background: rgba(255,159,10,0.08); }
   .bottombar-tab[data-page="fitness"].active .bottombar-tab-icon { filter: none; opacity: 1; }
+  .bottombar-tab[data-page="health"].active  { color: #30D158; background: rgba(48,209,88,0.08); }
+  .bottombar-tab[data-page="health"].active  .bottombar-tab-icon { filter: none; opacity: 1; }
+  .bottombar-tab[data-page="water"].active   { color: #7DD3FC; background: rgba(125,211,252,0.08); }
+  .bottombar-tab[data-page="water"].active   .bottombar-tab-icon { filter: none; opacity: 1; }
+  .bottombar-tab[data-page="finance"].active { color: #BF5AF2; background: rgba(191,90,242,0.08); }
+  .bottombar-tab[data-page="finance"].active .bottombar-tab-icon { filter: none; opacity: 1; }
+  .bottombar-tab[data-page="caffeine"].active{ color: #F5A623; background: rgba(245,166,35,0.08); }
+  .bottombar-tab[data-page="caffeine"].active .bottombar-tab-icon { filter: none; opacity: 1; }
 }
 @media (max-width: 480px) {
   .topbar { padding-left: 10px; padding-right: 10px; gap: 6px; }
@@ -216,26 +216,34 @@ body.topbar-modal-open { overflow: hidden; touch-action: none; }
   <a href="main.html" class="bottombar-tab" data-page="main">
     <span class="bottombar-tab-icon">🏠</span><span>Main</span>
   </a>
-  <a href="health.html" class="bottombar-tab" data-page="health">
-    <span class="bottombar-tab-icon">💊</span><span>Health</span>
-  </a>
   <a href="gym.html" class="bottombar-tab" data-page="fitness">
     <span class="bottombar-tab-icon">💪</span><span>Fitness</span>
   </a>
+  <a href="health.html" class="bottombar-tab" data-page="health">
+    <span class="bottombar-tab-icon">💊</span><span>Health</span>
+  </a>
+  <a href="po-water.html" class="bottombar-tab bottombar-tab-desktop" data-page="water">
+    <span class="bottombar-tab-icon">💧</span><span>Water</span>
+  </a>
+  <a href="finance.html" class="bottombar-tab bottombar-tab-desktop" data-page="finance">
+    <span class="bottombar-tab-icon">📊</span><span>Finance</span>
+  </a>
+  <a href="caffeine.html" class="bottombar-tab bottombar-tab-desktop" data-page="caffeine">
+    <span class="bottombar-tab-icon">☕</span><span>Caffeine</span>
+  </a>
 </nav>`;
 
-  function isFinancePage() {
-    const p = (window.location.pathname || '').toLowerCase();
-    return p.endsWith('/finance.html') || p.endsWith('finance.html');
-  }
   function isEmbedded() {
     try { return window.self !== window.top; } catch (e) { return true; }
   }
-  function shouldShowChrome() { return !isFinancePage() && !isEmbedded(); }
+  function shouldShowChrome() { return !isEmbedded(); }
   function currentPageKey() {
     const p = (window.location.pathname || '').toLowerCase();
-    if (p.endsWith('health.html')) return 'health';
-    if (p.endsWith('gym.html')) return 'fitness';
+    if (p.endsWith('health.html'))    return 'health';
+    if (p.endsWith('gym.html'))       return 'fitness';
+    if (p.endsWith('po-water.html'))  return 'water';
+    if (p.endsWith('finance.html'))   return 'finance';
+    if (p.endsWith('caffeine.html'))  return 'caffeine';
     return 'main';
   }
 
