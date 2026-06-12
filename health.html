@@ -8,7 +8,7 @@
 <title>Daily Stack — Customizable Template</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
   <script src="sync.js" defer></script>
   <script src="topbar.js" defer></script>
 <style>
@@ -766,11 +766,10 @@ main {
   transition: background 0.15s, color 0.15s;
 }
 .macro-scan-btn:hover { background: rgba(255,255,255,0.09); color: var(--text-primary); }
-/* Action buttons */
-.macro-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+/* Scan button */
 .macro-action-btn {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 12px; border-radius: 12px;
+  width: 100%; padding: 13px; border-radius: 12px; margin-bottom: 14px;
   border: 1px dashed rgba(255,255,255,0.15);
   background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(100,210,255,0.04) 100%);
   color: var(--text-secondary); font-size: 13px; font-family: inherit;
@@ -780,24 +779,6 @@ main {
 .macro-action-btn:hover { border-color: rgba(100,210,255,0.35); color: #64D2FF; background: rgba(100,210,255,0.06); }
 .macro-action-btn:active { transform: scale(0.98); }
 .macro-action-btn:disabled { opacity: 0.5; pointer-events: none; }
-/* Search panel */
-.macro-search-panel { margin-bottom: 12px; }
-.macro-search-row { display: flex; gap: 8px; margin-bottom: 10px; }
-.macro-search-row .stack-input { flex: 1; }
-.macro-results-list { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-.macro-result-item {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  padding: 10px 12px; border-radius: 10px; text-align: left;
-  border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.03);
-  font-family: inherit; cursor: pointer; width: 100%;
-  transition: background 0.15s, border-color 0.15s;
-}
-.macro-result-item:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
-.macro-result-main { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-.macro-result-name { font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.macro-result-brand { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.macro-result-cal { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); flex-shrink: 0; }
-.macro-result-loading { font-size: 13px; color: var(--text-tertiary); text-align: center; padding: 16px 0; }
 /* Confirm card */
 .macro-scan-card {
   margin-top: 14px; border-radius: 14px; overflow: hidden;
@@ -848,8 +829,9 @@ main {
   border: 1px solid var(--border-strong); background: rgba(255,255,255,0.06);
   color: var(--text-secondary); font-size: 14px; cursor: pointer; font-family: inherit;
 }
-#scannerReader { flex: 1; min-height: 0; }
-#scannerReader video { width: 100% !important; object-fit: cover; }
+#scannerReader { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+#scannerReader video { width: 100% !important; height: 100% !important; object-fit: cover; display: block; }
+#scannerReader canvas { position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; }
 .scanner-status { padding: 12px 20px; padding-bottom: max(12px, env(safe-area-inset-bottom)); font-size: 13px; color: var(--text-tertiary); text-align: center; flex-shrink: 0; }
 .macro-modal-bg {
   position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.75);
@@ -1093,22 +1075,9 @@ main {
       </div>
 
       <div class="macro-add-wrap">
-        <div class="macro-action-grid">
-          <button id="macroBarcodeBtn" class="macro-action-btn">
-            <span>📷</span><span>Scan Barcode</span>
-          </button>
-          <button id="macroSearchToggle" class="macro-action-btn">
-            <span>🔍</span><span>Search Food</span>
-          </button>
-        </div>
-
-        <div id="macroSearchPanel" class="macro-search-panel" hidden>
-          <div class="macro-search-row">
-            <input id="macroSearchInput" class="stack-input" type="search" placeholder="e.g. Greek yoghurt, chicken breast…" />
-            <button id="macroSearchBtn" class="macro-modal-save macro-scan-btn">Go</button>
-          </div>
-          <div id="macroResultsList" class="macro-results-list"></div>
-        </div>
+        <button id="macroBarcodeBtn" class="macro-action-btn">
+          <span>📷</span><span>Scan Barcode</span>
+        </button>
 
         <div id="macroConfirmCard" class="macro-scan-card" hidden>
           <div class="macro-scan-card-inner">
@@ -2187,129 +2156,82 @@ document.addEventListener('DOMContentLoaded', function () {
   // ── State ─────────────────────────────────────────────────────────
   let pendingProduct = null;
   let servingCount   = 1;
-  let html5QrInst    = null;
+  let scanning       = false;
+  let detections     = {};
 
-  // ── Barcode scanner ───────────────────────────────────────────────
+  // ── Barcode scanner (Quagga2) ─────────────────────────────────────
   $('macroBarcodeBtn').addEventListener('click', openScanner);
   $('scannerClose').addEventListener('click', closeScanner);
 
+  function handleDetected(result) {
+    if (scanning) return;
+    const code = result && result.codeResult && result.codeResult.code;
+    if (!code) return;
+    detections[code] = (detections[code] || 0) + 1;
+    if (detections[code] < 2) return;
+    scanning = true;
+    closeScanner();
+    onBarcodeDetected(code);
+  }
+
   function openScanner() {
+    try { Quagga.stop(); } catch(e) {}
+    scanning   = false;
+    detections = {};
     $('scannerModal').hidden = false;
     $('scannerStatus').textContent = 'Starting camera…';
-    if (typeof Html5Qrcode === 'undefined') {
+
+    if (typeof Quagga === 'undefined') {
       $('scannerStatus').textContent = 'Scanner not loaded — check internet connection.';
       return;
     }
-    html5QrInst = new Html5Qrcode('scannerReader', {
-      formatsToSupport: [
-        Html5QrcodeSupportedFormats.EAN_13,
-        Html5QrcodeSupportedFormats.EAN_8,
-        Html5QrcodeSupportedFormats.UPC_A,
-        Html5QrcodeSupportedFormats.UPC_E,
-        Html5QrcodeSupportedFormats.CODE_128,
-        Html5QrcodeSupportedFormats.CODE_39,
-        Html5QrcodeSupportedFormats.QR_CODE,
-      ]
-    });
-    html5QrInst.start(
-      { facingMode: 'environment' },
-      { fps: 10, qrbox: { width: 250, height: 150 } },
-      onBarcodeDetected,
-      () => {}
-    ).then(() => {
-      $('scannerStatus').textContent = 'Scanning for barcodes…';
-    }).catch(err => {
-      $('scannerStatus').textContent = 'Camera error: ' + (err.message || err);
+
+    Quagga.init({
+      inputStream: {
+        type: 'LiveStream',
+        target: $('scannerReader'),
+        constraints: { facingMode: 'environment' },
+      },
+      locator: { patchSize: 'medium', halfSample: true },
+      numOfWorkers: 0,
+      frequency: 10,
+      decoder: {
+        readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader', 'code_128_reader'],
+        multiple: false,
+      },
+      locate: true,
+    }, function(err) {
+      if (err) {
+        $('scannerStatus').textContent = 'Camera error: ' + (err.message || err);
+        return;
+      }
+      try { Quagga.offDetected(handleDetected); } catch(e) {}
+      Quagga.onDetected(handleDetected);
+      Quagga.start();
+      $('scannerStatus').textContent = 'Hold barcode steady in view…';
     });
   }
 
   function closeScanner() {
-    const cleanup = () => { $('scannerModal').hidden = true; $('scannerStatus').textContent = ''; };
-    if (html5QrInst) {
-      html5QrInst.stop().catch(() => {}).finally(() => {
-        if (html5QrInst) { html5QrInst.clear(); html5QrInst = null; }
-        cleanup();
-      });
-    } else {
-      cleanup();
-    }
+    try { Quagga.offDetected(handleDetected); Quagga.stop(); } catch(e) {}
+    $('scannerModal').hidden = true;
+    $('scannerStatus').textContent = '';
   }
 
   async function onBarcodeDetected(barcode) {
-    closeScanner();
     const btn = $('macroBarcodeBtn');
     btn.disabled = true;
     btn.lastElementChild.textContent = 'Looking up…';
     try {
       const product = await fetchByBarcode(barcode);
       if (product) showConfirm(product);
-      else alert('Product not found in Open Food Facts.\nTry searching by name instead.');
+      else alert('Product not found in Open Food Facts database.');
     } catch(e) {
       alert('Lookup failed: ' + e.message);
     } finally {
       btn.disabled = false;
       btn.lastElementChild.textContent = 'Scan Barcode';
     }
-  }
-
-  // ── Text search ───────────────────────────────────────────────────
-  $('macroSearchToggle').addEventListener('click', () => {
-    const panel = $('macroSearchPanel');
-    panel.hidden = !panel.hidden;
-    if (!panel.hidden) setTimeout(() => $('macroSearchInput').focus(), 60);
-  });
-
-  $('macroSearchBtn').addEventListener('click', doSearch);
-  $('macroSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
-
-  async function doSearch() {
-    const q = ($('macroSearchInput').value || '').trim();
-    if (!q) return;
-    const list = $('macroResultsList');
-    list.innerHTML = '<div class="macro-result-loading">Searching…</div>';
-    try {
-      const url = 'https://world.openfoodfacts.org/cgi/search.pl?search_terms=' +
-        encodeURIComponent(q) +
-        '&search_simple=1&action=process&json=1&page_size=10' +
-        '&fields=product_name,brands,nutriments,serving_size,serving_quantity';
-      const res  = await fetch(url);
-      const json = await res.json();
-      renderResults(json.products || []);
-    } catch(e) {
-      list.innerHTML = '<div class="macro-result-loading">Search failed — check your connection.</div>';
-    }
-  }
-
-  function renderResults(products) {
-    const list = $('macroResultsList');
-    list.innerHTML = '';
-    const valid = products.filter(p => {
-      const n = p.nutriments || {};
-      return p.product_name && (n['energy-kcal_100g'] || n['proteins_100g']);
-    });
-    if (!valid.length) {
-      list.innerHTML = '<div class="macro-result-loading">No results with nutrition data.</div>';
-      return;
-    }
-    valid.forEach(p => {
-      const n   = p.nutriments || {};
-      const cal = Math.round(n['energy-kcal_100g'] || 0);
-      const btn = document.createElement('button');
-      btn.className = 'macro-result-item';
-      btn.innerHTML =
-        '<div class="macro-result-main">' +
-          '<span class="macro-result-name">' + escHtml(p.product_name) + '</span>' +
-          (p.brands ? '<span class="macro-result-brand">' + escHtml(p.brands.split(',')[0]) + '</span>' : '') +
-        '</div>' +
-        '<span class="macro-result-cal">' + cal + ' kcal/100g</span>';
-      btn.addEventListener('click', () => {
-        $('macroSearchPanel').hidden = true;
-        $('macroSearchInput').value  = '';
-        list.innerHTML = '';
-        showConfirm(parseProduct(p));
-      });
-      list.appendChild(btn);
-    });
   }
 
   // ── Open Food Facts helpers ───────────────────────────────────────
