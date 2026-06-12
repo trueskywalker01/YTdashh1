@@ -700,8 +700,21 @@ body::after {
   // Paste your Anthropic key here to enable ✨ Polish. Empty = falls back to plain add.
   const ANTHROPIC_API_KEY = '';
 
-  const WAKE_HOUR  = 8;
-  const SLEEP_HOUR = 24;
+  function getSleepHours() {
+    try {
+      const p = JSON.parse(localStorage.getItem('profile:data')) || {};
+      const bedtime   = p.bedtime;   // "HH:MM"
+      const sleepGoal = p.sleepGoal; // hours
+      const sleepHour = bedtime
+        ? parseInt(bedtime.split(':')[0]) + parseInt(bedtime.split(':')[1]) / 60
+        : 24;
+      const wakeHour = (sleepGoal && bedtime)
+        ? (sleepHour + sleepGoal) % 24
+        : 8;
+      return { sleepHour, wakeHour };
+    } catch { return { sleepHour: 24, wakeHour: 8 }; }
+  }
+  let { sleepHour: SLEEP_HOUR, wakeHour: WAKE_HOUR } = getSleepHours();
 
   // ---------- storage helpers ----------
   function storeGet(key) {
@@ -1304,6 +1317,11 @@ body::after {
   // Re-render when storage changes from another tab (or our bridged parent).
   window.addEventListener('storage', () => {
     loadToday(); loadTomorrow(); renderStreak();
+    // Re-read bedtime/wake from profile if it changed
+    const updated = getSleepHours();
+    SLEEP_HOUR = updated.sleepHour;
+    WAKE_HOUR  = updated.wakeHour;
+    updateDayRing();
   });
 })();
 </script>
