@@ -635,7 +635,7 @@ body::after {
     <div class="day-ring-text">
       <div class="day-ring-status"    id="dayRingStatus">Loading…</div>
       <div class="day-ring-remaining" id="dayRingRemaining">—</div>
-      <div class="day-ring-hours">8:00 AM – 12:00 AM</div>
+      <div class="day-ring-hours" id="dayRingHours">—</div>
     </div>
   </div>
 
@@ -921,6 +921,13 @@ body::after {
     const m = Math.floor(totalMin % 60);
     return h + 'h ' + m + 'm';
   }
+  function formatHour(decimalHour) {
+    const h24 = Math.floor(decimalHour) % 24;
+    const m   = Math.round((decimalHour % 1) * 60);
+    const ampm = h24 >= 12 ? 'PM' : 'AM';
+    const h12  = h24 % 12 || 12;
+    return h12 + (m ? ':' + pad2(m) : '') + ' ' + ampm;
+  }
 
   const C = 2 * Math.PI * 52;
   const fillEl = document.getElementById('dayRingFill');
@@ -937,6 +944,9 @@ body::after {
     const remainingEl = document.getElementById('dayRingRemaining');
 
     clockEl.textContent = formatClock(now);
+
+    const hoursEl = document.getElementById('dayRingHours');
+    if (hoursEl) hoursEl.textContent = formatHour(WAKE_HOUR) + ' – ' + formatHour(SLEEP_HOUR);
 
     if (hours < WAKE_HOUR) {
       fillEl.setAttribute('stroke-dashoffset', C);
