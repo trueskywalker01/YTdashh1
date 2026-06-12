@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050506">
+<title>Caffeine — Lucas' Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sync.js" defer></script>
+<script src="topbar.js" defer></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: #050506;
+  color: #B8B6B0;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+main {
+  position: relative; z-index: 2;
+  max-width: 720px; margin: 0 auto;
+  padding: 56px max(20px, env(safe-area-inset-right)) max(80px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  padding-top: max(56px, env(safe-area-inset-top));
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 60vh; gap: 12px; text-align: center;
+}
+.wip-icon { font-size: 48px; line-height: 1; }
+.wip-title { font-size: 22px; font-weight: 700; color: #FAFAFA; letter-spacing: -0.02em; }
+.wip-sub { font-size: 13px; color: #76746E; max-width: 260px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<main>
+  <div class="wip-icon">☕</div>
+  <div class="wip-title">Caffeine</div>
+  <div class="wip-sub">Work in progress — coming soon.</div>
+</main>
+</body>
+</html>
