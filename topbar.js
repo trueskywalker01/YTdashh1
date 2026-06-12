@@ -118,7 +118,7 @@ body.has-bottombar {
   .bottombar {
     position: fixed;
     left: 0; top: 0; bottom: 0; right: auto;
-    width: 84px;
+    width: 120px;
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
@@ -136,7 +136,7 @@ body.has-bottombar {
   .bottombar-tab-icon { font-size: 22px; }
   body.has-bottombar {
     padding-bottom: 0 !important;
-    padding-left: 84px !important;
+    padding-left: 120px !important;
   }
   /* Active indicator bar on left edge */
   .bottombar-tab.active::before {
