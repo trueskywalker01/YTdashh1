@@ -1467,14 +1467,14 @@ main {
   let todayKey = `stack:taken:${getActiveDate()}`;
 
   function getItems() {
-    const storedVersion = storeGet('stack:version');
     const stored = storeGet('stack:items');
-    if (!stored || !Array.isArray(stored) || !stored.length || storedVersion !== TEMPLATE_VERSION) {
+    if (!stored || !Array.isArray(stored) || !stored.length) {
       const fresh = JSON.parse(JSON.stringify(STACK_DEFAULTS));
       storeSet('stack:items', fresh);
       storeSet('stack:version', TEMPLATE_VERSION);
       return fresh;
     }
+    storeSet('stack:version', TEMPLATE_VERSION);
     return stored;
   }
   function setItems(items) { storeSet('stack:items', items); }
