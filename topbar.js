@@ -169,6 +169,8 @@ body.has-bottombar {
   .bottombar-tab[data-page="finance"].active .bottombar-tab-icon { filter: none; opacity: 1; }
   .bottombar-tab[data-page="caffeine"].active{ color: #F5A623; background: rgba(245,166,35,0.10); }
   .bottombar-tab[data-page="caffeine"].active .bottombar-tab-icon { filter: none; opacity: 1; }
+  .bottombar-tab[data-page="profile"].active { color: #E879F9; background: rgba(232,121,249,0.10); }
+  .bottombar-tab[data-page="profile"].active .bottombar-tab-icon { filter: none; opacity: 1; }
 }
 @media (max-width: 480px) {
   .topbar { padding-left: 10px; padding-right: 10px; gap: 6px; }
@@ -239,7 +241,10 @@ body.topbar-modal-open { overflow: hidden; touch-action: none; }
     <span class="bottombar-tab-icon">📊</span><span>Finance</span>
   </a>
   <a href="caffeine.html" class="bottombar-tab bottombar-tab-desktop" data-page="caffeine">
-    <span class="bottombar-tab-icon">☕</span><span>Caffeine</span>
+    <span class="bottombar-tab-icon">☕</span><span>Peak</span>
+  </a>
+  <a href="profile.html" class="bottombar-tab bottombar-tab-desktop" data-page="profile">
+    <span class="bottombar-tab-icon">👤</span><span>Profile</span>
   </a>
 </nav>`;
 
@@ -254,6 +259,7 @@ body.topbar-modal-open { overflow: hidden; touch-action: none; }
     if (p.endsWith('po-water.html'))  return 'water';
     if (p.endsWith('finance.html'))   return 'finance';
     if (p.endsWith('caffeine.html'))  return 'caffeine';
+    if (p.endsWith('profile.html'))   return 'profile';
     return 'main';
   }
 

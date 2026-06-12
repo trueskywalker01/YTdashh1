@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050506">
+<title>Profile — Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sync.js" defer></script>
+<script src="topbar.js" defer></script>
+<style>
+:root {
+  --text-primary:    #FAFAFA;
+  --text-secondary:  #B8B6B0;
+  --text-tertiary:   #76746E;
+  --text-quaternary: #4A4845;
+  --border-soft:     rgba(255,255,255,0.07);
+  --bg-card:         rgba(255,255,255,0.04);
+  --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: #050506;
+  color: var(--text-secondary);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+body {
+  padding: max(28px, env(safe-area-inset-top))
+           max(20px, env(safe-area-inset-right))
+           max(80px, env(safe-area-inset-bottom))
+           max(20px, env(safe-area-inset-left));
+}
+main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding-top: 32px;
+}
+
+/* ── Page header ── */
+.page-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-quaternary); margin-bottom: 6px; }
+.page-title   { font-size: 26px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; margin-bottom: 28px; }
+
+/* ── Card ── */
+.profile-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 18px;
+  padding: 24px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* ── Field ── */
+.field { margin-bottom: 20px; }
+.field:last-of-type { margin-bottom: 0; }
+.field-label {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 8px;
+}
+.field-name  { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.field-unit  { font-size: 11px; color: var(--text-quaternary); font-family: var(--font-mono); }
+.field-input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  padding: 13px 16px;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+  -webkit-appearance: none;
+}
+.field-input:focus {
+  border-color: rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.07);
+}
+.field-input::placeholder { color: var(--text-quaternary); font-weight: 400; }
+
+/* ── Divider ── */
+.card-divider { height: 1px; background: var(--border-soft); margin: 22px 0; }
+
+/* ── Save button ── */
+.save-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 13px;
+  border: none;
+  background: rgba(255,255,255,0.10);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.10s;
+  letter-spacing: -0.01em;
+}
+.save-btn:hover  { background: rgba(255,255,255,0.16); }
+.save-btn:active { transform: scale(0.98); }
+.save-btn.saved  { background: rgba(48,209,88,0.18); color: #30D158; }
+
+/* ── Stats row ── */
+.stats-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-top: 16px;
+}
+.stat-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+}
+.stat-value { font-size: 22px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; font-family: var(--font-mono); }
+.stat-label { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+.stat-value.green  { color: #30D158; }
+.stat-value.yellow { color: #FF9F0A; }
+.stat-value.red    { color: #FF6B6B; }
+</style>
+</head>
+<body>
+<main>
+  <div class="page-eyebrow">My info</div>
+  <div class="page-title">Profile</div>
+
+  <div class="profile-card">
+    <div class="field">
+      <div class="field-label">
+        <span class="field-name">Weight</span>
+        <span class="field-unit">kg</span>
+      </div>
+      <input id="fieldWeight" class="field-input" type="number" min="20" max="300" step="0.1" placeholder="e.g. 80" inputmode="decimal" />
+    </div>
+
+    <div class="field">
+      <div class="field-label">
+        <span class="field-name">Height</span>
+        <span class="field-unit">cm</span>
+      </div>
+      <input id="fieldHeight" class="field-input" type="number" min="100" max="250" step="1" placeholder="e.g. 178" inputmode="decimal" />
+    </div>
+
+    <div class="field">
+      <div class="field-label">
+        <span class="field-name">Goal weight</span>
+        <span class="field-unit">kg</span>
+      </div>
+      <input id="fieldGoalWeight" class="field-input" type="number" min="20" max="300" step="0.1" placeholder="e.g. 75" inputmode="decimal" />
+    </div>
+
+    <div class="card-divider"></div>
+
+    <button id="saveBtn" class="save-btn">Save</button>
+  </div>
+
+  <div class="stats-row" id="statsRow" style="display:none"></div>
+</main>
+
+<script>
+(function () {
+  const STORE_KEY = 'profile:data';
+  const fields = {
+    weight:     document.getElementById('fieldWeight'),
+    height:     document.getElementById('fieldHeight'),
+    goalWeight: document.getElementById('fieldGoalWeight'),
+  };
+  const saveBtn   = document.getElementById('saveBtn');
+  const statsRow  = document.getElementById('statsRow');
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; }
+  }
+  function save(data) { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
+
+  function renderStats(data) {
+    const w = parseFloat(data.weight);
+    const h = parseFloat(data.height);
+    const g = parseFloat(data.goalWeight);
+    if (!w || !h) { statsRow.style.display = 'none'; return; }
+
+    const bmi = w / ((h / 100) ** 2);
+    let bmiClass = 'green';
+    if (bmi < 18.5 || bmi > 30) bmiClass = 'red';
+    else if (bmi > 25) bmiClass = 'yellow';
+
+    let toGoalHtml = '';
+    if (g && w) {
+      const diff = +(w - g).toFixed(1);
+      const sign = diff > 0 ? '−' : '+';
+      const cls  = diff <= 0 ? 'green' : (Math.abs(diff) < 5 ? 'yellow' : 'red');
+      toGoalHtml = `<div class="stat-card">
+        <div class="stat-value ${cls}">${sign}${Math.abs(diff)} kg</div>
+        <div class="stat-label">To goal</div>
+      </div>`;
+    }
+
+    statsRow.innerHTML = `
+      <div class="stat-card">
+        <div class="stat-value ${bmiClass}">${bmi.toFixed(1)}</div>
+        <div class="stat-label">BMI</div>
+      </div>
+      ${toGoalHtml}`;
+    statsRow.style.display = 'grid';
+    statsRow.style.gridTemplateColumns = toGoalHtml ? '1fr 1fr' : '1fr';
+  }
+
+  function init() {
+    const data = load();
+    if (data.weight)     fields.weight.value     = data.weight;
+    if (data.height)     fields.height.value     = data.height;
+    if (data.goalWeight) fields.goalWeight.value = data.goalWeight;
+    renderStats(data);
+  }
+
+  saveBtn.addEventListener('click', () => {
+    const data = {
+      weight:     fields.weight.value     ? parseFloat(fields.weight.value)     : null,
+      height:     fields.height.value     ? parseFloat(fields.height.value)     : null,
+      goalWeight: fields.goalWeight.value ? parseFloat(fields.goalWeight.value) : null,
+    };
+    save(data);
+    renderStats(data);
+    saveBtn.textContent = 'Saved ✓';
+    saveBtn.classList.add('saved');
+    setTimeout(() => { saveBtn.textContent = 'Save'; saveBtn.classList.remove('saved'); }, 1800);
+  });
+
+  Object.values(fields).forEach(f => {
+    f.addEventListener('keydown', e => { if (e.key === 'Enter') saveBtn.click(); });
+  });
+
+  init();
+})();
+</script>
+</body>
+</html>
