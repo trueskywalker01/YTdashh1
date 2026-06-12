@@ -685,11 +685,66 @@ main {
 .macro-add-row { display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr 1fr auto; gap: 6px; align-items: center; }
 .macro-scan-btn {
   display: flex; align-items: center; justify-content: center; gap: 6px;
-  width: 100%; margin-top: 10px; padding: 9px 14px; border-radius: 10px;
-  border: 1px dashed rgba(255,255,255,0.10); background: transparent;
-  color: var(--text-tertiary); font-size: 12px; font-family: inherit;
-  font-weight: 600; cursor: default; letter-spacing: 0.02em; opacity: 0.65;
+  padding: 9px 16px; border-radius: 10px; flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05);
+  color: var(--text-secondary); font-size: 12px; font-family: inherit;
+  font-weight: 700; cursor: pointer; letter-spacing: 0.02em;
+  transition: background 0.15s, color 0.15s;
 }
+.macro-scan-btn:hover { background: rgba(255,255,255,0.09); color: var(--text-primary); }
+.macro-scan-trigger-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 13px; border-radius: 12px; margin-bottom: 14px;
+  border: 1px dashed rgba(255,255,255,0.15);
+  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(100,210,255,0.04) 100%);
+  color: var(--text-secondary); font-size: 13px; font-family: inherit;
+  font-weight: 700; cursor: pointer; letter-spacing: 0.01em;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+}
+.macro-scan-trigger-btn:hover { border-color: rgba(100,210,255,0.35); color: #64D2FF; background: rgba(100,210,255,0.06); }
+.macro-scan-trigger-btn:active { transform: scale(0.98); }
+.macro-scan-trigger-btn.loading { pointer-events: none; opacity: 0.7; }
+.macro-scan-file { display: none; }
+.macro-scan-card {
+  margin-top: 14px; border-radius: 14px; overflow: hidden;
+  border: 1px solid rgba(100,210,255,0.18);
+  background: rgba(100,210,255,0.04);
+  animation: macro-fade-in 0.25s ease both;
+}
+@keyframes macro-fade-in { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+.macro-scan-card[hidden] { display: none; }
+.macro-scan-card-inner { padding: 16px; }
+.macro-scan-card-top { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+.macro-scan-thumb { width: 72px; height: 72px; object-fit: cover; border-radius: 10px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.08); }
+.macro-scan-card-info { flex: 1; min-width: 0; }
+.macro-scan-food-name { font-size: 15px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; margin-bottom: 3px; }
+.macro-scan-serving { font-size: 11px; color: var(--text-tertiary); margin-bottom: 8px; font-family: var(--font-mono); }
+.macro-scan-macros { display: flex; flex-wrap: wrap; gap: 6px; }
+.macro-scan-macro-pill {
+  font-family: var(--font-mono); font-size: 10.5px; font-variant-numeric: tabular-nums;
+  padding: 3px 8px; border-radius: 6px; border: 1px solid; font-weight: 600;
+}
+.macro-scan-macro-pill.cal  { color: #FAFAFA; border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
+.macro-scan-macro-pill.prot { color: #FF9F0A; border-color: rgba(255,159,10,0.3); background: rgba(255,159,10,0.07); }
+.macro-scan-macro-pill.carb { color: #30D158; border-color: rgba(48,209,88,0.3); background: rgba(48,209,88,0.07); }
+.macro-scan-macro-pill.fat  { color: #64D2FF; border-color: rgba(100,210,255,0.3); background: rgba(100,210,255,0.07); }
+.macro-scan-nutrients-wrap { margin-bottom: 12px; }
+.macro-scan-nutrients-lbl { font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-quaternary); margin-bottom: 7px; }
+.macro-scan-nutrients { display: flex; flex-wrap: wrap; gap: 5px; }
+.macro-scan-nutrient-tag {
+  font-size: 11px; padding: 3px 9px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04);
+  color: var(--text-tertiary); font-weight: 500;
+}
+.macro-scan-advice {
+  font-size: 12.5px; line-height: 1.6; color: var(--text-secondary);
+  border-top: 1px solid var(--border-soft); padding-top: 12px; margin-bottom: 14px;
+}
+.macro-scan-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.macro-apikey-wrap { margin-bottom: 12px; }
+.macro-apikey-label { font-size: 11.5px; color: var(--text-tertiary); margin-bottom: 7px; line-height: 1.5; }
+.macro-apikey-row { display: flex; gap: 8px; }
+.macro-apikey-row .stack-input { flex: 1; }
 .macro-modal-bg {
   position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.75);
   display: flex; align-items: center; justify-content: center;
@@ -933,6 +988,46 @@ main {
       </div>
 
       <div class="macro-add-wrap">
+        <input type="file" id="macroScanFile" accept="image/*" capture="environment" class="macro-scan-file" />
+        <button id="macroScanTrigger" class="macro-scan-trigger-btn">
+          <span id="macroScanBtnIcon">📷</span>
+          <span id="macroScanBtnText">Scan food photo</span>
+        </button>
+        <div id="macroApiKeyWrap" class="macro-apikey-wrap" hidden>
+          <div class="macro-apikey-label">Paste your Anthropic API key to enable photo scanning</div>
+          <div class="macro-apikey-row">
+            <input id="macroApiKeyInput" type="password" class="stack-input" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false" />
+            <button id="macroApiKeySave" class="macro-scan-btn">Save</button>
+          </div>
+        </div>
+
+        <div id="macroScanCard" class="macro-scan-card" hidden>
+          <div class="macro-scan-card-inner">
+            <div class="macro-scan-card-top">
+              <img id="macroScanThumb" class="macro-scan-thumb" src="" alt="Food photo" />
+              <div class="macro-scan-card-info">
+                <div class="macro-scan-food-name" id="macroScanFoodName"></div>
+                <div class="macro-scan-serving"   id="macroScanServing"></div>
+                <div class="macro-scan-macros">
+                  <span class="macro-scan-macro-pill cal"  id="macroScanCal"></span>
+                  <span class="macro-scan-macro-pill prot" id="macroScanProt"></span>
+                  <span class="macro-scan-macro-pill carb" id="macroScanCarb"></span>
+                  <span class="macro-scan-macro-pill fat"  id="macroScanFat"></span>
+                </div>
+              </div>
+            </div>
+            <div class="macro-scan-nutrients-wrap">
+              <div class="macro-scan-nutrients-lbl">Key nutrients &amp; minerals</div>
+              <div id="macroScanNutrients" class="macro-scan-nutrients"></div>
+            </div>
+            <div class="macro-scan-advice" id="macroScanAdvice"></div>
+            <div class="macro-scan-actions">
+              <button id="macroScanDismiss" class="macro-modal-cancel">Dismiss</button>
+              <button id="macroScanUse" class="macro-modal-save">Add to log</button>
+            </div>
+          </div>
+        </div>
+
         <div class="macro-add-row">
           <input id="macroAddName" type="text" class="stack-input" placeholder="Food / meal name" autocomplete="off" spellcheck="false" />
           <input id="macroAddCal"  type="number" class="stack-input" placeholder="kcal" min="0" />
@@ -1961,6 +2056,186 @@ document.addEventListener('DOMContentLoaded', function () {
 
   window.addEventListener('storage', render);
   render();
+})();
+</script>
+
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const API_KEY_STORE = 'anthropic_api_key';
+
+  const triggerBtn   = $('macroScanTrigger');
+  const fileInput    = $('macroScanFile');
+  const scanCard     = $('macroScanCard');
+  const apiKeyWrap   = $('macroApiKeyWrap');
+  const apiKeyInput  = $('macroApiKeyInput');
+  const apiKeySave   = $('macroApiKeySave');
+
+  let pendingScan = null;
+
+  function getKey() { return localStorage.getItem(API_KEY_STORE) || ''; }
+
+  function checkKey() {
+    if (getKey()) {
+      apiKeyWrap.hidden = true;
+    } else {
+      apiKeyWrap.hidden = false;
+    }
+  }
+  checkKey();
+
+  apiKeySave.addEventListener('click', () => {
+    const k = apiKeyInput.value.trim();
+    if (!k.startsWith('sk-ant-')) { alert('That doesn\'t look like an Anthropic API key (should start with sk-ant-).'); return; }
+    localStorage.setItem(API_KEY_STORE, k);
+    apiKeyInput.value = '';
+    apiKeyWrap.hidden = true;
+  });
+
+  triggerBtn.addEventListener('click', () => {
+    if (!getKey()) { apiKeyWrap.hidden = false; apiKeyInput.focus(); return; }
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    fileInput.value = '';
+
+    setBtnLoading(true);
+    scanCard.hidden = true;
+
+    try {
+      const { base64, mime, objectUrl } = await prepareImage(file);
+      const result = await callClaude(base64, mime);
+      pendingScan = result;
+      showCard(objectUrl, result);
+    } catch (err) {
+      setBtnLoading(false);
+      alert('Scan failed: ' + (err.message || 'Unknown error'));
+    }
+  });
+
+  async function prepareImage(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = reject;
+        img.onload = () => {
+          const MAX = 1280;
+          let w = img.width, h = img.height;
+          if (w > MAX || h > MAX) {
+            const ratio = Math.min(MAX / w, MAX / h);
+            w = Math.round(w * ratio);
+            h = Math.round(h * ratio);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          const base64  = dataUrl.split(',')[1];
+          resolve({ base64, mime: 'image/jpeg', objectUrl: dataUrl });
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function callClaude(base64, mime) {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': getKey(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mime, data: base64 } },
+            { type: 'text', text: `Analyze this food photo and estimate the nutritional content for the visible portion. Return ONLY a raw JSON object — no markdown, no code fences, no explanation. Use this exact structure:
+{
+  "name": "descriptive food name",
+  "serving_note": "estimated portion, e.g. 1 plate ~450g",
+  "calories": 0,
+  "protein_g": 0,
+  "carbs_g": 0,
+  "fat_g": 0,
+  "nutrients": ["vitamin/mineral 1 with brief note", "vitamin/mineral 2", "vitamin/mineral 3", "vitamin/mineral 4"],
+  "advice": "2-3 sentences of practical, specific dietary advice about this meal in the context of fitness, body composition, and health."
+}
+Be realistic with estimates. If multiple foods visible, estimate the total plate.` }
+          ]
+        }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'API error ' + res.status);
+    }
+
+    const data = await res.json();
+    const text = data.content[0].text.trim();
+    const jsonStr = text.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
+    return JSON.parse(jsonStr);
+  }
+
+  function showCard(objectUrl, r) {
+    $('macroScanThumb').src      = objectUrl;
+    $('macroScanFoodName').textContent = r.name || 'Unknown food';
+    $('macroScanServing').textContent  = r.serving_note || '';
+    $('macroScanCal').textContent  = (r.calories    || 0) + ' kcal';
+    $('macroScanProt').textContent = (r.protein_g   || 0) + 'g protein';
+    $('macroScanCarb').textContent = (r.carbs_g     || 0) + 'g carbs';
+    $('macroScanFat').textContent  = (r.fat_g       || 0) + 'g fat';
+
+    const nutrients = $('macroScanNutrients');
+    nutrients.innerHTML = '';
+    (r.nutrients || []).forEach(n => {
+      const tag = document.createElement('span');
+      tag.className = 'macro-scan-nutrient-tag';
+      tag.textContent = n;
+      nutrients.appendChild(tag);
+    });
+
+    $('macroScanAdvice').textContent = r.advice || '';
+    scanCard.hidden = false;
+    setBtnLoading(false);
+    scanCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  $('macroScanDismiss').addEventListener('click', () => {
+    scanCard.hidden = true;
+    pendingScan = null;
+  });
+
+  $('macroScanUse').addEventListener('click', () => {
+    if (!pendingScan) return;
+    const r = pendingScan;
+    $('macroAddName').value = r.name || '';
+    $('macroAddCal').value  = r.calories   || '';
+    $('macroAddProt').value = r.protein_g  || '';
+    $('macroAddCarb').value = r.carbs_g    || '';
+    $('macroAddFat').value  = r.fat_g      || '';
+    scanCard.hidden = true;
+    pendingScan = null;
+    $('macroAddBtn').click();
+  });
+
+  function setBtnLoading(on) {
+    triggerBtn.classList.toggle('loading', on);
+    $('macroScanBtnIcon').textContent = on ? '⏳' : '📷';
+    $('macroScanBtnText').textContent = on ? 'Analysing photo…' : 'Scan food photo';
+  }
 })();
 </script>
 
