@@ -115,7 +115,7 @@ body.has-bottombar {
   .bottombar {
     position: fixed;
     left: 0; top: 0; bottom: 0; right: auto;
-    width: 72px;
+    width: 84px;
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
@@ -126,14 +126,39 @@ body.has-bottombar {
   .bottombar-tab {
     flex: 0;
     width: 100%;
-    padding: 14px 0;
-    gap: 4px;
+    padding: 22px 0;
+    gap: 6px;
+    position: relative;
   }
   .bottombar-tab-icon { font-size: 22px; }
   body.has-bottombar {
     padding-bottom: 0 !important;
-    padding-left: 72px !important;
+    padding-left: 84px !important;
   }
+  /* Active indicator bar on left edge */
+  .bottombar-tab.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 22%; bottom: 22%;
+    width: 3px; border-radius: 0 3px 3px 0;
+    background: currentColor;
+  }
+  /* Per-tab colour themes */
+  .bottombar-tab[data-page="main"].active {
+    color: #5B8DEF;
+    background: rgba(91, 141, 239, 0.08);
+  }
+  .bottombar-tab[data-page="main"].active .bottombar-tab-icon { filter: none; opacity: 1; }
+  .bottombar-tab[data-page="health"].active {
+    color: #30D158;
+    background: rgba(48, 209, 88, 0.08);
+  }
+  .bottombar-tab[data-page="health"].active .bottombar-tab-icon { filter: none; opacity: 1; }
+  .bottombar-tab[data-page="fitness"].active {
+    color: #FF9F0A;
+    background: rgba(255, 159, 10, 0.08);
+  }
+  .bottombar-tab[data-page="fitness"].active .bottombar-tab-icon { filter: none; opacity: 1; }
 }
 @media (max-width: 480px) {
   .topbar { padding-left: 10px; padding-right: 10px; gap: 6px; }
