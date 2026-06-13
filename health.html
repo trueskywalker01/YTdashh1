@@ -649,6 +649,20 @@ main {
   cursor: pointer; font-family: inherit; letter-spacing: 0.04em; transition: all 0.15s;
 }
 .macro-goals-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
+/* ── AI scan button ── */
+.macro-scan-btn { display:inline-flex; align-items:center; justify-content:center; width:40px; height:38px; border-radius:9px; border:1px solid rgba(255,255,255,0.10); background:rgba(255,255,255,0.05); color:var(--text-secondary); font-size:17px; cursor:pointer; transition:background 0.2s; flex-shrink:0; }
+.macro-scan-btn:hover { background:rgba(255,255,255,0.10); }
+.macro-scan-btn.scanning { animation:scanPulse 0.9s ease-in-out infinite; pointer-events:none; }
+@keyframes scanPulse { 0%,100%{opacity:0.45} 50%{opacity:1} }
+/* ── Nutrient goal edit ── */
+.nutr-goal-edit { font-size:10px; padding:1px 5px; border-radius:5px; border:1px solid rgba(255,255,255,0.08); background:transparent; color:var(--text-quaternary); cursor:pointer; font-family:var(--font); }
+.nutr-goal-edit:hover { background:rgba(255,255,255,0.06); color:var(--text-tertiary); }
+.nutr-tip { font-size:10px; color:var(--text-quaternary); padding:2px 0 5px 22px; font-style:italic; line-height:1.4; }
+/* ── Stack date scheduling ── */
+.stack-date-btn { font-size:10px; padding:2px 7px; border-radius:5px; border:1px solid rgba(255,255,255,0.08); background:transparent; color:var(--text-quaternary); cursor:pointer; flex-shrink:0; white-space:nowrap; }
+.stack-date-btn:hover { background:rgba(255,255,255,0.05); color:var(--text-tertiary); }
+.stack-item.scheduled { opacity:0.45; }
+.stack-item.scheduled .stack-check { pointer-events:none; cursor:default; }
 .macro-overview { display: grid; grid-template-columns: 148px 1fr; gap: 20px; align-items: center; margin-bottom: 20px; }
 .macro-cal-ring { position: relative; width: 140px; height: 140px; flex-shrink: 0; }
 .macro-ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
@@ -1144,6 +1158,8 @@ main {
           <input id="macroSearchInput" type="search" class="stack-input macro-search-input" placeholder="Search food (e.g. chicken breast, banana)…" autocomplete="off" spellcheck="false" />
           <button id="macroSearchBtn" class="macro-search-submit">Search</button>
           <button id="macroHistoryBtn" class="macro-history-btn" title="Meal history">🗂</button>
+          <button id="macroScanBtn" class="macro-scan-btn" title="Scan food with AI">📷</button>
+          <input id="macroScanInput" type="file" accept="image/*" hidden />
         </div>
         <div id="macroSearchResults" class="macro-search-results" hidden></div>
 
@@ -1471,6 +1487,31 @@ main {
     { name: 'Methylene Blue', dose: '1–4mg/kg', window: 'morning', note: 'Oral solution · mitochondrial function · neuroprotection research', icon: '🔬', aliases: ['methylene blue', 'mb'] },
   ];
 
+  // 2.8 — Supplement → micronutrient amounts (applied on "taken")
+  const SUPPLEMENT_NUTR_MAP = {
+    'vitamin d3':          { vit_d: 50 },
+    'vitamin d':           { vit_d: 25 },
+    'vitamin k2 (mk-7)':   { vit_k: 200 },
+    'vitamin c':           { vit_c: 500 },
+    'vitamin b12':         { vit_b12: 0.5 },
+    'b-complex':           { vit_b1: 1.2, vit_b2: 1.3, vit_b3: 16, vit_b6: 1.7, vit_b12: 2.4, vit_b9: 400, vit_b7: 30 },
+    'folate':              { vit_b9: 400 },
+    'biotin':              { vit_b7: 30 },
+    'vitamin a':           { vit_a: 1500 },
+    'vitamin e':           { vit_e: 15 },
+    'multivitamin':        { vit_a:900, vit_c:90, vit_d:20, vit_e:15, vit_k:120, vit_b1:1.2, vit_b2:1.3, vit_b3:16, vit_b6:1.7, vit_b12:2.4, vit_b9:400, calcium:200, iron:8, magnesium:100, zinc:11, selenium:55 },
+    'magnesium glycinate':   { magnesium: 200 },
+    'magnesium l-threonate': { magnesium: 144 },
+    'magnesium citrate':     { magnesium: 200 },
+    'zinc':                { zinc: 25 },
+    'iron':                { iron: 18 },
+    'calcium':             { calcium: 500 },
+    'selenium':            { selenium: 150 },
+    'iodine':              { iodine: 150 },
+    'omega-3 (fish oil)':  { omega3: 2 },
+    'krill oil':           { omega3: 0.5 },
+  };
+
   let todayKey = `stack:taken:${getActiveDate()}`;
 
   function getItems() {
@@ -1494,8 +1535,21 @@ main {
 
   function toggleTaken(id) {
     const taken = getTaken();
-    if (taken[id]) delete taken[id]; else taken[id] = Date.now();
-    setTaken(taken); render();
+    const wasTaken = !!taken[id];
+    if (wasTaken) delete taken[id]; else taken[id] = Date.now();
+    setTaken(taken);
+    // 2.8 — auto-log micronutrients when supplement is checked
+    if (!wasTaken) {
+      const item = getItems().find(i => i.id === id);
+      if (item) {
+        const key = item.name.toLowerCase().trim();
+        const amounts = SUPPLEMENT_NUTR_MAP[key];
+        if (amounts && typeof window.applyNutrientAmounts === 'function') {
+          window.applyNutrientAmounts(amounts);
+        }
+      }
+    }
+    render();
   }
   function toggleLow(id) {
     const low = getLow();
@@ -1570,9 +1624,12 @@ main {
         const isTaken = !!taken[item.id];
         const isLow = low.includes(item.id);
         const isMissed = !isTaken && isPastCutoff;
+        // 2.11 — start date scheduling
+        const todayDateStr = getActiveDate();
+        const isScheduled = item.startDate && item.startDate > todayDateStr;
 
         const row = document.createElement('div');
-        row.className = 'stack-item' + (isTaken ? ' taken' : '') + (isMissed ? ' missed' : '');
+        row.className = 'stack-item' + (isTaken ? ' taken' : '') + (isMissed ? ' missed' : '') + (isScheduled ? ' scheduled' : '');
 
         let tagHtml = '';
         if (item.tag === 'stack') tagHtml = '<span class="stack-item-tag tag-stack">stack</span>';
@@ -1586,6 +1643,7 @@ main {
             </div>
             <div class="stack-item-meta" data-edit="meta" data-id="${item.id}">${escapeHtml(metaText(item))}</div>
           </div>
+          <button class="stack-date-btn" data-action="setdate" data-id="${item.id}" title="${item.startDate ? 'Change start date' : 'Set start date'}">📅${item.startDate ? ' ' + item.startDate : ''}</button>
           <button class="stack-low-btn ${isLow ? 'is-low' : ''}" data-action="low" data-id="${item.id}">↓ Running low</button>
           <button class="stack-item-del" data-action="del" data-id="${item.id}" aria-label="Delete">×</button>`;
 
@@ -1702,6 +1760,11 @@ main {
     if (btn.dataset.action === 'toggle') toggleTaken(id);
     else if (btn.dataset.action === 'low') toggleLow(id);
     else if (btn.dataset.action === 'del') deleteItem(id);
+    else if (btn.dataset.action === 'setdate') {
+      const cur = getItems().find(i => i.id === id);
+      const val = prompt('Start date (YYYY-MM-DD) — leave empty to clear:', cur?.startDate || '');
+      if (val !== null) { updateItem(id, 'startDate', val.trim() || undefined); render(); }
+    }
   });
   document.getElementById('stackGroups').addEventListener('pointerdown', (e) => {
     const btn = e.target.closest('[data-action="del"]');
@@ -2256,6 +2319,15 @@ document.addEventListener('DOMContentLoaded', function () {
     render();
   });
 
+  // 2.7 — auto-apply profile goals if none saved yet
+  (function () {
+    const g = loadGoals();
+    if (!g.cal) {
+      const sug = profileSuggestion();
+      if (sug) saveGoals({ cal: sug.cal, prot: sug.prot, carb: sug.carb, fat: sug.fat });
+    }
+  })();
+
   window.addEventListener('storage', render);
   render();
 })();
@@ -2476,6 +2548,66 @@ document.addEventListener('DOMContentLoaded', function () {
   ['macroManualName','macroManualCal','macroManualProt','macroManualCarb','macroManualFat']
     .forEach(id => { $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('macroManualAdd').click(); }); });
 
+  // 2.6 — AI food photo scanner (Claude vision)
+  $('macroScanBtn').addEventListener('click', () => $('macroScanInput').click());
+  $('macroScanInput').addEventListener('change', async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    let apiKey = localStorage.getItem('claude:apiKey');
+    if (!apiKey) {
+      apiKey = prompt('Enter your Claude API key to enable photo food scanning (stored locally only):');
+      if (!apiKey) return;
+      localStorage.setItem('claude:apiKey', apiKey.trim());
+    }
+    const btn = $('macroScanBtn');
+    btn.classList.add('scanning'); btn.textContent = '⏳';
+    try {
+      const base64 = await new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result.split(',')[1]);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-allow-from-browser': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 256,
+          messages: [{ role: 'user', content: [
+            { type: 'image', source: { type: 'base64', media_type: file.type || 'image/jpeg', data: base64 } },
+            { type: 'text', text: 'Identify the food in this photo and estimate its nutritional content for the serving shown. Reply with ONLY valid JSON (no markdown): {"name":"food name","cal":0,"prot":0,"carb":0,"fat":0,"servingDesc":"e.g. 1 slice / 100g"}' }
+          ]}]
+        })
+      });
+      if (!resp.ok) { const t = await resp.text(); throw new Error(resp.status + ' — ' + t.slice(0,120)); }
+      const data = await resp.json();
+      const raw  = (data.content[0].text || '').replace(/```json
+?/g,'').replace(/```/g,'').trim();
+      const parsed = JSON.parse(raw);
+      showConfirmCard({
+        name:    parsed.name || 'Scanned food',
+        brand:   parsed.servingDesc || '~1 serving',
+        perG:    100,
+        cal100:  Number(parsed.cal)  || 0,
+        prot100: Number(parsed.prot) || 0,
+        carb100: Number(parsed.carb) || 0,
+        fat100:  Number(parsed.fat)  || 0,
+        fiber100:0,
+      });
+    } catch(err) {
+      alert('Scan failed: ' + err.message);
+    } finally {
+      btn.classList.remove('scanning'); btn.textContent = '📷';
+      this.value = '';
+    }
+  });
+
   function setLoadingState(on) {
     $('macroLoadingCard').hidden = !on;
     $('macroSearchBtn').disabled = on;
@@ -2545,34 +2677,36 @@ document.addEventListener('DOMContentLoaded', function () {
   function loadNutrLog()   { try { return JSON.parse(localStorage.getItem(NUTR_LOG_PFX + todayStr())) || {}; } catch(e) { return {}; } }
   function saveNutrLog(l)  { localStorage.setItem(NUTR_LOG_PFX + todayStr(), JSON.stringify(l)); }
 
+  const NUTR_GOALS_KEY = 'nutrients:goals';
+  function loadNutrGoals() { try { return JSON.parse(localStorage.getItem(NUTR_GOALS_KEY)) || {}; } catch(e) { return {}; } }
+  function saveNutrGoals(g) { localStorage.setItem(NUTR_GOALS_KEY, JSON.stringify(g)); }
+
   const NUTR_DB = [
-    // Vitamins (unit in parentheses matches nutrient_amounts keys from Claude)
-    { id:'vit_a',   name:'Vitamin A',      unit:'mcg', rda:900,   tab:'vitamins', color:'#FF9F0A' },
-    { id:'vit_b1',  name:'B1 Thiamine',    unit:'mg',  rda:1.2,   tab:'vitamins', color:'#FFD60A' },
-    { id:'vit_b2',  name:'B2 Riboflavin',  unit:'mg',  rda:1.3,   tab:'vitamins', color:'#FFD60A' },
-    { id:'vit_b3',  name:'B3 Niacin',      unit:'mg',  rda:16,    tab:'vitamins', color:'#FF9F0A' },
-    { id:'vit_b5',  name:'B5 Pantothenic', unit:'mg',  rda:5,     tab:'vitamins', color:'#FF9F0A' },
-    { id:'vit_b6',  name:'Vitamin B6',     unit:'mg',  rda:1.7,   tab:'vitamins', color:'#FF9F0A' },
-    { id:'vit_b7',  name:'B7 Biotin',      unit:'mcg', rda:30,    tab:'vitamins', color:'#FFD60A' },
-    { id:'vit_b9',  name:'B9 Folate',      unit:'mcg', rda:400,   tab:'vitamins', color:'#FFD60A' },
-    { id:'vit_b12', name:'Vitamin B12',    unit:'mcg', rda:2.4,   tab:'vitamins', color:'#30D158' },
-    { id:'vit_c',   name:'Vitamin C',      unit:'mg',  rda:90,    tab:'vitamins', color:'#30D158' },
-    { id:'vit_d',   name:'Vitamin D',      unit:'mcg', rda:20,    tab:'vitamins', color:'#FFD60A' },
-    { id:'vit_e',   name:'Vitamin E',      unit:'mg',  rda:15,    tab:'vitamins', color:'#FF9F0A' },
-    { id:'vit_k',   name:'Vitamin K',      unit:'mcg', rda:120,   tab:'vitamins', color:'#30D158' },
-    // Minerals & other
-    { id:'calcium',    name:'Calcium',     unit:'mg',  rda:1000,  tab:'minerals', color:'#64D2FF' },
-    { id:'iron',       name:'Iron',        unit:'mg',  rda:8,     tab:'minerals', color:'#FF6B6B' },
-    { id:'magnesium',  name:'Magnesium',   unit:'mg',  rda:420,   tab:'minerals', color:'#BF5AF2' },
-    { id:'zinc',       name:'Zinc',        unit:'mg',  rda:11,    tab:'minerals', color:'#64D2FF' },
-    { id:'potassium',  name:'Potassium',   unit:'mg',  rda:3500,  tab:'minerals', color:'#30D158' },
-    { id:'sodium',     name:'Sodium',      unit:'mg',  rda:2300,  tab:'minerals', color:'#FF6B6B' },
-    { id:'phosphorus', name:'Phosphorus',  unit:'mg',  rda:700,   tab:'minerals', color:'#64D2FF' },
-    { id:'selenium',   name:'Selenium',    unit:'mcg', rda:55,    tab:'minerals', color:'#FFD60A' },
-    { id:'iodine',     name:'Iodine',      unit:'mcg', rda:150,   tab:'minerals', color:'#64D2FF' },
-    { id:'chromium',   name:'Chromium',    unit:'mcg', rda:35,    tab:'minerals', color:'#64D2FF' },
-    { id:'omega3',     name:'Omega-3',     unit:'g',   rda:1.6,   tab:'minerals', color:'#30D158' },
-    { id:'fiber',      name:'Fiber',       unit:'g',   rda:38,    tab:'minerals', color:'#30D158' },
+    { id:'vit_a',      name:'Vitamin A',      unit:'mcg', rda:900,   tab:'vitamins', color:'#FF9F0A', tip:'Fat-soluble — take with a fatty meal. Excess is toxic; prefer mixed carotenoids from food.' },
+    { id:'vit_b1',     name:'B1 Thiamine',    unit:'mg',  rda:1.2,   tab:'vitamins', color:'#FFD60A', tip:'Water-soluble, found in whole grains and legumes. Part of energy (ATP) metabolism.' },
+    { id:'vit_b2',     name:'B2 Riboflavin',  unit:'mg',  rda:1.3,   tab:'vitamins', color:'#FFD60A', tip:'Bright yellow urine is normal at adequate intake. Take with food.' },
+    { id:'vit_b3',     name:'B3 Niacin',      unit:'mg',  rda:16,    tab:'vitamins', color:'#FF9F0A', tip:'Flushing form (nicotinic acid) causes redness. Niacinamide avoids this side effect.' },
+    { id:'vit_b5',     name:'B5 Pantothenic', unit:'mg',  rda:5,     tab:'vitamins', color:'#FF9F0A', tip:'Widely available — deficiency is rare. Key for CoA synthesis and adrenal function.' },
+    { id:'vit_b6',     name:'Vitamin B6',     unit:'mg',  rda:1.7,   tab:'vitamins', color:'#FF9F0A', tip:'Over 100 mg/day long-term can cause peripheral neuropathy. Keep supplemental doses low.' },
+    { id:'vit_b7',     name:'B7 Biotin',      unit:'mcg', rda:30,    tab:'vitamins', color:'#FFD60A', tip:'Raw egg whites block biotin absorption. Supports keratin for hair, skin, and nails.' },
+    { id:'vit_b9',     name:'B9 Folate',      unit:'mcg', rda:400,   tab:'vitamins', color:'#FFD60A', tip:'Prefer methylfolate (active form). Critical for DNA synthesis. Essential in pregnancy.' },
+    { id:'vit_b12',    name:'Vitamin B12',    unit:'mcg', rda:2.4,   tab:'vitamins', color:'#30D158', tip:'Methylcobalamin preferred. Vegans are often deficient. Pairs with folate for methylation.' },
+    { id:'vit_c',      name:'Vitamin C',      unit:'mg',  rda:90,    tab:'vitamins', color:'#30D158', tip:'Split doses above 500 mg. Dramatically boosts iron absorption. Pairs with quercetin.' },
+    { id:'vit_d',      name:'Vitamin D',      unit:'mcg', rda:20,    tab:'vitamins', color:'#FFD60A', tip:'Fat-soluble — take with biggest meal. Pairs with K2 to direct calcium to bones. 20 mcg = 800 IU.' },
+    { id:'vit_e',      name:'Vitamin E',      unit:'mg',  rda:15,    tab:'vitamins', color:'#FF9F0A', tip:'Fat-soluble — with fat. Mixed tocopherols preferred. High doses can interfere with K2.' },
+    { id:'vit_k',      name:'Vitamin K',      unit:'mcg', rda:120,   tab:'vitamins', color:'#30D158', tip:'K2 (MK-7) pairs with D3 to prevent arterial calcification and direct calcium to bones.' },
+    { id:'calcium',    name:'Calcium',        unit:'mg',  rda:1000,  tab:'minerals', color:'#64D2FF', tip:'Take with food in ≤500 mg doses. Avoid taking alongside iron or zinc — competes for absorption.' },
+    { id:'iron',       name:'Iron',           unit:'mg',  rda:8,     tab:'minerals', color:'#FF6B6B', tip:'Best on empty stomach with vitamin C. Avoid with calcium, coffee, or tea within 2 hours.' },
+    { id:'magnesium',  name:'Magnesium',      unit:'mg',  rda:420,   tab:'minerals', color:'#BF5AF2', tip:'Glycinate/malate are gentlest on gut. Very common deficiency. Supports sleep, mood, and muscle.' },
+    { id:'zinc',       name:'Zinc',           unit:'mg',  rda:11,    tab:'minerals', color:'#64D2FF', tip:'Take with food to reduce nausea. Avoid taking with iron or calcium. Competes with copper long-term.' },
+    { id:'potassium',  name:'Potassium',      unit:'mg',  rda:3500,  tab:'minerals', color:'#30D158', tip:'Best sourced from food (avocado, banana, greens). Supplement overdose can be dangerous.' },
+    { id:'sodium',     name:'Sodium',         unit:'mg',  rda:2300,  tab:'minerals', color:'#FF6B6B', tip:'Athletes may need more due to sweat loss. Processed food is the main source — limit if sedentary.' },
+    { id:'phosphorus', name:'Phosphorus',     unit:'mg',  rda:700,   tab:'minerals', color:'#64D2FF', tip:'Protein-rich diets usually exceed RDA. Pairs with calcium for bone density.' },
+    { id:'selenium',   name:'Selenium',       unit:'mcg', rda:55,    tab:'minerals', color:'#FFD60A', tip:'2 Brazil nuts ≈ 200 mcg. Toxicity possible above 400 mcg/day — do not over-supplement.' },
+    { id:'iodine',     name:'Iodine',         unit:'mcg', rda:150,   tab:'minerals', color:'#64D2FF', tip:'Essential for thyroid function. Iodized salt covers most needs. Excess can suppress thyroid.' },
+    { id:'chromium',   name:'Chromium',       unit:'mcg', rda:35,    tab:'minerals', color:'#64D2FF', tip:'Supports insulin sensitivity. Found in broccoli, whole grains, and grape juice.' },
+    { id:'omega3',     name:'Omega-3',        unit:'g',   rda:1.6,   tab:'minerals', color:'#30D158', tip:'EPA+DHA most bioavailable. Take with a fatty meal. Pairs with astaxanthin for oxidation protection.' },
+    { id:'fiber',      name:'Fiber',          unit:'g',   rda:38,    tab:'minerals', color:'#30D158', tip:'Aim for both soluble and insoluble types. Increase gradually to avoid bloating. Drink more water.' },
   ];
 
   let nutrActiveTab = 'vitamins';
@@ -2600,9 +2734,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     panel.innerHTML = '';
 
+    const nutrGoals = loadNutrGoals();
     NUTR_DB.filter(n => n.tab === nutrActiveTab).forEach(n => {
       const logged = Number(log[n.id]) || 0;
-      const p = n.rda > 0 ? Math.min(100, Math.round(logged / n.rda * 100)) : 0;
+      const goal   = Number(nutrGoals[n.id]) || n.rda;
+      const p = goal > 0 ? Math.min(100, Math.round(logged / goal * 100)) : 0;
       const dotColor = logged === 0
         ? 'rgba(255,255,255,0.12)'
         : p >= 100 ? '#30D158'
@@ -2616,12 +2752,14 @@ document.addEventListener('DOMContentLoaded', function () {
         '<div class="nutr-row-top">' +
           '<div class="nutr-dot" style="background:' + dotColor + '"></div>' +
           '<div class="nutr-name">' + n.name + '</div>' +
-          '<div class="nutr-amt">' + fmt(logged) + ' / ' + fmt(n.rda) + ' ' + n.unit + '</div>' +
+          '<div class="nutr-amt">' + fmt(logged) + ' / ' + fmt(goal) + ' ' + n.unit + '</div>' +
+          '<button class="nutr-goal-edit" data-id="' + n.id + '" title="Edit daily goal">✎</button>' +
           '<button class="nutr-add-btn" data-id="' + n.id + '" aria-label="Log ' + n.name + '">+</button>' +
         '</div>' +
         '<div class="nutr-bar-indent">' +
           '<div class="nutr-bar-track"><div class="nutr-bar-fill" style="width:' + p + '%;background:' + n.color + '"></div></div>' +
         '</div>' +
+        (n.tip ? '<div class="nutr-tip">' + n.tip + '</div>' : '') +
         '<div class="nutr-log-row" id="nutrLog_' + n.id + '"' + (openIds.has(n.id) ? '' : ' hidden') + ' data-id="' + n.id + '">' +
           '<input type="number" class="nutr-log-input" id="nutrLogInput_' + n.id + '" placeholder="0" min="0" step="any" />' +
           '<span class="nutr-log-unit">' + n.unit + '</span>' +
@@ -2649,6 +2787,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const panel = $('nutrPanel');
     if (panel) {
       panel.addEventListener('click', e => {
+        const goalEditBtn = e.target.closest('.nutr-goal-edit');
+        if (goalEditBtn) {
+          const id = goalEditBtn.dataset.id;
+          const nutr = NUTR_DB.find(n => n.id === id);
+          const goals = loadNutrGoals();
+          const cur = Number(goals[id]) || nutr.rda;
+          const newVal = parseFloat(prompt('Daily goal for ' + nutr.name + ' (' + nutr.unit + '):', cur));
+          if (!isNaN(newVal) && newVal > 0) { goals[id] = newVal; saveNutrGoals(goals); renderNutr(); }
+          return;
+        }
         const addBtn = e.target.closest('.nutr-add-btn');
         if (addBtn) {
           const id = addBtn.dataset.id;
