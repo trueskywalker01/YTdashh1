@@ -863,6 +863,96 @@ img, video, canvas, svg { max-width: 100%; }
   color: var(--text-3); font-size: 12px; font-style: italic;
 }
 
+/* ── Muscle Heatmap ─────────────────────────────────────────── */
+.hm-card {
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 16px;
+}
+.hm-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.hm-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-1);
+  letter-spacing: -0.01em;
+}
+.hm-split-badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: var(--text-2);
+}
+.hm-split-badge.is-rest {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-3);
+}
+.hm-body { display: flex; gap: 16px; align-items: flex-start; }
+.hm-svg { flex-shrink: 0; width: 120px; height: auto; }
+.hm-base { fill: rgba(255,255,255,0.055); }
+.hm-group {
+  fill: rgba(255,255,255,0.04);
+  transition: fill 0.35s, filter 0.35s;
+}
+.hm-group.planned {
+  fill: rgba(48,209,88,0.22);
+  filter: drop-shadow(0 0 4px rgba(48,209,88,0.5));
+}
+.hm-group.trained {
+  fill: rgba(255,159,10,0.28);
+  filter: drop-shadow(0 0 4px rgba(255,159,10,0.6));
+}
+.hm-labels {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-top: 2px;
+}
+.hm-muscle-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--text-3);
+  transition: color 0.35s;
+}
+.hm-muscle-item.planned { color: #30D158; }
+.hm-muscle-item.trained { color: #FF9F0A; }
+.hm-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  flex-shrink: 0;
+  transition: background 0.35s;
+}
+.hm-muscle-item.planned .hm-dot { background: #30D158; }
+.hm-muscle-item.trained .hm-dot { background: #FF9F0A; }
+.hm-rest-note {
+  font-size: 12px; color: var(--text-3); font-style: italic;
+  padding: 6px 0 2px;
+}
+.hm-legend {
+  display: flex;
+  gap: 14px;
+  margin-top: 14px;
+  font-size: 10px;
+  color: var(--text-3);
+}
+.hm-legend-item { display: flex; align-items: center; gap: 5px; }
+.hm-legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+.hm-legend-dot.planned { background: #30D158; }
+.hm-legend-dot.trained { background: #FF9F0A; }
+
 /* ============================================================
    WEIGHT TRACKER + PROGRESS PHOTOS — scoped under .wt-* so the
    styles can't leak into the rest of the app.
@@ -1586,6 +1676,67 @@ img, video, canvas, svg { max-width: 100%; }
       </button>
       <div class="po-tw-past-body" id="poTwPastBody" style="display:none"></div>
     </div>
+
+    <!-- Muscle Heatmap -->
+    <div class="po-sub-section">
+      <div class="po-sub-title">Muscle Heatmap</div>
+      <div class="hm-card">
+        <div class="hm-header">
+          <span class="hm-title">Today's target</span>
+          <span class="hm-split-badge" id="hmSplitBadge">—</span>
+        </div>
+        <div class="hm-body" id="hmMapBody">
+          <svg class="hm-svg" viewBox="0 0 160 290" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Body base silhouette -->
+            <ellipse cx="80" cy="20" rx="17" ry="19" class="hm-base"/>
+            <rect x="74" y="37" width="12" height="12" rx="4" class="hm-base"/>
+            <rect x="56" y="46" width="48" height="90" rx="12" class="hm-base"/>
+            <rect x="53" y="132" width="54" height="20" rx="9" class="hm-base"/>
+            <rect x="37" y="50" width="15" height="42" rx="7" class="hm-base"/>
+            <rect x="108" y="50" width="15" height="42" rx="7" class="hm-base"/>
+            <rect x="38" y="95" width="13" height="26" rx="6" class="hm-base"/>
+            <rect x="109" y="95" width="13" height="26" rx="6" class="hm-base"/>
+            <rect x="55" y="152" width="20" height="54" rx="10" class="hm-base"/>
+            <rect x="85" y="152" width="20" height="54" rx="10" class="hm-base"/>
+            <rect x="55" y="210" width="20" height="44" rx="10" class="hm-base"/>
+            <rect x="85" y="210" width="20" height="44" rx="10" class="hm-base"/>
+            <!-- Chest -->
+            <rect x="60" y="50" width="40" height="36" rx="10" class="hm-group" id="hm-chest"/>
+            <!-- Front Delts -->
+            <ellipse cx="49" cy="58" rx="11" ry="11" class="hm-group" id="hm-front-delts-l"/>
+            <ellipse cx="111" cy="58" rx="11" ry="11" class="hm-group" id="hm-front-delts-r"/>
+            <!-- Triceps (outer upper arm) -->
+            <rect x="37" y="54" width="9" height="32" rx="4" class="hm-group" id="hm-triceps-l"/>
+            <rect x="114" y="54" width="9" height="32" rx="4" class="hm-group" id="hm-triceps-r"/>
+            <!-- Biceps (front upper arm) -->
+            <rect x="48" y="54" width="9" height="28" rx="4" class="hm-group" id="hm-biceps-l"/>
+            <rect x="103" y="54" width="9" height="28" rx="4" class="hm-group" id="hm-biceps-r"/>
+            <!-- Back / Lats (lateral torso flare) -->
+            <rect x="56" y="82" width="8" height="46" rx="4" class="hm-group" id="hm-back-l"/>
+            <rect x="96" y="82" width="8" height="46" rx="4" class="hm-group" id="hm-back-r"/>
+            <!-- Abs -->
+            <rect x="65" y="88" width="30" height="40" rx="8" class="hm-group" id="hm-abs"/>
+            <!-- Glutes (hip area) -->
+            <rect x="55" y="134" width="20" height="16" rx="8" class="hm-group" id="hm-glutes-l"/>
+            <rect x="85" y="134" width="20" height="16" rx="8" class="hm-group" id="hm-glutes-r"/>
+            <!-- Quads -->
+            <rect x="58" y="152" width="16" height="48" rx="8" class="hm-group" id="hm-quads-l"/>
+            <rect x="86" y="152" width="16" height="48" rx="8" class="hm-group" id="hm-quads-r"/>
+            <!-- Hamstrings (outer edge of upper leg) -->
+            <rect x="55" y="158" width="6" height="40" rx="3" class="hm-group" id="hm-hamstrings-l"/>
+            <rect x="99" y="158" width="6" height="40" rx="3" class="hm-group" id="hm-hamstrings-r"/>
+            <!-- Calves -->
+            <rect x="58" y="212" width="16" height="40" rx="8" class="hm-group" id="hm-calves-l"/>
+            <rect x="86" y="212" width="16" height="40" rx="8" class="hm-group" id="hm-calves-r"/>
+          </svg>
+          <div class="hm-labels" id="hmLabels"></div>
+        </div>
+        <div class="hm-legend">
+          <div class="hm-legend-item"><span class="hm-legend-dot planned"></span>Planned</div>
+          <div class="hm-legend-item"><span class="hm-legend-dot trained"></span>Trained today</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2069,6 +2220,7 @@ img, video, canvas, svg { max-width: 100%; }
     renderRx(); renderStats(); renderSparkline(); renderHistory();
     renderTodaysWorkout();
     renderPastWorkouts();
+    renderHeatmap();
     // Pre-fill weight input with last logged weight (or starting weight)
     const ex = getCurrentEx();
     if (ex && !ex.bw) {
@@ -2216,6 +2368,77 @@ img, video, canvas, svg { max-width: 100%; }
     }).join('');
   }
 
+  // ── Muscle group heatmap ──────────────────────────────────────
+  const HM_MUSCLE_MAP = {
+    push:  ['chest', 'front-delts', 'triceps'],
+    pull:  ['back', 'biceps'],
+    legs:  ['quads', 'hamstrings', 'glutes', 'calves'],
+  };
+  const HM_MUSCLE_LABEL = {
+    'chest':       'Chest',
+    'front-delts': 'Front Delts',
+    'triceps':     'Triceps',
+    'back':        'Back & Lats',
+    'biceps':      'Biceps',
+    'quads':       'Quads',
+    'hamstrings':  'Hamstrings',
+    'glutes':      'Glutes',
+    'calves':      'Calves',
+  };
+  const HM_MUSCLE_IDS = {
+    'chest':       ['hm-chest'],
+    'front-delts': ['hm-front-delts-l', 'hm-front-delts-r'],
+    'triceps':     ['hm-triceps-l', 'hm-triceps-r'],
+    'back':        ['hm-back-l', 'hm-back-r'],
+    'biceps':      ['hm-biceps-l', 'hm-biceps-r'],
+    'abs':         ['hm-abs'],
+    'glutes':      ['hm-glutes-l', 'hm-glutes-r'],
+    'quads':       ['hm-quads-l', 'hm-quads-r'],
+    'hamstrings':  ['hm-hamstrings-l', 'hm-hamstrings-r'],
+    'calves':      ['hm-calves-l', 'hm-calves-r'],
+  };
+
+  function renderHeatmap() {
+    const badge = document.getElementById('hmSplitBadge');
+    const mapBody = document.getElementById('hmMapBody');
+    const labelsEl = document.getElementById('hmLabels');
+    if (!badge || !mapBody || !labelsEl) return;
+
+    const split = todaySplit();
+    const isRest = isRestName(split.name);
+    const todayKey = wtDateKey(new Date());
+    const isTrained = !!doneDays[todayKey];
+    const stateClass = isTrained ? 'trained' : 'planned';
+
+    badge.textContent = split.name ? split.name.toUpperCase() + ' DAY' : '—';
+    badge.classList.toggle('is-rest', isRest);
+
+    // Reset all muscle groups
+    document.querySelectorAll('.hm-group').forEach(el => {
+      el.classList.remove('planned', 'trained');
+    });
+    labelsEl.innerHTML = '';
+
+    if (isRest) {
+      labelsEl.innerHTML = '<div class="hm-rest-note">Rest day — muscles recovering.</div>';
+      return;
+    }
+
+    const splitKey = (split.name || '').toLowerCase().replace(/[^a-z]/g, '');
+    const muscles = HM_MUSCLE_MAP[splitKey] || [];
+
+    muscles.forEach(m => {
+      (HM_MUSCLE_IDS[m] || []).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add(stateClass);
+      });
+      const item = document.createElement('div');
+      item.className = 'hm-muscle-item ' + stateClass;
+      item.innerHTML = '<span class="hm-dot"></span>' + (HM_MUSCLE_LABEL[m] || m);
+      labelsEl.appendChild(item);
+    });
+  }
+
   $('poTwDoneBtn').addEventListener('click', () => {
     const todayKey = wtDateKey(new Date());
     if (doneDays[todayKey]) {
@@ -2226,6 +2449,7 @@ img, video, canvas, svg { max-width: 100%; }
     saveDoneDays(doneDays);
     renderTodaysWorkout();
     renderPastWorkouts();
+    renderHeatmap();
   });
   $('poTwPastToggle').addEventListener('click', () => {
     const body = $('poTwPastBody');
