@@ -616,9 +616,12 @@ body::after {
   -webkit-backdrop-filter: blur(24px) saturate(1.2);
   box-shadow: 0 12px 40px rgba(0,0,0,0.45);
 }
-.cal-inner {
-  max-width: 360px; margin: 0 auto;
+.cal-inner { max-width: 100%; }
+.cal-month-tag {
+  font-size: 8px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-tertiary); line-height: 1; min-height: 9px;
 }
+.cal-cell.cal-past { opacity: 0.4; }
 .cal-head {
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
 }
@@ -1636,15 +1639,18 @@ body::after {
                    'July','August','September','October','November','December'];
   const DOW     = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
-  // State
+  // State — rolling 6-week window starting on the Sunday of the current week
   const _now = new Date();
-  let calYear  = _now.getFullYear();
-  let calMonth = _now.getMonth();
-  let calSelected = null;
-  let calEditing  = null;
-  const todayStr  = _now.getFullYear() + '-' +
+  const todayStr = _now.getFullYear() + '-' +
     String(_now.getMonth() + 1).padStart(2,'0') + '-' +
     String(_now.getDate()).padStart(2,'0');
+  var calWindowStart = (function() {
+    var d = new Date(_now);
+    d.setDate(d.getDate() - d.getDay()); // back to Sunday
+    return toKey(d);
+  }());
+  let calSelected = null;
+  let calEditing  = null;
 
   // Storage
   function load() {
@@ -1699,26 +1705,40 @@ body::after {
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  // ---- Grid render ----
+  // ---- Grid render — rolling 42-day window ----
   function calRender() {
-    var tasks = load();
-    var first = new Date(calYear, calMonth, 1);
-    var last  = new Date(calYear, calMonth + 1, 0);
-    $('calMonthLabel').textContent = MONTHS[calMonth] + ' ' + calYear;
+    var tasks   = load();
+    var start   = fromKey(calWindowStart);
+    var end     = new Date(start); end.setDate(start.getDate() + 41);
+    // Header: date range
+    var sMon = MONTHS[start.getMonth()].slice(0,3);
+    var eMon = MONTHS[end.getMonth()].slice(0,3);
+    var label = sMon + ' ' + start.getDate();
+    if (start.getFullYear() !== end.getFullYear()) label += ' ' + start.getFullYear();
+    label += ' – ' + eMon + ' ' + end.getDate() + ' ' + end.getFullYear();
+    $('calMonthLabel').textContent = label;
+
     var html = '';
-    for (var i = 0; i < first.getDay(); i++) html += '<div class="cal-cell cal-empty"></div>';
-    for (var d = 1; d <= last.getDate(); d++) {
-      var ds  = toKey(new Date(calYear, calMonth, d));
+    for (var i = 0; i < 42; i++) {
+      var date = new Date(start); date.setDate(start.getDate() + i);
+      var ds   = toKey(date);
+      var isPast = date < _now && ds !== todayStr;
       var dayTasks = tasks.filter(function(t) { return taskOn(t, ds); });
       var cls = 'cal-cell';
       if (ds === todayStr)    cls += ' cal-today';
       if (ds === calSelected) cls += ' cal-selected';
+      if (isPast)             cls += ' cal-past';
+      // Show 3-letter month on 1st of month
+      var monthTag = date.getDate() === 1
+        ? '<span class="cal-month-tag">' + MONTHS[date.getMonth()].slice(0,3) + '</span>'
+        : '<span class="cal-month-tag"></span>';
       var dots = dayTasks.slice(0,3).map(function(t) {
         var done = !!(t.completed && t.completed[ds]);
         return '<span class="cal-dot' + (done ? ' cal-dot-done' : '') + '"></span>';
       }).join('');
       html += '<div class="' + cls + '" data-date="' + ds + '">'
-            + '<span class="cal-day-num">' + d + '</span>'
+            + monthTag
+            + '<span class="cal-day-num">' + date.getDate() + '</span>'
             + '<div class="cal-dots">' + dots + '</div>'
             + '</div>';
     }
@@ -1735,6 +1755,12 @@ body::after {
     $('calDayPanel').style.display = '';
     calRender();
     renderPanel(ds);
+  }
+  function shiftWindow(weeks) {
+    var d = fromKey(calWindowStart);
+    d.setDate(d.getDate() + weeks * 7);
+    calWindowStart = toKey(d);
+    calRender();
   }
 
   function renderPanel(ds) {
@@ -1833,12 +1859,8 @@ body::after {
   }
 
   // ---- Events ----
-  $('calPrev').addEventListener('click', function() {
-    if (--calMonth < 0) { calMonth = 11; calYear--; } calRender();
-  });
-  $('calNext').addEventListener('click', function() {
-    if (++calMonth > 11) { calMonth = 0; calYear++; } calRender();
-  });
+  $('calPrev').addEventListener('click', function() { shiftWindow(-1); });
+  $('calNext').addEventListener('click', function() { shiftWindow(1); });
   $('calDayClose').addEventListener('click', function() {
     calSelected = null; $('calDayPanel').style.display = 'none'; calRender();
   });
