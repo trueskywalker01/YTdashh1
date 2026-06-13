@@ -897,19 +897,27 @@ img, video, canvas, svg { max-width: 100%; }
   color: var(--text-3);
 }
 .hm-body { display: flex; gap: 16px; align-items: flex-start; }
-.hm-svg { flex-shrink: 0; width: 120px; height: auto; }
-.hm-base { fill: rgba(255,255,255,0.055); }
+.hm-svg { flex-shrink: 0; width: 150px; height: auto; }
+.hm-base {
+  fill: rgba(255,255,255,0.07);
+  stroke: rgba(255,255,255,0.10);
+  stroke-width: 0.5;
+}
 .hm-group {
-  fill: rgba(255,255,255,0.04);
-  transition: fill 0.35s, filter 0.35s;
+  fill: rgba(255,255,255,0.05);
+  stroke: rgba(255,255,255,0.13);
+  stroke-width: 0.8;
+  transition: fill 0.35s, filter 0.35s, stroke 0.35s;
 }
 .hm-group.planned {
-  fill: rgba(48,209,88,0.22);
-  filter: drop-shadow(0 0 4px rgba(48,209,88,0.5));
+  fill: rgba(48,209,88,0.28);
+  stroke: rgba(48,209,88,0.55);
+  filter: drop-shadow(0 0 5px rgba(48,209,88,0.45));
 }
 .hm-group.trained {
-  fill: rgba(255,159,10,0.28);
-  filter: drop-shadow(0 0 4px rgba(255,159,10,0.6));
+  fill: rgba(255,159,10,0.30);
+  stroke: rgba(255,159,10,0.55);
+  filter: drop-shadow(0 0 5px rgba(255,159,10,0.5));
 }
 .hm-labels {
   flex: 1;
@@ -1686,48 +1694,90 @@ img, video, canvas, svg { max-width: 100%; }
           <span class="hm-split-badge" id="hmSplitBadge">—</span>
         </div>
         <div class="hm-body" id="hmMapBody">
-          <svg class="hm-svg" viewBox="0 0 160 290" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Body base silhouette -->
-            <ellipse cx="80" cy="20" rx="17" ry="19" class="hm-base"/>
-            <rect x="74" y="37" width="12" height="12" rx="4" class="hm-base"/>
-            <rect x="56" y="46" width="48" height="90" rx="12" class="hm-base"/>
-            <rect x="53" y="132" width="54" height="20" rx="9" class="hm-base"/>
-            <rect x="37" y="50" width="15" height="42" rx="7" class="hm-base"/>
-            <rect x="108" y="50" width="15" height="42" rx="7" class="hm-base"/>
-            <rect x="38" y="95" width="13" height="26" rx="6" class="hm-base"/>
-            <rect x="109" y="95" width="13" height="26" rx="6" class="hm-base"/>
-            <rect x="55" y="152" width="20" height="54" rx="10" class="hm-base"/>
-            <rect x="85" y="152" width="20" height="54" rx="10" class="hm-base"/>
-            <rect x="55" y="210" width="20" height="44" rx="10" class="hm-base"/>
-            <rect x="85" y="210" width="20" height="44" rx="10" class="hm-base"/>
-            <!-- Chest -->
-            <rect x="60" y="50" width="40" height="36" rx="10" class="hm-group" id="hm-chest"/>
-            <!-- Front Delts -->
-            <ellipse cx="49" cy="58" rx="11" ry="11" class="hm-group" id="hm-front-delts-l"/>
-            <ellipse cx="111" cy="58" rx="11" ry="11" class="hm-group" id="hm-front-delts-r"/>
-            <!-- Triceps (outer upper arm) -->
-            <rect x="37" y="54" width="9" height="32" rx="4" class="hm-group" id="hm-triceps-l"/>
-            <rect x="114" y="54" width="9" height="32" rx="4" class="hm-group" id="hm-triceps-r"/>
-            <!-- Biceps (front upper arm) -->
-            <rect x="48" y="54" width="9" height="28" rx="4" class="hm-group" id="hm-biceps-l"/>
-            <rect x="103" y="54" width="9" height="28" rx="4" class="hm-group" id="hm-biceps-r"/>
-            <!-- Back / Lats (lateral torso flare) -->
-            <rect x="56" y="82" width="8" height="46" rx="4" class="hm-group" id="hm-back-l"/>
-            <rect x="96" y="82" width="8" height="46" rx="4" class="hm-group" id="hm-back-r"/>
-            <!-- Abs -->
-            <rect x="65" y="88" width="30" height="40" rx="8" class="hm-group" id="hm-abs"/>
-            <!-- Glutes (hip area) -->
-            <rect x="55" y="134" width="20" height="16" rx="8" class="hm-group" id="hm-glutes-l"/>
-            <rect x="85" y="134" width="20" height="16" rx="8" class="hm-group" id="hm-glutes-r"/>
-            <!-- Quads -->
-            <rect x="58" y="152" width="16" height="48" rx="8" class="hm-group" id="hm-quads-l"/>
-            <rect x="86" y="152" width="16" height="48" rx="8" class="hm-group" id="hm-quads-r"/>
-            <!-- Hamstrings (outer edge of upper leg) -->
-            <rect x="55" y="158" width="6" height="40" rx="3" class="hm-group" id="hm-hamstrings-l"/>
-            <rect x="99" y="158" width="6" height="40" rx="3" class="hm-group" id="hm-hamstrings-r"/>
-            <!-- Calves -->
-            <rect x="58" y="212" width="16" height="40" rx="8" class="hm-group" id="hm-calves-l"/>
-            <rect x="86" y="212" width="16" height="40" rx="8" class="hm-group" id="hm-calves-r"/>
+          <svg class="hm-svg" viewBox="0 0 200 440" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- ── Base silhouette (non-muscle tissue) ── -->
+            <!-- Head -->
+            <ellipse cx="100" cy="28" rx="22" ry="26" class="hm-base"/>
+            <!-- Neck -->
+            <path d="M 90,52 C 88,60 88,68 90,72 Q 100,76 110,72 C 112,68 112,60 110,52 Q 100,56 90,52 Z" class="hm-base"/>
+            <!-- Trapezius connectors -->
+            <path d="M 90,64 Q 76,66 64,76 Q 56,84 54,94 Q 62,88 72,80 Q 82,72 90,68 Z" class="hm-base"/>
+            <path d="M 110,64 Q 124,66 136,76 Q 144,84 146,94 Q 138,88 128,80 Q 118,72 110,68 Z" class="hm-base"/>
+            <!-- Sternum / linea alba -->
+            <rect x="96" y="84" width="8" height="36" rx="3" class="hm-base"/>
+            <rect x="98" y="122" width="4" height="64" rx="2" class="hm-base"/>
+            <!-- Forearms -->
+            <path d="M 38,154 Q 34,172 34,190 Q 34,204 40,210 Q 46,214 52,210 Q 56,204 56,188 Q 56,172 52,158 Q 48,152 44,152 Q 40,152 38,154 Z" class="hm-base"/>
+            <path d="M 162,154 Q 166,172 166,190 Q 166,204 160,210 Q 154,214 148,210 Q 144,204 144,188 Q 144,172 148,158 Q 152,152 156,152 Q 160,152 162,154 Z" class="hm-base"/>
+            <!-- Hands -->
+            <ellipse cx="46" cy="218" rx="11" ry="9" class="hm-base"/>
+            <ellipse cx="154" cy="218" rx="11" ry="9" class="hm-base"/>
+            <!-- Pelvis center -->
+            <rect x="82" y="206" width="36" height="28" rx="8" class="hm-base"/>
+            <!-- Inner thighs / adductors -->
+            <path d="M 92,244 Q 88,268 88,294 Q 88,314 90,326 Q 92,318 92,294 Q 92,268 94,248 Z" class="hm-base"/>
+            <path d="M 108,244 Q 112,268 112,294 Q 112,314 110,326 Q 108,318 108,294 Q 108,268 106,248 Z" class="hm-base"/>
+            <!-- Shins -->
+            <rect x="68" y="376" width="20" height="34" rx="8" class="hm-base"/>
+            <rect x="112" y="376" width="20" height="34" rx="8" class="hm-base"/>
+            <!-- Feet -->
+            <ellipse cx="78" cy="414" rx="20" ry="10" class="hm-base"/>
+            <ellipse cx="122" cy="414" rx="20" ry="10" class="hm-base"/>
+
+            <!-- ── MUSCLE GROUPS ── -->
+
+            <!-- FRONT DELTOIDS -->
+            <path d="M 54,80 Q 44,88 42,106 Q 44,120 56,124 Q 66,122 70,110 Q 72,96 66,86 Q 60,78 54,80 Z" class="hm-group" id="hm-front-delt-l"/>
+            <path d="M 146,80 Q 156,88 158,106 Q 156,120 144,124 Q 134,122 130,110 Q 128,96 134,86 Q 140,78 146,80 Z" class="hm-group" id="hm-front-delt-r"/>
+
+            <!-- CHEST (pectorals) -->
+            <path d="M 100,88 Q 88,84 78,94 Q 72,106 76,120 Q 80,128 92,128 Q 100,126 100,120 Z" class="hm-group" id="hm-chest-l"/>
+            <path d="M 100,88 Q 112,84 122,94 Q 128,106 124,120 Q 120,128 108,128 Q 100,126 100,120 Z" class="hm-group" id="hm-chest-r"/>
+
+            <!-- TRICEPS (outer upper arm) -->
+            <path d="M 42,94 Q 36,110 36,132 Q 36,148 40,156 Q 46,160 50,156 Q 48,142 46,126 Q 44,108 46,96 Z" class="hm-group" id="hm-tricep-l"/>
+            <path d="M 158,94 Q 164,110 164,132 Q 164,148 160,156 Q 154,160 150,156 Q 152,142 154,126 Q 156,108 154,96 Z" class="hm-group" id="hm-tricep-r"/>
+
+            <!-- BICEPS (front upper arm) -->
+            <path d="M 56,96 Q 52,114 52,134 Q 52,148 56,158 Q 60,162 64,158 Q 66,146 66,128 Q 66,110 62,96 Q 60,92 56,96 Z" class="hm-group" id="hm-bicep-l"/>
+            <path d="M 144,96 Q 148,114 148,134 Q 148,148 144,158 Q 140,162 136,158 Q 134,146 134,128 Q 134,110 138,96 Q 140,92 144,96 Z" class="hm-group" id="hm-bicep-r"/>
+
+            <!-- BACK / LATS (side-torso flare visible from front) -->
+            <path d="M 70,96 Q 62,118 60,146 Q 60,170 66,188 Q 70,194 74,192 Q 72,174 70,152 Q 68,124 72,100 Z" class="hm-group" id="hm-lat-l"/>
+            <path d="M 130,96 Q 138,118 140,146 Q 140,170 134,188 Q 130,194 126,192 Q 128,174 130,152 Q 132,124 128,100 Z" class="hm-group" id="hm-lat-r"/>
+
+            <!-- ABS (6 segments — always shown as body base) -->
+            <rect x="78" y="128" width="19" height="15" rx="5" class="hm-base"/>
+            <rect x="103" y="128" width="19" height="15" rx="5" class="hm-base"/>
+            <rect x="78" y="147" width="19" height="15" rx="5" class="hm-base"/>
+            <rect x="103" y="147" width="19" height="15" rx="5" class="hm-base"/>
+            <rect x="78" y="166" width="19" height="15" rx="5" class="hm-base"/>
+            <rect x="103" y="166" width="19" height="15" rx="5" class="hm-base"/>
+            <rect x="80" y="185" width="40" height="14" rx="5" class="hm-base"/>
+
+            <!-- GLUTES (hip flare, front view) -->
+            <path d="M 70,210 Q 58,224 56,248 Q 64,234 70,220 Q 72,214 74,210 Z" class="hm-group" id="hm-glute-l"/>
+            <path d="M 130,210 Q 142,224 144,248 Q 136,234 130,220 Q 128,214 126,210 Z" class="hm-group" id="hm-glute-r"/>
+
+            <!-- QUADS — rectus femoris (center) -->
+            <path d="M 84,242 Q 80,268 80,296 Q 80,316 84,328 Q 88,330 92,326 Q 94,310 94,284 Q 94,258 90,242 Q 88,238 84,242 Z" class="hm-group" id="hm-quad-rf-l"/>
+            <path d="M 116,242 Q 120,268 120,296 Q 120,316 116,328 Q 112,330 108,326 Q 106,310 106,284 Q 106,258 110,242 Q 112,238 116,242 Z" class="hm-group" id="hm-quad-rf-r"/>
+            <!-- QUADS — vastus lateralis (outer) -->
+            <path d="M 72,246 Q 66,270 64,298 Q 64,316 68,328 Q 72,322 74,306 Q 76,282 74,260 Q 72,250 72,246 Z" class="hm-group" id="hm-quad-vl-l"/>
+            <path d="M 128,246 Q 134,270 136,298 Q 136,316 132,328 Q 128,322 126,306 Q 124,282 126,260 Q 128,250 128,246 Z" class="hm-group" id="hm-quad-vl-r"/>
+            <!-- QUADS — vastus medialis (inner teardrop) -->
+            <path d="M 92,288 Q 90,302 92,316 Q 94,324 98,322 Q 98,310 96,298 Q 94,290 92,288 Z" class="hm-group" id="hm-quad-vm-l"/>
+            <path d="M 108,288 Q 110,302 108,316 Q 106,324 102,322 Q 102,310 104,298 Q 106,290 108,288 Z" class="hm-group" id="hm-quad-vm-r"/>
+
+            <!-- HAMSTRINGS (outer thigh edge, visible from front) -->
+            <path d="M 62,248 Q 56,274 56,304 Q 58,320 62,330 Q 62,312 60,288 Q 60,266 62,250 Z" class="hm-group" id="hm-ham-l"/>
+            <path d="M 138,248 Q 144,274 144,304 Q 142,320 138,330 Q 138,312 140,288 Q 140,266 138,250 Z" class="hm-group" id="hm-ham-r"/>
+
+            <!-- CALVES (gastrocnemius, 2 heads per leg) -->
+            <path d="M 64,338 Q 60,358 60,380 Q 62,394 68,398 Q 74,396 78,384 Q 80,368 78,350 Q 74,338 68,334 Q 66,334 64,338 Z" class="hm-group" id="hm-calf-l-med"/>
+            <path d="M 80,336 Q 84,352 84,374 Q 82,386 78,394 Q 84,390 88,378 Q 90,362 88,344 Q 86,336 80,336 Z" class="hm-group" id="hm-calf-l-lat"/>
+            <path d="M 136,338 Q 140,358 140,380 Q 138,394 132,398 Q 126,396 122,384 Q 120,368 122,350 Q 126,338 132,334 Q 134,334 136,338 Z" class="hm-group" id="hm-calf-r-med"/>
+            <path d="M 120,336 Q 116,352 116,374 Q 118,386 122,394 Q 116,390 112,378 Q 110,362 112,344 Q 114,336 120,336 Z" class="hm-group" id="hm-calf-r-lat"/>
           </svg>
           <div class="hm-labels" id="hmLabels"></div>
         </div>
@@ -2386,16 +2436,15 @@ img, video, canvas, svg { max-width: 100%; }
     'calves':      'Calves',
   };
   const HM_MUSCLE_IDS = {
-    'chest':       ['hm-chest'],
-    'front-delts': ['hm-front-delts-l', 'hm-front-delts-r'],
-    'triceps':     ['hm-triceps-l', 'hm-triceps-r'],
-    'back':        ['hm-back-l', 'hm-back-r'],
-    'biceps':      ['hm-biceps-l', 'hm-biceps-r'],
-    'abs':         ['hm-abs'],
-    'glutes':      ['hm-glutes-l', 'hm-glutes-r'],
-    'quads':       ['hm-quads-l', 'hm-quads-r'],
-    'hamstrings':  ['hm-hamstrings-l', 'hm-hamstrings-r'],
-    'calves':      ['hm-calves-l', 'hm-calves-r'],
+    'chest':       ['hm-chest-l', 'hm-chest-r'],
+    'front-delts': ['hm-front-delt-l', 'hm-front-delt-r'],
+    'triceps':     ['hm-tricep-l', 'hm-tricep-r'],
+    'back':        ['hm-lat-l', 'hm-lat-r'],
+    'biceps':      ['hm-bicep-l', 'hm-bicep-r'],
+    'glutes':      ['hm-glute-l', 'hm-glute-r'],
+    'quads':       ['hm-quad-rf-l', 'hm-quad-rf-r', 'hm-quad-vl-l', 'hm-quad-vl-r', 'hm-quad-vm-l', 'hm-quad-vm-r'],
+    'hamstrings':  ['hm-ham-l', 'hm-ham-r'],
+    'calves':      ['hm-calf-l-med', 'hm-calf-l-lat', 'hm-calf-r-med', 'hm-calf-r-lat'],
   };
 
   function renderHeatmap() {
