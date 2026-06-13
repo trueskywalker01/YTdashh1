@@ -113,8 +113,24 @@ body.has-bottombar {
 }
 @media (max-width: 768px) {
   .bottombar-tab-desktop { display: none; }
+  .sidebar-brand { display: none; }
 }
 @media (min-width: 769px) {
+  .sidebar-brand {
+    display: block;
+    position: absolute;
+    top: 18px; left: 0; right: 0;
+    padding: 0 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.03em;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    line-height: 1.2;
+  }
   .bottombar {
     position: fixed;
     left: 0; top: 0; bottom: 0; right: auto;
@@ -225,6 +241,7 @@ body.topbar-modal-open { overflow: hidden; touch-action: none; }
 
   const bottombarHtml = `
 <nav class="bottombar" id="bottombar" role="navigation" aria-label="Main tabs">
+  <div class="sidebar-brand">Lucas' Dashboard</div>
   <a href="main.html" class="bottombar-tab" data-page="main">
     <span class="bottombar-tab-icon">🏠</span><span>Main</span>
   </a>

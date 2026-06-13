@@ -1262,6 +1262,8 @@ img, video, canvas, svg { max-width: 100%; }
 }
 @media (min-width: 769px) {
   .po-shell { max-width: 1100px; }
+  .wt-chart { height: 220px; }
+  .wt-chart-wrap { margin: 20px 0 10px; }
 }
 
 .hidden { display: none !important; }
@@ -3390,8 +3392,9 @@ img, video, canvas, svg { max-width: 100%; }
           try { localPhotos = JSON.parse(localStorage.getItem(k) || '[]'); } catch {}
           const remotePhotos = Array.isArray(remote[k]) ? remote[k] : [];
           const remoteIds = new Set(remotePhotos.map((p) => p && p.id));
-          const localOnly = localPhotos.filter((p) => p && !p.url && !remoteIds.has(p.id));
-          const merged = [...remotePhotos, ...localOnly];
+          const localOnly = localPhotos.filter((p) => p && !remoteIds.has(p.id));
+          const merged = [...remotePhotos, ...localOnly]
+            .sort((a, b) => (b.dateKey || '').localeCompare(a.dateKey || ''));
           const incoming = JSON.stringify(merged);
           if (localStorage.getItem(k) !== incoming) {
             try { _pcOrigSet(k, incoming); changed = true; } catch {}
