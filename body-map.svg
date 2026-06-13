@@ -1,110 +1,106 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 450" fill="none">
   <rect width="200" height="450" fill="white"/>
   <style>
-    .muscle { fill: white; stroke: #bbb; stroke-width: 1; stroke-linejoin: round; }
-    .body   { fill: white; stroke: #ddd; stroke-width: 0.7; stroke-linejoin: round; }
+    .muscle-green  { fill: #3EC96E; stroke: #1a1a1a; stroke-width: 1; stroke-linejoin: round; }
+    .muscle-orange { fill: #FF8A30; stroke: #1a1a1a; stroke-width: 1; stroke-linejoin: round; }
+    .muscle-blue   { fill: #4A9EFF; stroke: #1a1a1a; stroke-width: 1; stroke-linejoin: round; }
+    .muscle-gray   { fill: #BBBBBB; stroke: #1a1a1a; stroke-width: 1; stroke-linejoin: round; }
+    .base          { fill: #F0F0F0; stroke: #AAAAAA; stroke-width: 0.8; stroke-linejoin: round; }
   </style>
 
   <!-- HEAD -->
-  <ellipse cx="100" cy="27" rx="24" ry="26" class="body"/>
-
+  <ellipse cx="100" cy="27" rx="24" ry="26" class="base"/>
   <!-- NECK -->
-  <path d="M90,51 L88,72 Q100,76 112,72 L110,51 Q100,55 90,51Z" class="body"/>
-
+  <path d="M90,51 L88,72 Q100,76 112,72 L110,51 Q100,55 90,51Z" class="base"/>
   <!-- TRAPEZIUS -->
-  <path d="M88,64 Q74,68 58,80 Q50,90 50,100 L60,96 Q70,88 82,78 Q90,72 90,68Z" class="body"/>
-  <path d="M112,64 Q126,68 142,80 Q150,90 150,100 L140,96 Q130,88 118,78 Q110,72 110,68Z" class="body"/>
-
+  <path d="M88,64 Q74,68 58,80 Q50,90 50,100 L60,96 Q70,88 82,78 Q90,72 90,68Z" class="base"/>
+  <path d="M112,64 Q126,68 142,80 Q150,90 150,100 L140,96 Q130,88 118,78 Q110,72 110,68Z" class="base"/>
   <!-- STERNUM -->
-  <rect x="97" y="88" width="6" height="42" rx="2" class="body"/>
+  <rect x="97" y="88" width="6" height="42" rx="2" class="base"/>
 
-  <!-- FRONT DELTOIDS -->
-  <path d="M52,80 Q38,94 36,116 Q36,136 50,144 Q62,142 68,128 Q72,112 66,96 Q58,80 52,80Z" class="muscle" id="hm-front-delt-l"/>
-  <path d="M148,80 Q162,94 164,116 Q164,136 150,144 Q138,142 132,128 Q128,112 134,96 Q142,80 148,80Z" class="muscle" id="hm-front-delt-r"/>
+  <!-- FRONT DELTOIDS — green -->
+  <path d="M52,80 Q38,94 36,116 Q36,136 50,144 Q62,142 68,128 Q72,112 66,96 Q58,80 52,80Z" class="muscle-green" id="hm-front-delt-l"/>
+  <path d="M148,80 Q162,94 164,116 Q164,136 150,144 Q138,142 132,128 Q128,112 134,96 Q142,80 148,80Z" class="muscle-green" id="hm-front-delt-r"/>
 
-  <!-- CHEST (pectoralis major) -->
-  <path d="M100,90 Q88,86 78,96 Q70,110 74,128 Q78,140 92,144 Q100,142 100,134Z" class="muscle" id="hm-chest-l"/>
-  <path d="M100,90 Q112,86 122,96 Q130,110 126,128 Q122,140 108,144 Q100,142 100,134Z" class="muscle" id="hm-chest-r"/>
+  <!-- CHEST — green -->
+  <path d="M100,90 Q88,86 78,96 Q70,110 74,128 Q78,140 92,144 Q100,142 100,134Z" class="muscle-green" id="hm-chest-l"/>
+  <path d="M100,90 Q112,86 122,96 Q130,110 126,128 Q122,140 108,144 Q100,142 100,134Z" class="muscle-green" id="hm-chest-r"/>
 
-  <!-- LATS (visible from front as side flare) -->
-  <path d="M68,96 Q58,124 56,162 Q56,192 64,214 Q70,220 74,218 Q72,198 70,168 Q68,132 72,102Z" class="muscle" id="hm-lat-l"/>
-  <path d="M132,96 Q142,124 144,162 Q144,192 136,214 Q130,220 126,218 Q128,198 130,168 Q132,132 128,102Z" class="muscle" id="hm-lat-r"/>
+  <!-- LATS (side flare) — gray -->
+  <path d="M68,96 Q58,124 56,162 Q56,192 64,214 Q70,220 74,218 Q72,198 70,168 Q68,132 72,102Z" class="muscle-gray" id="hm-lat-l"/>
+  <path d="M132,96 Q142,124 144,162 Q144,192 136,214 Q130,220 126,218 Q128,198 130,168 Q132,132 128,102Z" class="muscle-gray" id="hm-lat-r"/>
 
-  <!-- TRICEPS -->
-  <path d="M36,96 Q26,120 26,150 Q26,172 36,182 Q44,188 50,186 Q48,168 46,148 Q44,124 46,98Z" class="muscle" id="hm-tricep-l"/>
-  <path d="M164,96 Q174,120 174,150 Q174,172 164,182 Q156,188 150,186 Q152,168 154,148 Q156,124 154,98Z" class="muscle" id="hm-tricep-r"/>
+  <!-- TRICEPS — orange -->
+  <path d="M36,96 Q26,120 26,150 Q26,172 36,182 Q44,188 50,186 Q48,168 46,148 Q44,124 46,98Z" class="muscle-orange" id="hm-tricep-l"/>
+  <path d="M164,96 Q174,120 174,150 Q174,172 164,182 Q156,188 150,186 Q152,168 154,148 Q156,124 154,98Z" class="muscle-orange" id="hm-tricep-r"/>
 
-  <!-- BICEPS -->
-  <path d="M52,100 Q46,122 46,150 Q46,170 52,182 Q58,188 66,186 Q70,174 70,152 Q70,130 64,108 Q60,98 52,100Z" class="muscle" id="hm-bicep-l"/>
-  <path d="M148,100 Q154,122 154,150 Q154,170 148,182 Q142,188 134,186 Q130,174 130,152 Q130,130 136,108 Q140,98 148,100Z" class="muscle" id="hm-bicep-r"/>
+  <!-- BICEPS — orange -->
+  <path d="M52,100 Q46,122 46,150 Q46,170 52,182 Q58,188 66,186 Q70,174 70,152 Q70,130 64,108 Q60,98 52,100Z" class="muscle-orange" id="hm-bicep-l"/>
+  <path d="M148,100 Q154,122 154,150 Q154,170 148,182 Q142,188 134,186 Q130,174 130,152 Q130,130 136,108 Q140,98 148,100Z" class="muscle-orange" id="hm-bicep-r"/>
 
   <!-- FOREARMS -->
-  <path d="M36,186 Q28,208 30,230 Q32,246 44,250 Q54,250 58,240 Q62,224 58,206 Q54,188 48,186 Q42,184 36,186Z" class="body"/>
-  <path d="M164,186 Q172,208 170,230 Q168,246 156,250 Q146,250 142,240 Q138,224 142,206 Q146,188 152,186 Q158,184 164,186Z" class="body"/>
-
+  <path d="M36,186 Q28,208 30,230 Q32,246 44,250 Q54,250 58,240 Q62,224 58,206 Q54,188 48,186 Q42,184 36,186Z" class="base"/>
+  <path d="M164,186 Q172,208 170,230 Q168,246 156,250 Q146,250 142,240 Q138,224 142,206 Q146,188 152,186 Q158,184 164,186Z" class="base"/>
   <!-- HANDS -->
-  <ellipse cx="46" cy="256" rx="13" ry="10" class="body"/>
-  <ellipse cx="154" cy="256" rx="13" ry="10" class="body"/>
+  <ellipse cx="46" cy="256" rx="13" ry="10" class="base"/>
+  <ellipse cx="154" cy="256" rx="13" ry="10" class="base"/>
 
-  <!-- ABS — 6 segments -->
-  <rect x="78" y="146" width="20" height="17" rx="6" class="body"/>
-  <rect x="102" y="146" width="20" height="17" rx="6" class="body"/>
-  <rect x="78" y="167" width="20" height="17" rx="6" class="body"/>
-  <rect x="102" y="167" width="20" height="17" rx="6" class="body"/>
-  <rect x="78" y="188" width="20" height="15" rx="6" class="body"/>
-  <rect x="102" y="188" width="20" height="15" rx="6" class="body"/>
+  <!-- ABS — blue (6 segments) -->
+  <rect x="78" y="146" width="20" height="17" rx="6" class="muscle-blue"/>
+  <rect x="102" y="146" width="20" height="17" rx="6" class="muscle-blue"/>
+  <rect x="78" y="167" width="20" height="17" rx="6" class="muscle-blue"/>
+  <rect x="102" y="167" width="20" height="17" rx="6" class="muscle-blue"/>
+  <rect x="78" y="188" width="20" height="15" rx="6" class="muscle-blue"/>
+  <rect x="102" y="188" width="20" height="15" rx="6" class="muscle-blue"/>
   <!-- Linea alba -->
-  <rect x="99" y="144" width="2" height="62" rx="1" fill="#ddd" stroke="none"/>
-  <!-- Obliques -->
-  <path d="M74,144 Q66,166 64,192 Q64,212 68,224 Q72,220 76,210 Q78,198 78,182 Q78,164 76,144Z" class="body"/>
-  <path d="M126,144 Q134,166 136,192 Q136,212 132,224 Q128,220 122,210 Q122,198 122,182 Q122,164 124,144Z" class="body"/>
-  <!-- Lower abs -->
-  <rect x="80" y="208" width="40" height="14" rx="5" class="body"/>
+  <rect x="99" y="144" width="2" height="62" rx="1" fill="white" stroke="none"/>
+  <!-- OBLIQUES — blue -->
+  <path d="M74,144 Q66,166 64,192 Q64,212 68,224 Q72,220 76,210 Q78,198 78,182 Q78,164 76,144Z" class="muscle-blue"/>
+  <path d="M126,144 Q134,166 136,192 Q136,212 132,224 Q128,220 122,210 Q122,198 122,182 Q122,164 124,144Z" class="muscle-blue"/>
+  <!-- LOWER ABS -->
+  <rect x="80" y="208" width="40" height="14" rx="5" class="muscle-blue"/>
 
   <!-- PELVIS -->
-  <path d="M76,226 Q62,236 58,256 Q68,244 82,238 Q90,232 100,232 Q110,232 118,238 Q132,244 142,256 Q138,236 124,226 Q108,230 100,230 Q92,230 76,226Z" class="body"/>
+  <path d="M76,226 Q62,236 58,256 Q68,244 82,238 Q90,232 100,232 Q110,232 118,238 Q132,244 142,256 Q138,236 124,226 Q108,230 100,230 Q92,230 76,226Z" class="base"/>
 
-  <!-- GLUTES (hip flare, front view) -->
-  <path d="M60,258 Q46,274 46,298 Q58,278 68,264 Q72,254 76,246Z" class="muscle" id="hm-glute-l"/>
-  <path d="M140,258 Q154,274 154,298 Q142,278 132,264 Q128,254 124,246Z" class="muscle" id="hm-glute-r"/>
+  <!-- GLUTES — gray (front view, hip flare) -->
+  <path d="M60,258 Q46,274 46,298 Q58,278 68,264 Q72,254 76,246Z" class="muscle-gray" id="hm-glute-l"/>
+  <path d="M140,258 Q154,274 154,298 Q142,278 132,264 Q128,254 124,246Z" class="muscle-gray" id="hm-glute-r"/>
 
-  <!-- ADDUCTORS (inner thigh) -->
-  <path d="M98,252 Q94,278 94,318 Q94,344 98,362 Q96,350 96,322 Q96,290 98,260Z" class="body"/>
-  <path d="M102,252 Q106,278 106,318 Q106,344 102,362 Q104,350 104,322 Q104,290 102,260Z" class="body"/>
+  <!-- ADDUCTORS -->
+  <path d="M98,252 Q94,278 94,318 Q94,344 98,362 Q96,350 96,322 Q96,290 98,260Z" class="base"/>
+  <path d="M102,252 Q106,278 106,318 Q106,344 102,362 Q104,350 104,322 Q104,290 102,260Z" class="base"/>
 
-  <!-- QUADS — rectus femoris (center) -->
-  <path d="M80,260 Q76,294 76,330 Q76,356 82,372 Q86,376 90,372 Q94,364 94,336 Q94,304 90,266 Q86,256 80,260Z" class="muscle" id="hm-quad-rf-l"/>
-  <path d="M120,260 Q124,294 124,330 Q124,356 118,372 Q114,376 110,372 Q106,364 106,336 Q106,304 110,266 Q114,256 120,260Z" class="muscle" id="hm-quad-rf-r"/>
+  <!-- QUADS — orange (rectus femoris) -->
+  <path d="M80,260 Q76,294 76,330 Q76,356 82,372 Q86,376 90,372 Q94,364 94,336 Q94,304 90,266 Q86,256 80,260Z" class="muscle-orange" id="hm-quad-rf-l"/>
+  <path d="M120,260 Q124,294 124,330 Q124,356 118,372 Q114,376 110,372 Q106,364 106,336 Q106,304 110,266 Q114,256 120,260Z" class="muscle-orange" id="hm-quad-rf-r"/>
+  <!-- QUADS — orange (vastus lateralis) -->
+  <path d="M70,268 Q62,302 60,340 Q60,364 66,378 Q72,370 74,350 Q76,324 74,290 Q72,274 70,268Z" class="muscle-orange" id="hm-quad-vl-l"/>
+  <path d="M130,268 Q138,302 140,340 Q140,364 134,378 Q128,370 126,350 Q124,324 126,290 Q128,274 130,268Z" class="muscle-orange" id="hm-quad-vl-r"/>
+  <!-- QUADS — orange (vastus medialis teardrop) -->
+  <path d="M92,322 Q88,340 90,358 Q94,370 98,366 Q98,352 96,338 Q94,326 92,322Z" class="muscle-orange" id="hm-quad-vm-l"/>
+  <path d="M108,322 Q112,340 110,358 Q106,370 102,366 Q102,352 104,338 Q106,326 108,322Z" class="muscle-orange" id="hm-quad-vm-r"/>
 
-  <!-- QUADS — vastus lateralis (outer) -->
-  <path d="M70,268 Q62,302 60,340 Q60,364 66,378 Q72,370 74,350 Q76,324 74,290 Q72,274 70,268Z" class="muscle" id="hm-quad-vl-l"/>
-  <path d="M130,268 Q138,302 140,340 Q140,364 134,378 Q128,370 126,350 Q124,324 126,290 Q128,274 130,268Z" class="muscle" id="hm-quad-vl-r"/>
-
-  <!-- QUADS — vastus medialis (inner teardrop) -->
-  <path d="M92,322 Q88,340 90,358 Q94,370 98,366 Q98,352 96,338 Q94,326 92,322Z" class="muscle" id="hm-quad-vm-l"/>
-  <path d="M108,322 Q112,340 110,358 Q106,370 102,366 Q102,352 104,338 Q106,326 108,322Z" class="muscle" id="hm-quad-vm-r"/>
-
-  <!-- HAMSTRINGS / IT band (outer thigh) -->
-  <path d="M60,272 Q50,310 50,350 Q52,374 60,386 Q60,366 58,336 Q58,306 60,280Z" class="muscle" id="hm-ham-l"/>
-  <path d="M140,272 Q150,310 150,350 Q148,374 140,386 Q140,366 142,336 Q142,306 140,280Z" class="muscle" id="hm-ham-r"/>
+  <!-- HAMSTRINGS / IT band — gray -->
+  <path d="M60,272 Q50,310 50,350 Q52,374 60,386 Q60,366 58,336 Q58,306 60,280Z" class="muscle-gray" id="hm-ham-l"/>
+  <path d="M140,272 Q150,310 150,350 Q148,374 140,386 Q140,366 142,336 Q142,306 140,280Z" class="muscle-gray" id="hm-ham-r"/>
 
   <!-- KNEE CAPS -->
-  <ellipse cx="79" cy="382" rx="16" ry="11" class="body"/>
-  <ellipse cx="121" cy="382" rx="16" ry="11" class="body"/>
+  <ellipse cx="79" cy="382" rx="16" ry="11" class="base"/>
+  <ellipse cx="121" cy="382" rx="16" ry="11" class="base"/>
 
-  <!-- CALVES — medial head -->
-  <path d="M60,396 Q54,420 56,440 Q60,452 70,454 Q80,452 84,438 Q86,422 80,400 Q74,386 66,386 Q62,388 60,396Z" class="muscle" id="hm-calf-l-med"/>
-  <path d="M140,396 Q146,420 144,440 Q140,452 130,454 Q120,452 116,438 Q114,422 120,400 Q126,386 134,386 Q138,388 140,396Z" class="muscle" id="hm-calf-r-med"/>
+  <!-- CALVES — green (medial) -->
+  <path d="M60,396 Q54,420 56,440 Q60,452 70,454 Q80,452 84,438 Q86,422 80,400 Q74,386 66,386 Q62,388 60,396Z" class="muscle-green" id="hm-calf-l-med"/>
+  <path d="M140,396 Q146,420 144,440 Q140,452 130,454 Q120,452 116,438 Q114,422 120,400 Q126,386 134,386 Q138,388 140,396Z" class="muscle-green" id="hm-calf-r-med"/>
+  <!-- CALVES — green (lateral) -->
+  <path d="M82,394 Q88,414 86,436 Q84,448 80,454 Q90,448 96,434 Q98,416 92,394 Q90,386 86,388Z" class="muscle-green" id="hm-calf-l-lat"/>
+  <path d="M118,394 Q112,414 114,436 Q116,448 120,454 Q110,448 104,434 Q102,416 108,394 Q110,386 114,388Z" class="muscle-green" id="hm-calf-r-lat"/>
 
-  <!-- CALVES — lateral head -->
-  <path d="M82,394 Q88,414 86,436 Q84,448 80,454 Q90,448 96,434 Q98,416 92,394 Q90,386 86,388Z" class="muscle" id="hm-calf-l-lat"/>
-  <path d="M118,394 Q112,414 114,436 Q116,448 120,454 Q110,448 104,434 Q102,416 108,394 Q110,386 114,388Z" class="muscle" id="hm-calf-r-lat"/>
-
-  <!-- TIBIALIS ANTERIOR (shin) -->
-  <rect x="66" y="396" width="14" height="44" rx="5" fill="white" stroke="#d0d0d0" stroke-width="0.6"/>
-  <rect x="120" y="396" width="14" height="44" rx="5" fill="white" stroke="#d0d0d0" stroke-width="0.6"/>
+  <!-- TIBIALIS / SHIN -->
+  <rect x="66" y="396" width="14" height="44" rx="5" fill="#E8E8E8" stroke="#AAAAAA" stroke-width="0.6"/>
+  <rect x="120" y="396" width="14" height="44" rx="5" fill="#E8E8E8" stroke="#AAAAAA" stroke-width="0.6"/>
 
   <!-- FEET -->
-  <ellipse cx="76" cy="446" rx="22" ry="9" class="body"/>
-  <ellipse cx="124" cy="446" rx="22" ry="9" class="body"/>
+  <ellipse cx="76" cy="446" rx="22" ry="9" class="base"/>
+  <ellipse cx="124" cy="446" rx="22" ry="9" class="base"/>
 </svg>
