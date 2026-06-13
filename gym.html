@@ -1693,108 +1693,180 @@ img, video, canvas, svg { max-width: 100%; }
           <span class="hm-split-badge" id="hmSplitBadge">—</span>
         </div>
         <div class="hm-body" id="hmMapBody">
-          <svg class="hm-svg" viewBox="0 0 200 450" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g transform="translate(100,0) scale(1.25,1) translate(-100,0)">
-            <!-- HEAD -->
-            <ellipse cx="100" cy="27" rx="24" ry="26" fill="#F0F0F0" stroke="#AAAAAA" stroke-width="0.8"/>
-            <!-- NECK -->
-            <path d="M90,51 L88,72 Q100,76 112,72 L110,51 Q100,55 90,51Z" fill="#F0F0F0" stroke="#AAAAAA" stroke-width="0.8"/>
-            <!-- TRAPEZIUS -->
-            <path d="M88,64 Q72,66 50,78 Q42,88 43,100 L53,96 Q65,86 82,76 Q90,72 90,68Z" fill="#F0F0F0" stroke="#AAAAAA" stroke-width="0.8"/>
-            <path d="M112,64 Q128,66 150,78 Q158,88 157,100 L147,96 Q135,86 118,76 Q110,72 110,68Z" fill="#F0F0F0" stroke="#AAAAAA" stroke-width="0.8"/>
-            <!-- STERNUM -->
-            <rect x="97" y="88" width="6" height="42" rx="2" fill="#F0F0F0" stroke="#AAAAAA" stroke-width="0.8"/>
+          <svg class="hm-svg" viewBox="0 0 200 460" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <clipPath id="hmBodyClip">
+                <ellipse cx="100" cy="27" rx="21" ry="25"/>
+                <path d="M88,50 L86,70 Q56,74 40,102 Q28,130 32,164
+                         L40,198 Q38,224 40,254 L32,274 Q22,282 28,292
+                         L46,276 Q48,234 52,202 Q56,174 58,148
+                         L58,260 Q54,284 56,362 L62,390 Q64,408 64,434
+                         L58,454 L92,454 L90,274 Q96,270 100,270
+                         Q104,270 110,274 L108,454 L142,454 L136,434
+                         Q136,408 138,390 L144,362 Q146,284 142,260
+                         L142,148 Q144,174 148,202 Q152,234 154,276
+                         L172,292 Q178,282 168,274 L160,254
+                         Q162,224 160,198 L168,164 Q172,130 160,102
+                         Q144,74 114,70 L112,50 Z"/>
+              </clipPath>
+            </defs>
 
-            <!-- CLAVICLES -->
-            <path d="M98,89 Q74,82 44,78" stroke="#AAAAAA" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-            <path d="M102,89 Q126,82 156,78" stroke="#AAAAAA" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            <!-- ── FILLED ZONES (clipped to body silhouette) ── -->
+            <g clip-path="url(#hmBodyClip)">
 
-            <!-- FRONT DELTOIDS — green -->
-            <path d="M44,78 Q30,92 28,116 Q28,136 44,144 Q56,142 62,128 Q68,112 62,96 Q52,80 44,78Z" class="hm-group" style="fill:#3EC96E" id="hm-front-delt-l"/>
-            <path d="M156,78 Q170,92 172,116 Q172,136 156,144 Q144,142 138,128 Q132,112 138,96 Q148,80 156,78Z" class="hm-group" style="fill:#3EC96E" id="hm-front-delt-r"/>
+              <!-- BASE: fills anything not covered by a zone -->
+              <rect x="0" y="0" width="200" height="460" fill="#C8C8C8"/>
 
-            <!-- CHEST — green -->
-            <path d="M100,90 Q86,84 75,94 Q67,108 71,128 Q76,140 92,144 Q100,142 100,134Z" class="hm-group" style="fill:#3EC96E" id="hm-chest-l"/>
-            <path d="M100,90 Q114,84 125,94 Q133,108 129,128 Q124,140 108,144 Q100,142 100,134Z" class="hm-group" style="fill:#3EC96E" id="hm-chest-r"/>
+              <!-- TRAPEZIUS / NECK — gray -->
+              <rect x="56" y="50" width="88" height="32" fill="#BBBBBB"/>
 
-            <!-- LATS — gray -->
-            <path d="M68,96 Q60,124 60,162 Q61,194 66,214 Q70,220 74,218 Q72,198 72,168 Q70,132 72,102Z" class="hm-group" style="fill:#BBBBBB" id="hm-lat-l"/>
-            <path d="M132,96 Q140,124 140,162 Q139,194 134,214 Q130,220 126,218 Q128,198 128,168 Q130,132 128,102Z" class="hm-group" style="fill:#BBBBBB" id="hm-lat-r"/>
+              <!-- LEFT DELTOID — green -->
+              <rect x="22" y="82" width="36" height="66" class="hm-group" style="fill:#3EC96E" id="hm-front-delt-l"/>
+              <!-- RIGHT DELTOID — green -->
+              <rect x="142" y="82" width="36" height="66" class="hm-group" style="fill:#3EC96E" id="hm-front-delt-r"/>
 
-            <!-- TRICEPS — orange -->
-            <path d="M28,96 Q18,120 18,150 Q18,172 28,182 Q36,188 42,186 Q40,168 38,148 Q36,124 38,98Z" class="hm-group" style="fill:#FF8A30" id="hm-tricep-l"/>
-            <path d="M172,96 Q182,120 182,150 Q182,172 172,182 Q164,188 158,186 Q160,168 162,148 Q164,124 162,98Z" class="hm-group" style="fill:#FF8A30" id="hm-tricep-r"/>
+              <!-- LEFT CHEST (pec) — green -->
+              <rect x="58" y="70" width="42" height="78" class="hm-group" style="fill:#3EC96E" id="hm-chest-l"/>
+              <!-- RIGHT CHEST (pec) — green -->
+              <rect x="100" y="70" width="42" height="78" class="hm-group" style="fill:#3EC96E" id="hm-chest-r"/>
 
-            <!-- BICEPS — orange -->
-            <path d="M46,100 Q40,122 40,150 Q40,170 46,182 Q52,188 62,186 Q66,174 66,152 Q66,130 60,108 Q56,98 46,100Z" class="hm-group" style="fill:#FF8A30" id="hm-bicep-l"/>
-            <path d="M154,100 Q160,122 160,150 Q160,170 154,182 Q148,188 138,186 Q134,174 134,152 Q134,130 140,108 Q144,98 154,100Z" class="hm-group" style="fill:#FF8A30" id="hm-bicep-r"/>
+              <!-- LEFT TRICEP — orange (outer half of upper arm) -->
+              <rect x="22" y="148" width="18" height="54" class="hm-group" style="fill:#FF8A30" id="hm-tricep-l"/>
+              <!-- LEFT BICEP — orange (inner half of upper arm) -->
+              <rect x="40" y="148" width="18" height="54" class="hm-group" style="fill:#FF8A30" id="hm-bicep-l"/>
+              <!-- RIGHT BICEP — orange -->
+              <rect x="142" y="148" width="18" height="54" class="hm-group" style="fill:#FF8A30" id="hm-bicep-r"/>
+              <!-- RIGHT TRICEP — orange -->
+              <rect x="160" y="148" width="18" height="54" class="hm-group" style="fill:#FF8A30" id="hm-tricep-r"/>
 
-            <!-- FOREARMS -->
-            <path d="M28,186 Q20,208 22,230 Q24,246 36,250 Q48,250 52,240 Q56,224 52,206 Q48,188 40,186 Q34,184 28,186Z" fill="#E0E0E0" stroke="#AAAAAA" stroke-width="0.8"/>
-            <path d="M172,186 Q180,208 178,230 Q176,246 164,250 Q152,250 148,240 Q144,224 148,206 Q152,188 160,186 Q166,184 172,186Z" fill="#E0E0E0" stroke="#AAAAAA" stroke-width="0.8"/>
-            <!-- HANDS -->
-            <ellipse cx="38" cy="256" rx="13" ry="10" fill="#E0E0E0" stroke="#AAAAAA" stroke-width="0.8"/>
-            <ellipse cx="162" cy="256" rx="13" ry="10" fill="#E0E0E0" stroke="#AAAAAA" stroke-width="0.8"/>
+              <!-- LEFT LAT / OBLIQUE — gray -->
+              <rect x="58" y="148" width="20" height="80" class="hm-group" style="fill:#AAAAAA" id="hm-lat-l"/>
+              <!-- RIGHT LAT / OBLIQUE — gray -->
+              <rect x="122" y="148" width="20" height="80" class="hm-group" style="fill:#AAAAAA" id="hm-lat-r"/>
 
-            <!-- ABS — blue (6 segments) -->
-            <rect x="78" y="146" width="20" height="17" rx="6" fill="#4A9EFF" stroke="#1a1a1a" stroke-width="1"/>
-            <rect x="102" y="146" width="20" height="17" rx="6" fill="#4A9EFF" stroke="#1a1a1a" stroke-width="1"/>
-            <rect x="78" y="167" width="20" height="17" rx="6" fill="#4A9EFF" stroke="#1a1a1a" stroke-width="1"/>
-            <rect x="102" y="167" width="20" height="17" rx="6" fill="#4A9EFF" stroke="#1a1a1a" stroke-width="1"/>
-            <rect x="78" y="188" width="20" height="15" rx="6" fill="#4A9EFF" stroke="#1a1a1a" stroke-width="1"/>
-            <rect x="102" y="188" width="20" height="15" rx="6" fill="#4A9EFF" stroke="#1a1a1a" stroke-width="1"/>
-            <!-- Linea alba -->
-            <rect x="99" y="144" width="2" height="62" rx="1" fill="white" stroke="none"/>
-            <!-- OBLIQUES — blue -->
-            <path d="M77,144 Q71,163 69,189 Q69,210 72,222 Q74,220 78,210 Q80,198 80,182 Q80,162 78,144Z" fill="#4A9EFF" stroke="#1a1a1a" stroke-width="1"/>
-            <path d="M123,144 Q129,163 131,189 Q131,210 128,222 Q126,220 122,210 Q120,198 120,182 Q120,162 122,144Z" fill="#4A9EFF" stroke="#1a1a1a" stroke-width="1"/>
-            <!-- LOWER ABS -->
-            <rect x="84" y="208" width="32" height="14" rx="5" fill="#4A9EFF" stroke="#1a1a1a" stroke-width="1"/>
+              <!-- ABS / CORE — blue -->
+              <rect x="78" y="148" width="44" height="80" fill="#4A9EFF"/>
 
-            <!-- PELVIS -->
-            <path d="M80,226 Q64,236 60,256 Q70,244 84,238 Q92,232 100,232 Q108,232 116,238 Q130,244 140,256 Q136,236 120,226 Q108,230 100,230 Q92,230 80,226Z" fill="#E0E0E0" stroke="#AAAAAA" stroke-width="0.8"/>
+              <!-- FOREARMS — gray -->
+              <rect x="22" y="202" width="36" height="56" fill="#BBBBBB"/>
+              <rect x="142" y="202" width="36" height="56" fill="#BBBBBB"/>
 
-            <!-- GLUTES — gray -->
-            <path d="M60,258 Q46,274 46,298 Q58,278 68,264 Q72,254 76,246Z" class="hm-group" style="fill:#BBBBBB" id="hm-glute-l"/>
-            <path d="M140,258 Q154,274 154,298 Q142,278 132,264 Q128,254 124,246Z" class="hm-group" style="fill:#BBBBBB" id="hm-glute-r"/>
+              <!-- PELVIS / LOWER ABS — gray -->
+              <rect x="58" y="228" width="84" height="36" fill="#BBBBBB"/>
 
-            <!-- ADDUCTORS -->
-            <path d="M98,252 Q94,278 94,318 Q94,344 98,362 Q96,350 96,322 Q96,290 98,260Z" fill="#E0E0E0" stroke="#AAAAAA" stroke-width="0.5"/>
-            <path d="M102,252 Q106,278 106,318 Q106,344 102,362 Q104,350 104,322 Q104,290 102,260Z" fill="#E0E0E0" stroke="#AAAAAA" stroke-width="0.5"/>
+              <!-- HANDS — gray -->
+              <rect x="18" y="258" width="40" height="22" fill="#BBBBBB"/>
+              <rect x="142" y="258" width="40" height="22" fill="#BBBBBB"/>
 
-            <!-- QUADS — orange (rectus femoris) -->
-            <path d="M80,260 Q76,294 76,330 Q76,356 82,372 Q86,376 90,372 Q94,364 94,336 Q94,304 90,266 Q86,256 80,260Z" class="hm-group" style="fill:#FF8A30" id="hm-quad-rf-l"/>
-            <path d="M120,260 Q124,294 124,330 Q124,356 118,372 Q114,376 110,372 Q106,364 106,336 Q106,304 110,266 Q114,256 120,260Z" class="hm-group" style="fill:#FF8A30" id="hm-quad-rf-r"/>
-            <!-- QUADS — orange (vastus lateralis) -->
-            <path d="M70,268 Q62,302 60,340 Q60,364 66,378 Q72,370 74,350 Q76,324 74,290 Q72,274 70,268Z" class="hm-group" style="fill:#FF8A30" id="hm-quad-vl-l"/>
-            <path d="M130,268 Q138,302 140,340 Q140,364 134,378 Q128,370 126,350 Q124,324 126,290 Q128,274 130,268Z" class="hm-group" style="fill:#FF8A30" id="hm-quad-vl-r"/>
-            <!-- QUADS — orange (vastus medialis teardrop) -->
-            <path d="M92,322 Q88,340 90,358 Q94,370 98,366 Q98,352 96,338 Q94,326 92,322Z" class="hm-group" style="fill:#FF8A30" id="hm-quad-vm-l"/>
-            <path d="M108,322 Q112,340 110,358 Q106,370 102,366 Q102,352 104,338 Q106,326 108,322Z" class="hm-group" style="fill:#FF8A30" id="hm-quad-vm-r"/>
+              <!-- LEFT GLUTE — gray (barely visible front view) -->
+              <rect x="58" y="264" width="42" height="14" class="hm-group" style="fill:#AAAAAA" id="hm-glute-l"/>
+              <!-- RIGHT GLUTE — gray -->
+              <rect x="100" y="264" width="42" height="14" class="hm-group" style="fill:#AAAAAA" id="hm-glute-r"/>
 
-            <!-- HAMSTRINGS / IT band — gray -->
-            <path d="M60,272 Q50,310 50,350 Q52,374 60,386 Q60,366 58,336 Q58,306 60,280Z" class="hm-group" style="fill:#BBBBBB" id="hm-ham-l"/>
-            <path d="M140,272 Q150,310 150,350 Q148,374 140,386 Q140,366 142,336 Q142,306 140,280Z" class="hm-group" style="fill:#BBBBBB" id="hm-ham-r"/>
+              <!-- LEFT QUAD vastus lateralis — orange (outer) -->
+              <rect x="58" y="278" width="10" height="110" class="hm-group" style="fill:#FF8A30" id="hm-quad-vl-l"/>
+              <!-- LEFT QUAD rectus femoris — orange (center) -->
+              <rect x="68" y="278" width="24" height="110" class="hm-group" style="fill:#FF8A30" id="hm-quad-rf-l"/>
+              <!-- LEFT QUAD vastus medialis — orange (inner, teardrop) -->
+              <rect x="82" y="318" width="10" height="70" class="hm-group" style="fill:#FF8A30" id="hm-quad-vm-l"/>
 
-            <!-- KNEE CAPS -->
-            <ellipse cx="79" cy="382" rx="16" ry="11" fill="#E0E0E0" stroke="#AAAAAA" stroke-width="0.8"/>
-            <ellipse cx="121" cy="382" rx="16" ry="11" fill="#E0E0E0" stroke="#AAAAAA" stroke-width="0.8"/>
+              <!-- RIGHT QUAD vastus medialis -->
+              <rect x="108" y="318" width="10" height="70" class="hm-group" style="fill:#FF8A30" id="hm-quad-vm-r"/>
+              <!-- RIGHT QUAD rectus femoris -->
+              <rect x="108" y="278" width="24" height="110" class="hm-group" style="fill:#FF8A30" id="hm-quad-rf-r"/>
+              <!-- RIGHT QUAD vastus lateralis -->
+              <rect x="132" y="278" width="10" height="110" class="hm-group" style="fill:#FF8A30" id="hm-quad-vl-r"/>
 
-            <!-- CALVES — green (medial) -->
-            <path d="M60,396 Q54,420 56,440 Q60,452 70,454 Q80,452 84,438 Q86,422 80,400 Q74,386 66,386 Q62,388 60,396Z" class="hm-group" style="fill:#3EC96E" id="hm-calf-l-med"/>
-            <path d="M140,396 Q146,420 144,440 Q140,452 130,454 Q120,452 116,438 Q114,422 120,400 Q126,386 134,386 Q138,388 140,396Z" class="hm-group" style="fill:#3EC96E" id="hm-calf-r-med"/>
-            <!-- CALVES — green (lateral) -->
-            <path d="M82,394 Q88,414 86,436 Q84,448 80,454 Q90,448 96,434 Q98,416 92,394 Q90,386 86,388Z" class="hm-group" style="fill:#3EC96E" id="hm-calf-l-lat"/>
-            <path d="M118,394 Q112,414 114,436 Q116,448 120,454 Q110,448 104,434 Q102,416 108,394 Q110,386 114,388Z" class="hm-group" style="fill:#3EC96E" id="hm-calf-r-lat"/>
+              <!-- HAMSTRINGS — gray (outer leg edge, front view) -->
+              <rect x="58" y="278" width="0" height="110" class="hm-group" style="fill:#AAAAAA" id="hm-ham-l"/>
+              <rect x="142" y="278" width="0" height="110" class="hm-group" style="fill:#AAAAAA" id="hm-ham-r"/>
 
-            <!-- TIBIALIS / SHIN -->
-            <rect x="66" y="396" width="14" height="44" rx="5" fill="#E8E8E8" stroke="#999" stroke-width="0.6"/>
-            <rect x="120" y="396" width="14" height="44" rx="5" fill="#E8E8E8" stroke="#999" stroke-width="0.6"/>
+              <!-- INNER THIGH / ADDUCTOR strip — slightly lighter -->
+              <rect x="92" y="278" width="16" height="110" fill="#C0C0C0"/>
 
-            <!-- FEET -->
-            <ellipse cx="76" cy="446" rx="22" ry="9" fill="#E0E0E0" stroke="#AAAAAA" stroke-width="0.8"/>
-            <ellipse cx="124" cy="446" rx="22" ry="9" fill="#E0E0E0" stroke="#AAAAAA" stroke-width="0.8"/>
+              <!-- LEFT CALF medial — green -->
+              <rect x="68" y="388" width="24" height="64" class="hm-group" style="fill:#3EC96E" id="hm-calf-l-med"/>
+              <!-- LEFT CALF lateral — green -->
+              <rect x="58" y="388" width="10" height="64" class="hm-group" style="fill:#3EC96E" id="hm-calf-l-lat"/>
+              <!-- RIGHT CALF medial — green -->
+              <rect x="108" y="388" width="24" height="64" class="hm-group" style="fill:#3EC96E" id="hm-calf-r-med"/>
+              <!-- RIGHT CALF lateral — green -->
+              <rect x="132" y="388" width="10" height="64" class="hm-group" style="fill:#3EC96E" id="hm-calf-r-lat"/>
+
+              <!-- SHIN / TIBIALIS — gray -->
+              <rect x="82" y="388" width="10" height="58" fill="#BBBBBB"/>
+              <rect x="108" y="388" width="10" height="58" fill="#BBBBBB"/>
+
+              <!-- FEET — gray -->
+              <rect x="54" y="452" width="40" height="8" fill="#BBBBBB"/>
+              <rect x="106" y="452" width="40" height="8" fill="#BBBBBB"/>
+
+              <!-- ── INTERNAL DIVIDING LINES ── -->
+              <g stroke="#1a1a1a" stroke-width="0.9" stroke-linecap="round">
+                <!-- Neck / shoulder top -->
+                <line x1="58" y1="70" x2="142" y2="70"/>
+                <!-- Trap bottom / chest top (angled) -->
+                <line x1="22" y1="82" x2="58" y2="82"/>
+                <line x1="142" y1="82" x2="178" y2="82"/>
+                <!-- Arm / torso vertical splits -->
+                <line x1="58" y1="70" x2="58" y2="264"/>
+                <line x1="142" y1="70" x2="142" y2="264"/>
+                <!-- Chest center -->
+                <line x1="100" y1="70" x2="100" y2="148"/>
+                <!-- Chest / abs boundary -->
+                <line x1="22" y1="148" x2="178" y2="148"/>
+                <!-- Lat / abs vertical -->
+                <line x1="78" y1="148" x2="78" y2="228"/>
+                <line x1="122" y1="148" x2="122" y2="228"/>
+                <!-- Bicep / tricep split -->
+                <line x1="40" y1="148" x2="40" y2="202"/>
+                <line x1="160" y1="148" x2="160" y2="202"/>
+                <!-- Forearm top -->
+                <line x1="22" y1="202" x2="58" y2="202"/>
+                <line x1="142" y1="202" x2="178" y2="202"/>
+                <!-- Abs bottom / pelvis -->
+                <line x1="58" y1="228" x2="142" y2="228"/>
+                <!-- Pelvis / thigh top -->
+                <line x1="58" y1="264" x2="142" y2="264"/>
+                <!-- Glute / quad split -->
+                <line x1="58" y1="278" x2="142" y2="278"/>
+                <!-- Leg center -->
+                <line x1="92" y1="264" x2="92" y2="454"/>
+                <line x1="108" y1="264" x2="108" y2="454"/>
+                <!-- VL / RF split -->
+                <line x1="68" y1="278" x2="68" y2="388"/>
+                <line x1="132" y1="278" x2="132" y2="388"/>
+                <!-- VM inner teardrop top -->
+                <line x1="82" y1="318" x2="92" y2="318"/>
+                <line x1="108" y1="318" x2="118" y2="318"/>
+                <!-- Quad / knee / calf -->
+                <line x1="58" y1="388" x2="142" y2="388"/>
+                <!-- Calf lateral split -->
+                <line x1="68" y1="388" x2="68" y2="452"/>
+                <line x1="132" y1="388" x2="132" y2="452"/>
+                <!-- Shin strips -->
+                <line x1="82" y1="388" x2="82" y2="446"/>
+                <line x1="118" y1="388" x2="118" y2="446"/>
+                <!-- Hands boundary -->
+                <line x1="22" y1="258" x2="58" y2="258"/>
+                <line x1="142" y1="258" x2="178" y2="258"/>
+              </g>
             </g>
+
+            <!-- ── BODY OUTLINE (drawn on top) ── -->
+            <ellipse cx="100" cy="27" rx="21" ry="25" stroke="#1a1a1a" stroke-width="1.5"/>
+            <path d="M88,50 L86,70 Q56,74 40,102 Q28,130 32,164
+                     L40,198 Q38,224 40,254 L32,274 Q22,282 28,292
+                     L46,276 Q48,234 52,202 Q56,174 58,148
+                     L58,260 Q54,284 56,362 L62,390 Q64,408 64,434
+                     L58,454 L92,454 L90,274 Q96,270 100,270
+                     Q104,270 110,274 L108,454 L142,454 L136,434
+                     Q136,408 138,390 L144,362 Q146,284 142,260
+                     L142,148 Q144,174 148,202 Q152,234 154,276
+                     L172,292 Q178,282 168,274 L160,254
+                     Q162,224 160,198 L168,164 Q172,130 160,102
+                     Q144,74 114,70 L112,50 Z"
+                  stroke="#1a1a1a" stroke-width="1.5"/>
           </svg>
           <div class="hm-labels" id="hmLabels"></div>
         </div>
