@@ -617,10 +617,8 @@ body::after {
   box-shadow: 0 12px 40px rgba(0,0,0,0.45);
 }
 .cal-inner {
-  max-width: 100%; margin: 0 auto;
+  max-width: 360px; margin: 0 auto;
 }
-.cal-cell.cal-other-month .cal-day-num { color: rgba(255,255,255,0.18); }
-.cal-cell.cal-other-month:hover { background: rgba(255,255,255,0.04); }
 .cal-head {
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
 }
@@ -1708,17 +1706,7 @@ body::after {
     var last  = new Date(calYear, calMonth + 1, 0);
     $('calMonthLabel').textContent = MONTHS[calMonth] + ' ' + calYear;
     var html = '';
-    var leadCount = first.getDay();
-    var prevLast  = new Date(calYear, calMonth, 0);
-    for (var i = leadCount - 1; i >= 0; i--) {
-      var pDay = prevLast.getDate() - i;
-      var pMo  = calMonth === 0 ? 11 : calMonth - 1;
-      var pYr  = calMonth === 0 ? calYear - 1 : calYear;
-      var pds  = toKey(new Date(pYr, pMo, pDay));
-      html += '<div class="cal-cell cal-other-month" data-date="' + pds + '">'
-            + '<span class="cal-day-num">' + pDay + '</span>'
-            + '<div class="cal-dots"></div></div>';
-    }
+    for (var i = 0; i < first.getDay(); i++) html += '<div class="cal-cell cal-empty"></div>';
     for (var d = 1; d <= last.getDate(); d++) {
       var ds  = toKey(new Date(calYear, calMonth, d));
       var dayTasks = tasks.filter(function(t) { return taskOn(t, ds); });
@@ -1734,16 +1722,6 @@ body::after {
             + '<div class="cal-dots">' + dots + '</div>'
             + '</div>';
     }
-    var totalCells = leadCount + last.getDate();
-    var trailCount = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
-    var nMo = calMonth === 11 ? 0 : calMonth + 1;
-    var nYr = calMonth === 11 ? calYear + 1 : calYear;
-    for (var t = 1; t <= trailCount; t++) {
-      var nds = toKey(new Date(nYr, nMo, t));
-      html += '<div class="cal-cell cal-other-month" data-date="' + nds + '">'
-            + '<span class="cal-day-num">' + t + '</span>'
-            + '<div class="cal-dots"></div></div>';
-    }
     $('calGrid').innerHTML = html;
     $('calGrid').querySelectorAll('.cal-cell[data-date]').forEach(function(el) {
       el.addEventListener('click', function() { selectDate(el.dataset.date); });
@@ -1754,9 +1732,6 @@ body::after {
   // ---- Day panel ----
   function selectDate(ds) {
     calSelected = ds;
-    var d = fromKey(ds);
-    calYear  = d.getFullYear();
-    calMonth = d.getMonth();
     $('calDayPanel').style.display = '';
     calRender();
     renderPanel(ds);
