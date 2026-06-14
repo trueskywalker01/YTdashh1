@@ -438,7 +438,8 @@ const PROFILES = {
 // ─── State ────────────────────────────────────────────────────
 var entries      = [];
 var bio          = null;
-var showCurves   = { caffeine:false, zyn:false, zyn_mini:false, modafinil:false, adderall:false };
+var showCurves   = { caffeine:false, zyn:false, zyn_mini:false, modafinil:false, adderall:false, hr:true, hrv:true };
+var bioHR        = []; // [{timestamp, bpm}]
 var expandedSub  = null;
 var expandedForm = 'ir';
 var dismissed    = new Set();
@@ -700,6 +701,36 @@ function renderChart() {
   if (pastLine)   out += '<path d="'+pastLine+'"   fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
   if (futLine)    out += '<path d="'+futLine+'"    fill="none" stroke="rgba(255,255,255,.40)" stroke-width="2"   stroke-dasharray="6,4" stroke-linecap="round"/>';
 
+  // HR line + secondary Y axis
+  if (showCurves.hr && bioHR.length) {
+    var bpms = bioHR.map(function(h){ return h.bpm; });
+    var hrMin = Math.max(30, Math.floor(Math.min.apply(null, bpms)) - 5);
+    var hrMax = Math.ceil(Math.max.apply(null, bpms)) + 10;
+    var yHR = function(bpm){ return CH.y2 - ((bpm-hrMin)/(hrMax-hrMin))*CH.h; };
+
+    out += '<line x1="'+x2+'" y1="'+CH.y1+'" x2="'+x2+'" y2="'+CH.y2+'" stroke="rgba(248,113,113,.12)" stroke-width="1"/>';
+    var hrStep = (hrMax-hrMin)/3;
+    [0,1,2,3].forEach(function(i){
+      var v = hrMin + hrStep*i;
+      var y = yHR(v);
+      out += '<text x="'+(x2+4)+'" y="'+(y+3).toFixed(1)+'" text-anchor="start" fill="rgba(248,113,113,.45)" font-size="8.5" font-family="ui-monospace,Menlo,monospace">'+Math.round(v)+'</text>';
+    });
+
+    var hrPts = bioHR.map(function(h){ return { x:xOf(toMins(h.timestamp),W), y:yHR(h.bpm) }; })
+      .filter(function(p){ return p.x>=CH.x1 && p.x<=x2; });
+    if (hrPts.length>=2) {
+      out += '<path d="'+catmull(hrPts)+'" fill="none" stroke="#F87171" stroke-width="1.2" opacity=".4"/>';
+    }
+  }
+
+  // HRV dot
+  if (showCurves.hrv && bio && bio.hrv!=null) {
+    var hvColor = bio.hrv>=50?'#22C55E':bio.hrv>=30?'#F59E0B':'#EF4444';
+    var hvX = (nowX>=CH.x1&&nowX<=x2) ? nowX : xOf((_chartStart+_chartEnd)/2,W);
+    out += '<circle cx="'+hvX.toFixed(1)+'" cy="'+(CH.y2-8).toFixed(1)+'" r="4" fill="'+hvColor+'" opacity=".85"/>';
+    out += '<text x="'+(hvX+8).toFixed(1)+'" y="'+(CH.y2-4).toFixed(1)+'" fill="'+hvColor+'" font-size="9" font-family="ui-monospace,Menlo,monospace" opacity=".75">'+Math.round(bio.hrv)+'ms</text>';
+  }
+
   // Dose markers
   intakeToday.forEach(function(e) {
     var x = xOf(toMins(e.timestamp), W);
@@ -771,11 +802,14 @@ function renderChart() {
 // ─── Legend ───────────────────────────────────────────────────
 function renderLegend() {
   var el = $e('pkLegend');
-  el.innerHTML = Object.keys(SUBS).map(function(sub) {
+  var items = Object.keys(SUBS).map(function(sub) {
     var s = SUBS[sub];
     return '<div class="pk-legend-item '+(showCurves[sub]?'on':'')+'" data-sub="'+sub+'">'
       +'<div class="pk-legend-dot" style="background:'+s.color+'"></div>'+s.icon+' '+s.label+'</div>';
-  }).join('');
+  });
+  items.push('<div class="pk-legend-item '+(showCurves.hr?'on':'')+'" data-sub="hr"><div class="pk-legend-dot" style="background:#F87171"></div> HR</div>');
+  items.push('<div class="pk-legend-item '+(showCurves.hrv?'on':'')+'" data-sub="hrv"><div class="pk-legend-dot" style="background:#22C55E"></div> HRV</div>');
+  el.innerHTML = items.join('');
   el.querySelectorAll('.pk-legend-item').forEach(function(item) {
     item.addEventListener('click', function() {
       var sub = item.dataset.sub;
@@ -1108,7 +1142,7 @@ function showToast(msg, undoFn) {
 
 // ─── Biometrics ───────────────────────────────────────────────
 function loadBio() {
-  return fetch(SUPA_URL+'/rest/v1/health_snapshots?order=snapshot_date.desc&limit=1', {
+  var snapPromise = fetch(SUPA_URL+'/rest/v1/health_snapshots?order=snapshot_date.desc&limit=1', {
     headers:{ 'apikey':SUPA_KEY, 'Authorization':'Bearer '+SUPA_KEY }
   }).then(function(r){ return r.ok?r.json():null; }).then(function(rows) {
     if (!rows||!rows.length) return;
@@ -1127,6 +1161,18 @@ function loadBio() {
       adjEl.textContent='⚠️ Poor sleep — effects reduced '+(Math.round((1-sleepMult())*100))+'%';
     }
   }).catch(function(){});
+
+  var today = todayStr();
+  var hrPromise = fetch(
+    SUPA_URL+'/rest/v1/heart_rate_samples?timestamp=gte.'+today+'T00:00:00&timestamp=lt.'+today+'T23:59:59&order=timestamp.asc&limit=500',
+    { headers:{ 'apikey':SUPA_KEY, 'Authorization':'Bearer '+SUPA_KEY } }
+  ).then(function(r){ return r.ok?r.json():null; }).then(function(rows) {
+    if (!rows||!rows.length) return;
+    bioHR = rows.map(function(r){ return { timestamp:r.timestamp, bpm:parseFloat(r.bpm) }; })
+      .filter(function(r){ return !isNaN(r.bpm); });
+  }).catch(function(){ bioHR = []; });
+
+  return Promise.all([snapPromise, hrPromise]);
 }
 
 // ─── Button wire-up ───────────────────────────────────────────
