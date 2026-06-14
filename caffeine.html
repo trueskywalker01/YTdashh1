@@ -288,8 +288,7 @@ button { font-family: var(--font); cursor: pointer; }
 
     <div class="pk-sub-wrap">
       <button class="pk-sub-btn" id="pkBtn-caffeine" data-sub="caffeine" type="button">
-        <span class="pk-sub-icon">☕</span>
-        <span class="pk-sub-name">Caffeine</span>
+                <span class="pk-sub-name">Caffeine</span>
         <span class="pk-sub-dose" id="pkDose-caffeine">100mg</span>
       </button>
       <div class="pk-sub-custom">
@@ -302,8 +301,7 @@ button { font-family: var(--font); cursor: pointer; }
       <div class="pk-nic-btns">
         <div class="pk-sub-wrap">
           <button class="pk-sub-btn" id="pkBtn-zyn" data-sub="zyn" type="button">
-            <span class="pk-sub-icon">🫧</span>
-            <span class="pk-sub-name">Zyn</span>
+                        <span class="pk-sub-name">Zyn</span>
             <span class="pk-sub-dose" id="pkDose-zyn">6mg</span>
           </button>
           <div class="pk-sub-custom">
@@ -313,8 +311,7 @@ button { font-family: var(--font); cursor: pointer; }
         </div>
         <div class="pk-sub-wrap">
           <button class="pk-sub-btn" id="pkBtn-zyn_mini" data-sub="zyn_mini" type="button">
-            <span class="pk-sub-icon">🟢</span>
-            <span class="pk-sub-name">Mini</span>
+                        <span class="pk-sub-name">Mini</span>
             <span class="pk-sub-dose" id="pkDose-zyn_mini">3mg</span>
           </button>
           <div class="pk-sub-custom">
@@ -327,8 +324,7 @@ button { font-family: var(--font); cursor: pointer; }
 
     <div class="pk-sub-wrap">
       <button class="pk-sub-btn" id="pkBtn-modafinil" data-sub="modafinil" type="button">
-        <span class="pk-sub-icon">💊</span>
-        <span class="pk-sub-name">Modafinil</span>
+                <span class="pk-sub-name">Modafinil</span>
         <span class="pk-sub-dose" id="pkDose-modafinil">100mg</span>
       </button>
       <div class="pk-sub-custom">
@@ -339,8 +335,7 @@ button { font-family: var(--font); cursor: pointer; }
 
     <div class="pk-sub-wrap">
       <button class="pk-sub-btn" id="pkBtn-adderall" data-sub="adderall" type="button">
-        <span class="pk-sub-icon">⚡</span>
-        <span class="pk-sub-name">Adderall</span>
+                <span class="pk-sub-name">Adderall</span>
         <span class="pk-sub-dose" id="pkDose-adderall">20mg IR</span>
       </button>
       <div class="pk-sub-custom">
@@ -419,11 +414,11 @@ const SUPA_URL = 'https://irchofgefxpgohqfngyo.supabase.co';
 const SUPA_KEY = 'sb_publishable_sNUOPZ-EBvdFBqUpO2N1Fw_-g6DWPst';
 
 const SUBS = {
-  caffeine:  { label:'Caffeine',  icon:'☕', color:'#D4915E', defaultMg:100, opts:[50,100,150,200,250,300] },
-  zyn:       { label:'Zyn',       icon:'🫧', color:'#4ECDC4', defaultMg:6,   opts:[3,6], isPouch:true },
-  zyn_mini:  { label:'Zyn Mini',  icon:'🟢', color:'#A3E635', defaultMg:3,   opts:[2,3], isPouch:true },
-  modafinil: { label:'Modafinil', icon:'💊', color:'#5B8DEF', defaultMg:100, opts:[50,100,200] },
-  adderall:  { label:'Adderall',  icon:'⚡', color:'#EF4444', defaultMg:20,  opts:[5,10,15,20,30] },
+  caffeine:  { label:'Caffeine',  icon:'', color:'#D4915E', defaultMg:100, opts:[50,100,150,200,250,300] },
+  zyn:       { label:'Zyn',       icon:'', color:'#4ECDC4', defaultMg:6,   opts:[3,6] },
+  zyn_mini:  { label:'Zyn Mini',  icon:'', color:'#A3E635', defaultMg:3,   opts:[2,3] },
+  modafinil: { label:'Modafinil', icon:'', color:'#5B8DEF', defaultMg:100, opts:[50,100,200] },
+  adderall:  { label:'Adderall',  icon:'', color:'#EF4444', defaultMg:20,  opts:[5,10,15,20,30] },
 };
 
 const CAF_SRCS = [
@@ -901,8 +896,8 @@ function renderRecent() {
     .sort(function(a,b){ return b.timestamp.localeCompare(a.timestamp); }).slice(0,3);
   var el = $e('pkRecent');
   el.innerHTML = rec.map(function(e) {
-    var s = SUBS[e.substance]||{icon:'?'};
-    return '<div class="pk-chip">'+s.icon+' '+fmtIso(e.timestamp)+' '+e.dose_mg+'mg</div>';
+    var s = SUBS[e.substance]||{label:'?'};
+    return '<div class="pk-chip">'+s.label+' '+fmtIso(e.timestamp)+' '+e.dose_mg+'mg</div>';
   }).join('');
 }
 
@@ -1034,7 +1029,7 @@ function renderTimeline() {
     var col = s ? s.color : '#F59E0B';
     var main='', meta='';
     if (e.type==='intake') {
-      main = (s?s.icon:'💊')+' '+(s?s.label:e.substance)+' '+e.dose_mg+'mg'+(e.formulation?' ('+e.formulation.toUpperCase()+')':'');
+      main = (s?s.label:e.substance)+' '+e.dose_mg+'mg'+(e.formulation?' ('+e.formulation.toUpperCase()+')':'');
       if (e.substance==='zyn'||e.substance==='zyn_mini') {
         meta = 'Active for 60 min from '+fmtIso(e.timestamp);
       }
