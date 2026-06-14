@@ -4,40 +4,1149 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#050506">
-<title>Caffeine — Lucas' Dashboard</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Peak Tracker — Lucas' Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="sync.js" defer></script>
 <script src="topbar.js" defer></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body {
-  background: #050506;
-  color: #B8B6B0;
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
+:root {
+  --font: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --bg: #050506;
+  --card: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.08);
+  --border-soft: rgba(255,255,255,0.05);
+  --text-1: #FAFAFA;
+  --text-2: rgba(255,255,255,0.65);
+  --text-3: rgba(255,255,255,0.38);
+  --text-4: rgba(255,255,255,0.22);
+  --c-caf:  #D4915E;
+  --c-zyn:  #4ECDC4;
+  --c-mini: #A3E635;
+  --c-mod:  #5B8DEF;
+  --c-add:  #EF4444;
+  --radius: 14px;
 }
-main {
-  position: relative; z-index: 2;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--text-1); font-family: var(--font); -webkit-font-smoothing: antialiased; min-height: 100dvh; }
+body { -webkit-text-size-adjust: 100%; }
+button { font-family: var(--font); cursor: pointer; }
+
+/* ── Layout ── */
+.pk-main {
   max-width: 720px; margin: 0 auto;
-  padding: 56px max(20px, env(safe-area-inset-right)) max(80px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
-  padding-top: max(56px, env(safe-area-inset-top));
+  padding: 56px max(16px,env(safe-area-inset-right)) max(110px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  padding-top: max(56px,env(safe-area-inset-top));
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+/* ── Header ── */
+.pk-header { display: flex; flex-direction: column; gap: 4px; }
+.pk-title { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; color: var(--text-1); }
+.pk-status { font-size: 13px; color: var(--text-3); line-height: 1.4; min-height: 18px; }
+.pk-bio-badge {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 6px;
+  padding: 5px 10px; background: var(--card); border: 1px solid var(--border);
+  border-radius: 99px; font-size: 11px; color: var(--text-3);
+}
+.pk-bio-badge span { color: var(--text-2); }
+.pk-sleep-warn { color: #F59E0B !important; }
+.pk-sleep-adj { font-size: 10px; color: #F59E0B; font-style: italic; margin-top: 2px; }
+
+/* ── Substance row ── */
+.pk-sub-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+.pk-nic-group { display: flex; flex-direction: column; gap: 4px; }
+.pk-nic-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text-4); text-align: center; }
+.pk-nic-btns { display: flex; gap: 6px; }
+.pk-sub-btn {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-height: 60vh; gap: 12px; text-align: center;
+  gap: 2px; padding: 10px 14px; border-radius: 12px; border: 2px solid;
+  background: transparent; min-width: 68px; transition: all 0.15s; position: relative; overflow: hidden;
 }
-.wip-icon { font-size: 48px; line-height: 1; }
-.wip-title { font-size: 22px; font-weight: 700; color: #FAFAFA; letter-spacing: -0.02em; }
-.wip-sub { font-size: 13px; color: #76746E; max-width: 260px; line-height: 1.6; }
+.pk-sub-btn:hover { filter: brightness(1.2); }
+.pk-sub-btn:active { transform: scale(0.95); }
+.pk-sub-btn[data-sub="caffeine"]  { border-color: var(--c-caf); background: rgba(212,145,94,.10); }
+.pk-sub-btn[data-sub="zyn"]       { border-color: var(--c-zyn); background: rgba(78,205,196,.10); }
+.pk-sub-btn[data-sub="zyn_mini"]  { border-color: var(--c-mini);background: rgba(163,230,53,.10); }
+.pk-sub-btn[data-sub="modafinil"] { border-color: var(--c-mod); background: rgba(91,141,239,.10); }
+.pk-sub-btn[data-sub="adderall"]  { border-color: var(--c-add); background: rgba(239,68,68,.10);  }
+.pk-sub-icon { font-size: 18px; line-height: 1; }
+.pk-sub-name { font-size: 10px; font-weight: 700; color: var(--text-2); white-space: nowrap; }
+.pk-sub-dose { font-size: 9px; color: var(--text-4); font-family: var(--font-mono); }
+.pk-pouch-timer { font-size: 9px; color: var(--c-zyn); font-family: var(--font-mono); }
+.pk-sub-btn.pk-active::after {
+  content: ''; position: absolute; top: 4px; right: 4px;
+  width: 6px; height: 6px; border-radius: 50%; opacity: 0.8;
+}
+.pk-sub-btn[data-sub="caffeine"].pk-active::after  { background: var(--c-caf); }
+.pk-sub-btn[data-sub="zyn"].pk-active::after       { background: var(--c-zyn); }
+.pk-sub-btn[data-sub="zyn_mini"].pk-active::after  { background: var(--c-mini);}
+.pk-sub-btn[data-sub="modafinil"].pk-active::after { background: var(--c-mod); }
+.pk-sub-btn[data-sub="adderall"].pk-active::after  { background: var(--c-add); }
+
+/* ── Expand panel ── */
+.pk-expand {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;
+  animation: pkSlide 0.18s ease-out;
+}
+@keyframes pkSlide { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform:none; } }
+.pk-expand-title { font-size: 13px; font-weight: 700; color: var(--text-2); }
+.pk-expand-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+.pk-expand label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-4); display: flex; flex-direction: column; gap: 4px; }
+.pk-expand input, .pk-expand select {
+  background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text-1); font-size: 13px; font-family: var(--font); padding: 7px 10px; outline: none;
+  -webkit-appearance: none; min-width: 80px;
+}
+.pk-expand input:focus, .pk-expand select:focus { border-color: rgba(255,255,255,0.25); }
+.pk-expand-log-btn {
+  padding: 9px 18px; background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 9px; color: var(--text-1); font-size: 13px; font-weight: 700;
+  transition: background 0.15s; flex-shrink: 0; align-self: flex-end;
+}
+.pk-expand-log-btn:hover { background: rgba(255,255,255,0.16); }
+.pk-ir-xr { display: flex; border-radius: 7px; overflow: hidden; border: 1px solid var(--border); width: fit-content; }
+.pk-ir-xr button { padding: 6px 14px; background: transparent; border: none; color: var(--text-3); font-size: 12px; font-weight: 700; transition: all 0.12s; }
+.pk-ir-xr button.active { background: rgba(239,68,68,0.25); color: #EF4444; }
+
+/* ── Recent chips ── */
+.pk-recent { display: flex; gap: 6px; flex-wrap: wrap; }
+.pk-chip {
+  padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border-soft);
+  color: var(--text-3); white-space: nowrap;
+}
+
+/* ── Chart ── */
+.pk-chart-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.pk-chart-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 12px 14px 6px; gap: 8px; flex-wrap: wrap;
+}
+.pk-peak-window { font-size: 11px; color: var(--text-4); font-family: var(--font-mono); }
+.pk-peak-window strong { color: var(--text-2); }
+.pk-legend { display: flex; gap: 10px; flex-wrap: wrap; }
+.pk-legend-item {
+  display: flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600;
+  color: var(--text-4); cursor: pointer; user-select: none; transition: color 0.12s;
+}
+.pk-legend-item.on { color: var(--text-2); }
+.pk-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.pk-svg-wrap { width: 100%; padding: 0 2px; position: relative; }
+.pk-svg { width: 100%; display: block; }
+.pk-crosshair-tip {
+  position: absolute; pointer-events: none;
+  background: rgba(15,15,18,0.92); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 10px;
+  font-size: 11px; color: var(--text-2); white-space: nowrap; z-index: 10;
+  transform: translateX(-50%); top: 30px; display: none;
+}
+
+/* ── Suggestions ── */
+.pk-sugg-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; -webkit-overflow-scrolling: touch; }
+.pk-sugg-row::-webkit-scrollbar { display: none; }
+.pk-sugg-card {
+  flex-shrink: 0; max-width: 280px; padding: 10px 14px; border-radius: 12px;
+  font-size: 12px; line-height: 1.5; position: relative; display: flex; flex-direction: column; gap: 4px;
+}
+.pk-sugg-card.blue { background: rgba(91,141,239,0.12); border: 1px solid rgba(91,141,239,0.25); color: #93B4F4; }
+.pk-sugg-card.amber{ background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.25); color: #FCD34D; }
+.pk-sugg-card.red  { background: rgba(239,68,68,0.12);  border: 1px solid rgba(239,68,68,0.25);  color: #FCA5A5; }
+.pk-sugg-dismiss {
+  position: absolute; top: 7px; right: 8px; background: none; border: none;
+  color: rgba(255,255,255,0.3); font-size: 13px; line-height: 1; cursor: pointer; padding: 2px 4px;
+}
+.pk-sugg-dismiss:hover { color: rgba(255,255,255,0.6); }
+
+/* ── Summary ── */
+.pk-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pk-sum-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 5px;
+}
+.pk-sum-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.10em; color: var(--text-4); }
+.pk-sum-value { font-size: 13px; color: var(--text-1); line-height: 1.5; }
+.pk-sum-sub { font-size: 11px; color: var(--text-3); }
+.pk-sum-intake { display: flex; flex-direction: column; gap: 3px; }
+.pk-sum-intake span { font-size: 12px; font-family: var(--font-mono); }
+
+/* ── Timeline ── */
+.pk-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--text-4); padding: 4px 0 2px; }
+.pk-timeline { display: flex; flex-direction: column; position: relative; padding-left: 20px; }
+.pk-timeline::before {
+  content:''; position: absolute; left: 7px; top: 8px; bottom: 8px;
+  width: 2px; background: rgba(255,255,255,0.07); border-radius: 1px;
+}
+.pk-tl-entry { display: flex; padding: 8px 0; position: relative; }
+.pk-tl-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  border: 2px solid; position: absolute; left: -22px; top: 11px; background: var(--bg);
+}
+.pk-tl-card {
+  flex: 1; background: var(--card); border: 1px solid var(--border-soft);
+  border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px;
+}
+.pk-tl-time { font-size: 10px; color: var(--text-4); font-family: var(--font-mono); }
+.pk-tl-main { font-size: 13px; color: var(--text-1); font-weight: 600; }
+.pk-tl-meta { font-size: 11px; color: var(--text-3); }
+.pk-tl-actions { display: flex; gap: 8px; margin-top: 4px; }
+.pk-tl-btn {
+  font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 5px;
+  background: transparent; border: 1px solid var(--border); color: var(--text-4);
+  cursor: pointer; transition: all 0.12s;
+}
+.pk-tl-btn.del:hover { background: rgba(239,68,68,0.12); border-color: #EF4444; color: #EF4444; }
+
+/* ── FAB ── */
+.pk-fab {
+  position: fixed; bottom: calc(24px + env(safe-area-inset-bottom)); right: max(20px,env(safe-area-inset-right));
+  z-index: 30; display: flex; flex-direction: column; align-items: center;
+  padding: 10px 20px; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.35);
+  border-radius: 99px; color: #FCD34D; font-size: 13px; font-weight: 700;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4); transition: all 0.15s;
+}
+.pk-fab:hover { background: rgba(245,158,11,0.25); }
+.pk-fab-since { font-size: 9px; font-weight: 500; color: rgba(252,211,77,0.55); margin-top: 1px; }
+
+/* ── Check-in modal ── */
+.pk-ci-bg {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.pk-ci-sheet {
+  width: 100%; max-width: 480px; background: #111113;
+  border-radius: 22px 22px 0 0; padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 14px;
+}
+.pk-ci-title { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+.pk-ci-row { display: flex; flex-direction: column; gap: 5px; }
+.pk-ci-row label { font-size: 11px; color: var(--text-3); display: flex; justify-content: space-between; }
+.pk-ci-row label span { font-weight: 700; color: var(--text-1); font-family: var(--font-mono); }
+.pk-ci-slider { width: 100%; accent-color: #F59E0B; }
+.pk-ci-actions { display: flex; gap: 8px; }
+.pk-ci-log { flex:1; padding: 12px; background: rgba(245,158,11,0.2); border: 1px solid rgba(245,158,11,0.4); border-radius: 10px; color: #FCD34D; font-size: 14px; font-weight: 700; }
+.pk-ci-log:hover { background: rgba(245,158,11,0.3); }
+.pk-ci-cancel { padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; color: var(--text-3); font-size: 14px; font-weight: 600; }
 @media (min-width: 769px) {
-  main { max-width: 1100px; }
+  .pk-ci-bg { align-items: center; }
+  .pk-ci-sheet { border-radius: 20px; max-height: 80vh; }
+  .pk-summary { grid-template-columns: 1fr 1fr 1fr 1fr; }
 }
+
+/* ── Toast ── */
+.pk-toast {
+  position: fixed; bottom: calc(100px + env(safe-area-inset-bottom)); left: 50%;
+  transform: translateX(-50%); z-index: 60;
+  background: rgba(20,20,22,0.95); border: 1px solid var(--border);
+  border-radius: 12px; padding: 10px 16px; font-size: 13px; color: var(--text-1);
+  display: flex; align-items: center; gap: 12px; white-space: nowrap;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5); animation: pkToastIn 0.2s ease-out; max-width: 90vw; white-space: normal;
+}
+.pk-toast-undo { background: none; border: none; color: #F59E0B; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline; flex-shrink: 0; }
+@keyframes pkToastIn { from { opacity:0; transform:translateX(-50%) translateY(10px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
 </style>
 </head>
 <body>
-<main>
-  <div class="wip-icon">☕</div>
-  <div class="wip-title">Caffeine</div>
-  <div class="wip-sub">Work in progress — coming soon.</div>
+<main class="pk-main">
+
+  <div class="pk-header">
+    <div class="pk-title">Peak Tracker</div>
+    <div class="pk-status" id="pkStatus">Baseline — dose up or embrace the calm.</div>
+    <div class="pk-bio-badge" id="pkBioBadge" style="display:none">
+      <span id="pkSleepLabel">Sleep: —</span>
+      <span id="pkHrvLabel" style="display:none">HRV: —</span>
+    </div>
+    <div class="pk-sleep-adj" id="pkSleepAdj" style="display:none"></div>
+  </div>
+
+  <!-- Substance quick-log row -->
+  <div class="pk-sub-row" id="pkSubRow">
+    <button class="pk-sub-btn" id="pkBtn-caffeine" data-sub="caffeine" type="button">
+      <span class="pk-sub-icon">☕</span>
+      <span class="pk-sub-name">Caffeine</span>
+      <span class="pk-sub-dose" id="pkDose-caffeine">100mg</span>
+    </button>
+    <div class="pk-nic-group">
+      <div class="pk-nic-label">Nicotine</div>
+      <div class="pk-nic-btns">
+        <button class="pk-sub-btn" id="pkBtn-zyn" data-sub="zyn" type="button">
+          <span class="pk-sub-icon">🫧</span>
+          <span class="pk-sub-name">Zyn</span>
+          <span class="pk-sub-dose" id="pkDose-zyn">6mg</span>
+          <span class="pk-pouch-timer" id="pkTimer-zyn" style="display:none"></span>
+        </button>
+        <button class="pk-sub-btn" id="pkBtn-zyn_mini" data-sub="zyn_mini" type="button">
+          <span class="pk-sub-icon">🟢</span>
+          <span class="pk-sub-name">Mini</span>
+          <span class="pk-sub-dose" id="pkDose-zyn_mini">3mg</span>
+          <span class="pk-pouch-timer" id="pkTimer-zyn_mini" style="display:none"></span>
+        </button>
+      </div>
+    </div>
+    <button class="pk-sub-btn" id="pkBtn-modafinil" data-sub="modafinil" type="button">
+      <span class="pk-sub-icon">💊</span>
+      <span class="pk-sub-name">Modafinil</span>
+      <span class="pk-sub-dose" id="pkDose-modafinil">100mg</span>
+    </button>
+    <button class="pk-sub-btn" id="pkBtn-adderall" data-sub="adderall" type="button">
+      <span class="pk-sub-icon">⚡</span>
+      <span class="pk-sub-name">Adderall</span>
+      <span class="pk-sub-dose" id="pkDose-adderall">20mg IR</span>
+    </button>
+  </div>
+
+  <div class="pk-recent" id="pkRecent"></div>
+  <div id="pkExpand" style="display:none"></div>
+
+  <!-- Composite chart -->
+  <div class="pk-chart-card">
+    <div class="pk-chart-top">
+      <div class="pk-peak-window" id="pkPeakWindow">No entries yet</div>
+      <div class="pk-legend" id="pkLegend"></div>
+    </div>
+    <div class="pk-svg-wrap">
+      <svg class="pk-svg" id="pkSvg" height="260"></svg>
+      <div class="pk-crosshair-tip" id="pkCrosshairTip"></div>
+    </div>
+  </div>
+
+  <!-- Suggestions -->
+  <div class="pk-sugg-row" id="pkSuggRow"></div>
+
+  <!-- Summary grid -->
+  <div class="pk-summary" id="pkSummary"></div>
+
+  <!-- Timeline -->
+  <div class="pk-section-label">Today's Log</div>
+  <div class="pk-timeline" id="pkTimeline"></div>
+
 </main>
+
+<!-- FAB -->
+<button class="pk-fab" id="pkFab" type="button">
+  <span>⚡ Check In</span>
+  <span class="pk-fab-since" id="pkFabSince"></span>
+</button>
+
+<!-- Check-in modal -->
+<div class="pk-ci-bg" id="pkCiBg" style="display:none">
+  <div class="pk-ci-sheet">
+    <div class="pk-ci-title">Quick Check-In</div>
+    <div class="pk-ci-row">
+      <label>😶‍🌫️ Focus — can you hold a thought?<span id="pkCiFocusVal">5</span></label>
+      <input type="range" class="pk-ci-slider" id="pkCiFocus" min="1" max="10" value="5">
+    </div>
+    <div class="pk-ci-row">
+      <label>🪫 Energy — body battery level?<span id="pkCiEnergyVal">5</span></label>
+      <input type="range" class="pk-ci-slider" id="pkCiEnergy" min="1" max="10" value="5">
+    </div>
+    <div class="pk-ci-row">
+      <label>😤 Mood — vibes?<span id="pkCiMoodVal">5</span></label>
+      <input type="range" class="pk-ci-slider" id="pkCiMood" min="1" max="10" value="5">
+    </div>
+    <div class="pk-ci-actions">
+      <button class="pk-ci-log" id="pkCiLog" type="button">Log Check-In</button>
+      <button class="pk-ci-cancel" id="pkCiCancel" type="button">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="pk-toast" id="pkToast" style="display:none"></div>
+
+<script>
+(function () {
+'use strict';
+
+const PK_KEY   = 'peak:entries';
+const PK_DISC  = 'peak:dismissed';
+const SUPA_URL = 'https://irchofgefxpgohqfngyo.supabase.co';
+const SUPA_KEY = 'sb_publishable_sNUOPZ-EBvdFBqUpO2N1Fw_-g6DWPst';
+
+const SUBS = {
+  caffeine:  { label:'Caffeine',  icon:'☕', color:'#D4915E', defaultMg:100, opts:[50,100,150,200,250,300] },
+  zyn:       { label:'Zyn',       icon:'🫧', color:'#4ECDC4', defaultMg:6,   opts:[3,6], isPouch:true },
+  zyn_mini:  { label:'Zyn Mini',  icon:'🟢', color:'#A3E635', defaultMg:3,   opts:[2,3], isPouch:true },
+  modafinil: { label:'Modafinil', icon:'💊', color:'#5B8DEF', defaultMg:100, opts:[50,100,200] },
+  adderall:  { label:'Adderall',  icon:'⚡', color:'#EF4444', defaultMg:20,  opts:[5,10,15,20,30] },
+};
+
+const CAF_SRCS = [
+  {l:'Custom',mg:0},{l:'Coffee',mg:95},{l:'Double Espresso',mg:127},
+  {l:'Energy Drink',mg:160},{l:'Pre-Workout',mg:200},{l:'Caffeine Pill',mg:200},{l:'Tea',mg:47},
+];
+
+const PROFILES = {
+  caffeine:    { onset:15, rise:30, plateau:30, hl:300, wt:1.0, ref:100, crash:0,    crashDur:0,  crashT:0    },
+  zyn:         { onset:2,  rise:3,  plateau:10, hl:120, wt:0.6, ref:6,   crash:0.05, crashDur:15, crashT:0.1  },
+  zyn_mini:    { onset:2,  rise:3,  plateau:8,  hl:120, wt:0.35,ref:3,   crash:0.03, crashDur:12, crashT:0.1  },
+  modafinil:   { onset:30, rise:90, plateau:180,hl:720, wt:1.4, ref:100, crash:0,    crashDur:0,  crashT:0    },
+  adderall_ir: { onset:20, rise:40, plateau:60, hl:600, wt:1.8, ref:20,  crash:0.15, crashDur:45, crashT:0.3  },
+  adderall_xr: { onset:30, rise:60, plateau:120,hl:720, wt:1.6, ref:20,  crash:0.08, crashDur:60, crashT:0.25 },
+};
+
+// ─── State ────────────────────────────────────────────────────
+var entries      = [];
+var bio          = null;
+var showCurves   = { caffeine:false, zyn:false, zyn_mini:false, modafinil:false, adderall:false };
+var expandedSub  = null;
+var expandedForm = 'ir';
+var dismissed    = new Set();
+var pouchState   = {};
+var _toastTimer  = null;
+var _pouchInterval = null;
+var _chartPts    = [];
+var _chartStart  = 6*60;
+var _chartEnd    = 24*60;
+
+function $e(id) { return document.getElementById(id); }
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+function pad(n) { return n < 10 ? '0'+n : ''+n; }
+function nowMins() { var d=new Date(); return d.getHours()*60+d.getMinutes()+d.getSeconds()/60; }
+function toMins(iso) { var d=new Date(iso); return d.getHours()*60+d.getMinutes()+d.getSeconds()/60; }
+function fmt12(m) {
+  var h24=Math.floor(m/60)%24, mn=Math.floor(m%60);
+  var h=h24%12||12, ap=h24>=12?'PM':'AM';
+  return h+(mn?':'+pad(mn):'')+' '+ap;
+}
+function fmtIso(iso) { return fmt12(toMins(iso)); }
+function newId() { return 'pk'+Date.now()+Math.random().toString(36).slice(2,6); }
+
+// ─── Storage ──────────────────────────────────────────────────
+function loadEntries() { try { entries=JSON.parse(localStorage.getItem(PK_KEY)||'[]'); } catch(e){ entries=[]; } }
+function saveEntries() { localStorage.setItem(PK_KEY,JSON.stringify(entries)); }
+function loadDismissed() { try { dismissed=new Set(JSON.parse(localStorage.getItem(PK_DISC)||'[]')); } catch(e){} }
+function saveDismissed() { localStorage.setItem(PK_DISC,JSON.stringify([...dismissed])); }
+
+// ─── PK Engine ────────────────────────────────────────────────
+function computeEffect(prof, mg, elapsed) {
+  if (elapsed < 0) return 0;
+  var df = (mg / prof.ref) * prof.wt;
+  var t  = elapsed;
+  if (t < prof.onset) return 0;
+  var ta = t - prof.onset;
+  if (ta < prof.rise) return df * (ta / prof.rise);
+  var tr = ta - prof.rise;
+  if (tr < prof.plateau) return df;
+  var tp  = tr - prof.plateau;
+  var dec = Math.exp(-0.693 * tp / prof.hl);
+  var eff = df * dec;
+  if (prof.crash > 0 && dec < prof.crashT) {
+    var cp = Math.min(1, (prof.crashT - dec) / prof.crashT);
+    eff -= df * prof.crash * Math.sin(cp * Math.PI);
+  }
+  return eff;
+}
+
+function entryEffect(e, t) {
+  var tStart = toMins(e.timestamp);
+  var elapsed = t - tStart;
+  if ((e.substance==='zyn'||e.substance==='zyn_mini') && e.timestamp_end) {
+    if (t <= tStart) return 0;
+    var tEnd = toMins(e.timestamp_end);
+    var prof = PROFILES[e.substance];
+    if (t <= tEnd) return computeEffect(prof, e.dose_mg, elapsed);
+    var eAtOut = computeEffect(prof, e.dose_mg, tEnd - tStart);
+    return Math.max(0, eAtOut * Math.exp(-0.693*(t-tEnd)/prof.hl));
+  }
+  if (e.substance==='adderall' && e.formulation==='xr') {
+    var pIr = PROFILES.adderall_ir;
+    var half = e.dose_mg/2;
+    return computeEffect(pIr,half,elapsed) + Math.max(0,computeEffect(pIr,half,elapsed-240));
+  }
+  var pKey = e.substance==='adderall' ? 'adderall_ir' : e.substance;
+  var p = PROFILES[pKey];
+  return p ? computeEffect(p, e.dose_mg, elapsed) : 0;
+}
+
+function sleepMult() {
+  if (!bio||!bio.sleepMin) return 1;
+  var h = bio.sleepMin/60;
+  if (h < 5) return 0.65;
+  if (h < 6) return 0.80;
+  return 1;
+}
+
+function buildCurve(stepMin) {
+  if (!stepMin) stepMin = 5;
+  var today = todayStr();
+  var tEntries = entries.filter(function(e){ return e.type==='intake' && e.timestamp && e.timestamp.startsWith(today); });
+  var sm = sleepMult() * (bio && bio.activeCal>300 ? 1.1 : 1);
+  var pts = [];
+  for (var t = _chartStart; t <= _chartEnd; t += stepMin) {
+    var composite = 0;
+    var perSub = {};
+    tEntries.forEach(function(e) {
+      var eff = entryEffect(e,t) * sm;
+      if (eff === 0 && t < toMins(e.timestamp)) return;
+      // Nicotine tolerance in rolling 180m window
+      if (e.substance==='zyn'||e.substance==='zyn_mini') {
+        var cnt = tEntries.filter(function(x){ return (x.substance==='zyn'||x.substance==='zyn_mini') && (t-toMins(x.timestamp))>=0 && (t-toMins(x.timestamp))<=180; }).length;
+        if (cnt >= 3) eff *= Math.pow(0.8, Math.max(0,cnt-2));
+      }
+      perSub[e.substance] = (perSub[e.substance]||0) + eff;
+      composite += eff;
+    });
+    // Caf+nic synergy
+    if ((perSub.caffeine||0)>0.01 && ((perSub.zyn||0)+(perSub.zyn_mini||0))>0.01) composite *= 1.05;
+    pts.push({ t:t, raw:composite, perSub:perSub });
+  }
+  // Normalize to 0-100
+  var maxRaw = 0;
+  pts.forEach(function(p){ if(p.raw>maxRaw) maxRaw=p.raw; });
+  var scale = maxRaw > 0.01 ? Math.min(100/maxRaw, 20) : 1;
+  pts.forEach(function(p){
+    p.norm = Math.max(-20, p.raw*scale);
+    var ps2 = {};
+    Object.keys(p.perSub).forEach(function(k){ ps2[k]=p.perSub[k]*scale; });
+    p.normSub = ps2;
+  });
+  _chartPts = pts;
+  return pts;
+}
+
+// ─── Chart ────────────────────────────────────────────────────
+var CH = { x1:44, y1:28, y2:228, h:200, yMin:-20, yMax:105 };
+
+function xOf(t, W) { return CH.x1 + (t-_chartStart)/(_chartEnd-_chartStart) * (W-CH.x1-14); }
+function yOf(v)    { return CH.y2 - ((v-CH.yMin)/(CH.yMax-CH.yMin))*CH.h; }
+
+function catmull(pts) {
+  if (!pts.length) return '';
+  var d = 'M '+pts[0].x.toFixed(1)+' '+pts[0].y.toFixed(1);
+  for (var i=1; i<pts.length; i++) {
+    var p0=pts[Math.max(0,i-2)], p1=pts[i-1], p2=pts[i], p3=pts[Math.min(pts.length-1,i+1)];
+    var c1x=p1.x+(p2.x-p0.x)/6, c1y=p1.y+(p2.y-p0.y)/6;
+    var c2x=p2.x-(p3.x-p1.x)/6, c2y=p2.y-(p3.y-p1.y)/6;
+    d+=' C '+c1x.toFixed(1)+' '+c1y.toFixed(1)+' '+c2x.toFixed(1)+' '+c2y.toFixed(1)+' '+p2.x.toFixed(1)+' '+p2.y.toFixed(1);
+  }
+  return d;
+}
+
+function renderChart() {
+  var svg = $e('pkSvg');
+  var wrap = svg.parentElement;
+  var W = Math.max(wrap.clientWidth||300, 300);
+  var x2 = W - 14;
+  svg.setAttribute('width', W);
+  svg.setAttribute('viewBox','0 0 '+W+' 260');
+  var baseY = yOf(0);
+  var nM = nowMins();
+  var nowX = xOf(nM, W);
+  var H = 260;
+
+  // Build curve
+  var pts = buildCurve(5);
+  var svgPts = pts.map(function(p){ return { x:xOf(p.t,W), y:yOf(p.norm), norm:p.norm, perSub:p.normSub, t:p.t }; });
+
+  // Split at nowX
+  var pastPts   = svgPts.filter(function(p){ return p.x <= nowX; });
+  var futurePts = svgPts.filter(function(p){ return p.x >= nowX; });
+  var midIdx = svgPts.findIndex(function(p){ return p.x >= nowX; });
+  if (midIdx > 0) {
+    var a=svgPts[midIdx-1], b=svgPts[midIdx];
+    if (a && b && b.x !== a.x) {
+      var tRatio = (nowX-a.x)/(b.x-a.x);
+      var mid = { x:nowX, y:a.y+(b.y-a.y)*tRatio };
+      if (pastPts.length && pastPts[pastPts.length-1].x < nowX) pastPts.push(mid);
+      if (futurePts.length && futurePts[0].x > nowX) futurePts.unshift(mid);
+    }
+  }
+
+  function toArea(aPts) {
+    if (!aPts.length) return '';
+    return catmull(aPts)+' L '+aPts[aPts.length-1].x.toFixed(1)+' '+baseY.toFixed(1)+' L '+aPts[0].x.toFixed(1)+' '+baseY.toFixed(1)+' Z';
+  }
+
+  // Sub-curve paths
+  var subPaths = {};
+  Object.keys(SUBS).forEach(function(sub) {
+    if (!showCurves[sub]) return;
+    var sPts = svgPts.map(function(p){ return { x:p.x, y:yOf((p.perSub&&p.perSub[sub])||0) }; });
+    subPaths[sub] = catmull(sPts);
+  });
+
+  // Crash zone (norm < 0)
+  var crashPath = '';
+  var cpts = []; var inC = false;
+  svgPts.forEach(function(p) {
+    if (p.norm < 0) {
+      if (!inC) { cpts.push({x:p.x,y:baseY}); inC=true; }
+      cpts.push(p);
+    } else if (inC) { cpts.push({x:p.x,y:baseY}); inC=false; }
+  });
+  if (cpts.length>=3) {
+    var cp='M '+cpts[0].x.toFixed(1)+' '+cpts[0].y.toFixed(1);
+    cpts.slice(1).forEach(function(p){ cp+=' L '+p.x.toFixed(1)+' '+p.y.toFixed(1); });
+    crashPath=cp+' Z';
+  }
+
+  var today = todayStr();
+  var intakeToday = entries.filter(function(e){ return e.type==='intake'&&e.timestamp&&e.timestamp.startsWith(today); });
+  var ciToday     = entries.filter(function(e){ return e.type==='checkin'&&e.timestamp&&e.timestamp.startsWith(today); });
+
+  var out = '<defs>';
+  out += '<linearGradient id="pkGP" x1="0" y1="'+CH.y1+'" x2="0" y2="'+CH.y2+'" gradientUnits="userSpaceOnUse">';
+  out += '<stop offset="0%" stop-color="#C084FC" stop-opacity=".75"/>';
+  out += '<stop offset="20%" stop-color="#8B5CF6" stop-opacity=".60"/>';
+  out += '<stop offset="45%" stop-color="#5B8DEF" stop-opacity=".50"/>';
+  out += '<stop offset="100%" stop-color="#64748B" stop-opacity=".15"/>';
+  out += '</linearGradient>';
+  out += '<linearGradient id="pkGF" x1="0" y1="'+CH.y1+'" x2="0" y2="'+CH.y2+'" gradientUnits="userSpaceOnUse">';
+  out += '<stop offset="0%" stop-color="#C084FC" stop-opacity=".22"/>';
+  out += '<stop offset="100%" stop-color="#64748B" stop-opacity=".05"/>';
+  out += '</linearGradient>';
+  out += '</defs>';
+
+  // Zone bands
+  var highY = yOf(65), peakY = yOf(85);
+  if (highY > CH.y1) out += '<rect x="'+CH.x1+'" y="'+Math.max(CH.y1,highY).toFixed(1)+'" width="'+(x2-CH.x1)+'" height="'+(Math.min(baseY,CH.y2)-Math.max(CH.y1,highY)).toFixed(1)+'" fill="rgba(91,141,239,.04)"/>';
+  if (peakY > CH.y1 && highY > CH.y1) out += '<rect x="'+CH.x1+'" y="'+CH.y1+'" width="'+(x2-CH.x1)+'" height="'+(Math.max(0,highY-CH.y1)).toFixed(1)+'" fill="rgba(192,132,252,.06)"/>';
+
+  // Grid + Y labels
+  [0,25,50,75,100].forEach(function(v) {
+    var y=yOf(v);
+    out += '<line x1="'+CH.x1+'" y1="'+y.toFixed(1)+'" x2="'+x2+'" y2="'+y.toFixed(1)+'" stroke="rgba(255,255,255,.05)" stroke-width="1"/>';
+    if (v>0) out += '<text x="'+(CH.x1-5)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" fill="rgba(255,255,255,.2)" font-size="9" font-family="ui-monospace,Menlo,monospace">'+v+'</text>';
+  });
+  out += '<line x1="'+CH.x1+'" y1="'+baseY.toFixed(1)+'" x2="'+x2+'" y2="'+baseY.toFixed(1)+'" stroke="rgba(255,255,255,.12)" stroke-width="1"/>';
+
+  // X labels
+  [6,9,12,15,18,21,24].forEach(function(h) {
+    var x = xOf(h*60, W);
+    var lbl = h===0||h===24?'12AM':h===12?'12PM':h>12?(h-12)+'PM':h+'AM';
+    out += '<text x="'+x.toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" fill="rgba(255,255,255,.2)" font-size="9" font-family="ui-monospace,Menlo,monospace">'+lbl+'</text>';
+    out += '<line x1="'+x.toFixed(1)+'" y1="'+CH.y1+'" x2="'+x.toFixed(1)+'" y2="'+(CH.y2+8)+'" stroke="rgba(255,255,255,.04)" stroke-width="1"/>';
+  });
+
+  // Crash
+  if (crashPath) out += '<path d="'+crashPath+'" fill="rgba(239,68,68,.18)"/>';
+
+  // Sub curves
+  Object.entries(subPaths).forEach(function(kv) {
+    var col = SUBS[kv[0]].color;
+    out += '<path d="'+kv[1]+'" fill="none" stroke="'+col+'" stroke-width="1.2" stroke-dasharray="5,3" opacity=".7"/>';
+  });
+
+  // Area fills
+  var pastArea = toArea(pastPts), futureArea = toArea(futurePts);
+  if (pastArea)   out += '<path d="'+pastArea+'"   fill="url(#pkGP)"/>';
+  if (futureArea) out += '<path d="'+futureArea+'" fill="url(#pkGF)"/>';
+
+  // Curve lines
+  var pastLine = catmull(pastPts), futLine = catmull(futurePts);
+  if (pastLine)   out += '<path d="'+pastLine+'"   fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+  if (futLine)    out += '<path d="'+futLine+'"    fill="none" stroke="rgba(255,255,255,.40)" stroke-width="2"   stroke-dasharray="6,4" stroke-linecap="round"/>';
+
+  // Dose markers
+  intakeToday.forEach(function(e) {
+    var x = xOf(toMins(e.timestamp), W);
+    if (x < CH.x1 || x > x2) return;
+    var col = SUBS[e.substance] ? SUBS[e.substance].color : '#fff';
+    out += '<line x1="'+x.toFixed(1)+'" y1="'+(baseY+2).toFixed(1)+'" x2="'+x.toFixed(1)+'" y2="'+(baseY+12).toFixed(1)+'" stroke="'+col+'" stroke-width="1.5"/>';
+    out += '<circle cx="'+x.toFixed(1)+'" cy="'+(baseY+13).toFixed(1)+'" r="4" fill="'+col+'"/>';
+  });
+
+  // Check-in scatter
+  ciToday.sort(function(a,b){ return a.timestamp.localeCompare(b.timestamp); }).forEach(function(e, i) {
+    var x = xOf(toMins(e.timestamp), W);
+    if (x < CH.x1 || x > x2) return;
+    var avg = ((e.focus||5)+(e.energy||5))/2/10*100;
+    var y = yOf(avg);
+    out += '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="5" fill="white" stroke="#F59E0B" stroke-width="2"/>';
+    if (i > 0) {
+      var prev = ciToday[i-1];
+      var px = xOf(toMins(prev.timestamp), W);
+      var pavg = ((prev.focus||5)+(prev.energy||5))/2/10*100;
+      var py = yOf(pavg);
+      out += '<line x1="'+px.toFixed(1)+'" y1="'+py.toFixed(1)+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="#F59E0B" stroke-width="1" opacity=".5"/>';
+    }
+  });
+
+  // Now-line
+  if (nowX >= CH.x1 && nowX <= x2) {
+    out += '<line x1="'+nowX.toFixed(1)+'" y1="'+CH.y1+'" x2="'+nowX.toFixed(1)+'" y2="'+(CH.y2+4)+'" stroke="rgba(255,255,255,.7)" stroke-width="1.5"/>';
+    var nearest = svgPts.reduce(function(b,p){ return Math.abs(p.t-nM)<Math.abs(b.t-nM)?p:b; }, svgPts[0]||{norm:0,t:nM});
+    if (nearest) {
+      var lv = Math.round(Math.max(0, nearest.norm));
+      var ly = Math.max(CH.y1+12, Math.min(CH.y2-6, nearest.y-10));
+      out += '<rect x="'+(nowX-18).toFixed(1)+'" y="'+(ly-12).toFixed(1)+'" width="36" height="16" rx="4" fill="rgba(255,255,255,.12)"/>';
+      out += '<text x="'+nowX.toFixed(1)+'" y="'+ly.toFixed(1)+'" text-anchor="middle" fill="white" font-size="10" font-weight="700" font-family="ui-monospace,Menlo,monospace">'+lv+'</text>';
+    }
+    out += '<circle cx="'+nowX.toFixed(1)+'" cy="'+CH.y1+'" r="4" fill="white"/>';
+  }
+
+  // Hit rect for crosshair
+  out += '<rect id="pkHit" x="'+CH.x1+'" y="'+CH.y1+'" width="'+(x2-CH.x1)+'" height="'+(CH.h+16)+'" fill="transparent" style="cursor:crosshair"/>';
+
+  svg.innerHTML = out;
+
+  // Crosshair tooltip
+  var hitRect = $e('pkHit');
+  var tip = $e('pkCrosshairTip');
+  function showCH(clientX) {
+    var rect = svg.getBoundingClientRect();
+    var scaleX = W / rect.width;
+    var svgX = (clientX - rect.left) * scaleX;
+    var t2 = _chartStart + (svgX - CH.x1) / (x2 - CH.x1) * (_chartEnd - _chartStart);
+    var near = svgPts.reduce(function(b,p){ return Math.abs(p.t-t2)<Math.abs(b.t-t2)?p:b; }, svgPts[0]);
+    if (!near) return;
+    var subs = Object.keys(near.perSub||{}).filter(function(k){ return (near.perSub[k]||0)>0.5; })
+      .map(function(k){ return SUBS[k]?SUBS[k].icon+' '+Math.round(near.perSub[k]):''; }).filter(Boolean).join('  ');
+    tip.innerHTML = '<strong>'+fmt12(near.t)+'</strong> — '+Math.round(Math.max(0,near.norm))+'/100'+(subs?' — '+subs:'');
+    var tipX = Math.min(rect.width-10, Math.max(10, clientX-rect.left));
+    tip.style.left = tipX + 'px';
+    tip.style.display = 'block';
+  }
+  if (hitRect) {
+    hitRect.addEventListener('mousemove', function(e){ showCH(e.clientX); });
+    hitRect.addEventListener('mouseleave', function(){ tip.style.display='none'; });
+    hitRect.addEventListener('touchstart', function(e){ showCH(e.touches[0].clientX); }, {passive:true});
+    hitRect.addEventListener('touchend', function(){ setTimeout(function(){ tip.style.display='none'; }, 1500); });
+  }
+}
+
+// ─── Legend ───────────────────────────────────────────────────
+function renderLegend() {
+  var el = $e('pkLegend');
+  el.innerHTML = Object.keys(SUBS).map(function(sub) {
+    var s = SUBS[sub];
+    return '<div class="pk-legend-item '+(showCurves[sub]?'on':'')+'" data-sub="'+sub+'">'
+      +'<div class="pk-legend-dot" style="background:'+s.color+'"></div>'+s.icon+' '+s.label+'</div>';
+  }).join('');
+  el.querySelectorAll('.pk-legend-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      var sub = item.dataset.sub;
+      showCurves[sub] = !showCurves[sub];
+      item.classList.toggle('on', showCurves[sub]);
+      renderChart();
+    });
+  });
+}
+
+// ─── Substance buttons ────────────────────────────────────────
+function renderSubBtns() {
+  var nM = nowMins();
+  Object.keys(SUBS).forEach(function(sub) {
+    var btn = $e('pkBtn-'+sub);
+    if (!btn) return;
+    var near = _chartPts.reduce(function(b,p){ return Math.abs(p.t-nM)<Math.abs(b.t-nM)?p:b; }, _chartPts[0]||{normSub:{}});
+    var isActive = near && (near.normSub&&near.normSub[sub]||0) > 0.5;
+    btn.classList.toggle('pk-active', !!isActive);
+    // Update pouch timer
+    if ((sub==='zyn'||sub==='zyn_mini') && pouchState[sub]) {
+      var mins = Math.floor((Date.now()-pouchState[sub].ts)/60000);
+      var te = $e('pkTimer-'+sub);
+      if (te) { te.textContent='IN '+mins+'m'; te.style.display=''; }
+    }
+  });
+}
+
+// ─── Quick log ────────────────────────────────────────────────
+function quickLog(sub) {
+  // Pouch out
+  if ((sub==='zyn'||sub==='zyn_mini') && pouchState[sub]) {
+    var eid = pouchState[sub].id;
+    var entry = entries.find(function(e){ return e.id===eid; });
+    if (entry) {
+      entry.timestamp_end = new Date().toISOString();
+      saveEntries();
+      delete pouchState[sub];
+      var te = $e('pkTimer-'+sub);
+      if (te) te.style.display='none';
+      showToast(SUBS[sub].icon+' Pouch out — logged', null);
+      update(); return;
+    }
+  }
+  var s = SUBS[sub];
+  var iso = new Date().toISOString();
+  var ne = { id:newId(), type:'intake', substance:sub, dose_mg:s.defaultMg, timestamp:iso,
+             formulation:sub==='adderall'?expandedForm:undefined, created_at:iso, updated_at:iso };
+  entries.push(ne);
+  saveEntries();
+  if (sub==='zyn'||sub==='zyn_mini') pouchState[sub] = { id:ne.id, ts:Date.now() };
+  warnLate(sub, s.defaultMg, iso);
+  var uid = ne.id;
+  showToast(s.icon+' '+s.label+' '+s.defaultMg+'mg logged at '+fmtIso(iso), function() {
+    entries = entries.filter(function(e){ return e.id!==uid; });
+    if (pouchState[sub]&&pouchState[sub].id===uid) delete pouchState[sub];
+    saveEntries(); update();
+  });
+  update();
+}
+
+function warnLate(sub, mg, iso) {
+  var h = new Date(iso).getHours();
+  if (sub==='caffeine'&&h>=16) showToast('⚠️ Late caffeine — residual active at midnight', null);
+  else if (sub==='caffeine'&&h>=14) showToast('⚠️ Caffeine after 2 PM may affect sleep', null);
+  if (sub==='modafinil'&&h>=10) showToast('⚠️ Late Modafinil — residual past midnight', null);
+  if (sub==='adderall'&&expandedForm==='ir'&&h>=14) showToast('⚠️ Adderall IR now — crash hits in ~3h', null);
+  if (sub==='adderall'&&expandedForm==='xr'&&h>=11) showToast('⚠️ Adderall XR — second peak lands very late', null);
+}
+
+// ─── Expand panel ─────────────────────────────────────────────
+function openExpand(sub) {
+  if (!sub || expandedSub===sub) { closeExpand(); return; }
+  expandedSub = sub;
+  var s = SUBS[sub];
+  var d = new Date();
+  var hh = pad(d.getHours()), mm = pad(d.getMinutes());
+  var html = '<div class="pk-expand-title">'+s.icon+' Log '+s.label+'</div><div class="pk-expand-row">';
+  html += '<label>Dose<select id="pkExpDose">';
+  s.opts.forEach(function(o){ html+='<option value="'+o+'"'+(o===s.defaultMg?' selected':'')+'>'+o+'mg</option>'; });
+  html += '</select></label>';
+  if (sub==='caffeine') {
+    html += '<label>Source<select id="pkCafSrc">';
+    CAF_SRCS.forEach(function(c){ html+='<option value="'+c.mg+'">'+c.l+(c.mg?' ('+c.mg+'mg)':'')+' </option>'; });
+    html += '</select></label>';
+  }
+  if (sub==='adderall') {
+    html += '<label>Type<div class="pk-ir-xr"><button type="button" id="pkIrBtn" class="'+(expandedForm==='ir'?'active':'')+'">IR</button><button type="button" id="pkXrBtn" class="'+(expandedForm==='xr'?'active':'')+'">XR</button></div></label>';
+  }
+  html += '<label>Time<input type="time" id="pkExpTime" value="'+hh+':'+mm+'"></label>';
+  html += '<label>Note<input type="text" id="pkExpNote" placeholder="optional…" style="min-width:110px"></label>';
+  html += '<button class="pk-expand-log-btn" id="pkExpLog" type="button">Log</button>';
+  html += '</div>';
+
+  var panel = $e('pkExpand');
+  panel.className = 'pk-expand'; panel.innerHTML = html; panel.style.display = '';
+
+  if (sub==='caffeine' && $e('pkCafSrc')) {
+    $e('pkCafSrc').addEventListener('change', function() { var mg=parseInt(this.value); if(mg>0) $e('pkExpDose').value=mg; });
+  }
+  if (sub==='adderall') {
+    $e('pkIrBtn').addEventListener('click',function(){ expandedForm='ir'; $e('pkIrBtn').classList.add('active'); $e('pkXrBtn').classList.remove('active'); });
+    $e('pkXrBtn').addEventListener('click',function(){ expandedForm='xr'; $e('pkXrBtn').classList.add('active'); $e('pkIrBtn').classList.remove('active'); });
+  }
+  $e('pkExpLog').addEventListener('click', function() {
+    var dose = parseInt($e('pkExpDose').value) || s.defaultMg;
+    var tv = $e('pkExpTime').value;
+    var note = ($e('pkExpNote').value||'').trim();
+    var parts = tv.split(':').map(Number);
+    var ts = new Date(); ts.setHours(parts[0],parts[1],0,0);
+    var iso = ts.toISOString();
+    var ne = { id:newId(), type:'intake', substance:sub, dose_mg:dose, timestamp:iso,
+               formulation:sub==='adderall'?expandedForm:undefined,
+               notes:note||undefined, created_at:iso, updated_at:iso };
+    entries.push(ne);
+    saveEntries();
+    if (sub==='zyn'||sub==='zyn_mini') pouchState[sub]={ id:ne.id, ts:ts.getTime() };
+    warnLate(sub, dose, iso);
+    closeExpand();
+    var uid = ne.id;
+    showToast(s.icon+' '+s.label+' '+dose+'mg logged at '+fmtIso(iso), function() {
+      entries=entries.filter(function(e){ return e.id!==uid; }); saveEntries(); update();
+    });
+    update();
+  });
+}
+
+function closeExpand() {
+  expandedSub = null;
+  var panel = $e('pkExpand');
+  panel.style.display = 'none'; panel.innerHTML = '';
+}
+
+// ─── Recent chips ─────────────────────────────────────────────
+function renderRecent() {
+  var today = todayStr();
+  var rec = entries.filter(function(e){ return e.type==='intake'&&e.timestamp&&e.timestamp.startsWith(today); })
+    .sort(function(a,b){ return b.timestamp.localeCompare(a.timestamp); }).slice(0,3);
+  var el = $e('pkRecent');
+  el.innerHTML = rec.map(function(e) {
+    var s = SUBS[e.substance]||{icon:'?'};
+    return '<div class="pk-chip">'+s.icon+' '+fmtIso(e.timestamp)+' '+e.dose_mg+'mg</div>';
+  }).join('');
+}
+
+// ─── Suggestions ──────────────────────────────────────────────
+function computeSugg() {
+  var suggs = [];
+  var today = todayStr();
+  var nM = nowMins();
+  var todayIn = entries.filter(function(e){ return e.type==='intake'&&e.timestamp&&e.timestamp.startsWith(today); });
+  var curPt = _chartPts.reduce(function(b,p){ return Math.abs(p.t-nM)<Math.abs(b.t-nM)?p:b; }, _chartPts[0]||{norm:0});
+  var cur = curPt ? curPt.norm : 0;
+  var next30 = _chartPts.find(function(p){ return p.t>nM+28&&p.t<nM+32; });
+  var maxPt = _chartPts.reduce(function(b,p){ return p.norm>b.norm?p:b; }, _chartPts[0]||{norm:0});
+
+  if (!todayIn.length) {
+    suggs.push({type:'blue',id:'s-empty',text:nM<10*60?'☀️ Good morning. What are you starting with?':'😐 Nothing logged yet — tap a substance above.'});
+  }
+  if (next30 && next30.norm>65 && cur<65) suggs.push({type:'blue',id:'s-peak30',text:'⏰ Peak in ~30 min. Start your hardest task NOW.'});
+  if (maxPt && maxPt.t<nM && cur<maxPt.norm*0.75 && cur>10) {
+    var fallAt = _chartPts.find(function(p){ return p.t>nM&&p.norm<20; });
+    suggs.push({type:'blue',id:'s-dec',text:'📉 Declining — '+(fallAt?'~'+Math.round(fallAt.t-nM)+'min of focus left.':'Winding down.')});
+  }
+  var zynRoll = todayIn.filter(function(e){ return (e.substance==='zyn'||e.substance==='zyn_mini')&&(nM-toMins(e.timestamp))<=180; });
+  if (zynRoll.length>=3 && !dismissed.has('s-zyn-tol')) suggs.push({type:'amber',id:'s-zyn-tol',text:'🫧 Nicotine tolerance building — each pouch ~20% weaker.'});
+  var lateCaf = todayIn.filter(function(e){ return e.substance==='caffeine'&&new Date(e.timestamp).getHours()>=14; });
+  if (lateCaf.length && !dismissed.has('s-caf-late')) suggs.push({type:'amber',id:'s-caf-late',text:'⚠️ Late caffeine — residual active at midnight. Sleep risk.'});
+  if (todayIn.some(function(e){ return e.substance==='modafinil'&&new Date(e.timestamp).getHours()>=10; }) && !dismissed.has('s-mod-late'))
+    suggs.push({type:'amber',id:'s-mod-late',text:'⚠️ Modafinil taken late — residual past midnight.'});
+  if (todayIn.some(function(e){ return e.substance==='adderall'&&e.formulation==='xr'&&new Date(e.timestamp).getHours()>=11; }) && !dismissed.has('s-xr-late'))
+    suggs.push({type:'amber',id:'s-xr-late',text:'⚠️ Adderall XR — second peak lands very late.'});
+  if (bio && bio.sleepMin && bio.sleepMin<300 && !dismissed.has('s-sleep'))
+    suggs.push({type:'red',id:'s-sleep',text:'😴 Only '+(bio.sleepMin/60).toFixed(1)+'hr sleep. Stimulant crashes hit harder.'});
+  if (bio && bio.hrv && bio.hrv<30 && cur>50 && !dismissed.has('s-hrv'))
+    suggs.push({type:'red',id:'s-hrv',text:'📊 HRV low ('+Math.round(bio.hrv)+'ms) — you may be overstimulated. Try a walk.'});
+  return suggs.slice(0,5);
+}
+
+function renderSugg() {
+  var suggs = computeSugg();
+  var el = $e('pkSuggRow');
+  if (!suggs.length) { el.innerHTML=''; return; }
+  el.innerHTML = suggs.map(function(s) {
+    return '<div class="pk-sugg-card '+s.type+'" data-id="'+s.id+'">'
+      +'<button class="pk-sugg-dismiss" data-id="'+s.id+'" type="button">✕</button>'
+      +'<span>'+s.text+'</span></div>';
+  }).join('');
+  el.querySelectorAll('.pk-sugg-dismiss').forEach(function(btn) {
+    btn.addEventListener('click', function(ev) {
+      ev.stopPropagation();
+      dismissed.add(btn.dataset.id); saveDismissed();
+      btn.closest('.pk-sugg-card').remove();
+    });
+  });
+}
+
+// ─── Summary ──────────────────────────────────────────────────
+function findPeakWin() {
+  if (!_chartPts.length) return null;
+  var maxV = Math.max.apply(null, _chartPts.map(function(p){ return p.norm; }));
+  if (maxV < 5) return null;
+  var thr = maxV * 0.75;
+  var inP = _chartPts.filter(function(p){ return p.norm>=thr; });
+  return inP.length ? { start:inP[0].t, end:inP[inP.length-1].t, peak:maxV } : null;
+}
+
+function getStatus() {
+  var nM = nowMins();
+  var cur = 0, trend = 0;
+  if (_chartPts.length) {
+    var near = _chartPts.reduce(function(b,p){ return Math.abs(p.t-nM)<Math.abs(b.t-nM)?p:b; }, _chartPts[0]);
+    cur = near.norm;
+    var next = _chartPts.find(function(p){ return p.t>nM; });
+    trend = next ? next.norm-cur : 0;
+  }
+  var today = todayStr();
+  if (!entries.some(function(e){ return e.type==='intake'&&e.timestamp&&e.timestamp.startsWith(today); })) return '😐 Baseline. Dose up or embrace the calm.';
+  if (cur < -2)  return '💤 Crashed. Rest, eat, hydrate.';
+  if (cur < 20)  return '😐 Baseline. Dose window open.';
+  if (trend > 2) {
+    var pw = findPeakWin();
+    return '📈 Rising — '+(pw&&pw.start>nM?'peak in ~'+Math.round(pw.start-nM)+'min.':'peak soon.')+ ' Queue your hardest task.';
+  }
+  if (cur >= 65) return '🔥 Peaking right now. Deep work — no distractions.';
+  if (trend < -2) {
+    var fl = _chartPts.find(function(p){ return p.t>nM&&p.norm<20; });
+    return '📉 Declining — '+(fl?'~'+Math.round(fl.t-nM)+'min of focus left.':'winding down.');
+  }
+  return '📊 Holding steady.';
+}
+
+function renderSummary() {
+  var today = todayStr();
+  var todayIn = entries.filter(function(e){ return e.type==='intake'&&e.timestamp&&e.timestamp.startsWith(today); });
+  var todayCi = entries.filter(function(e){ return e.type==='checkin'&&e.timestamp&&e.timestamp.startsWith(today); });
+  var totals = {};
+  todayIn.forEach(function(e){ totals[e.substance]=(totals[e.substance]||0)+e.dose_mg; });
+  var intHtml = Object.keys(SUBS).map(function(sub) {
+    var mg = totals[sub]||0;
+    return '<span style="color:'+(mg?SUBS[sub].color:'rgba(255,255,255,.2)')+'">'+SUBS[sub].icon+' '+mg+'mg</span>';
+  }).join('\n');
+  var pw = findPeakWin();
+  var status = getStatus();
+  var avgF = todayCi.length ? (todayCi.reduce(function(s,e){ return s+(e.focus||5); },0)/todayCi.length).toFixed(1) : '—';
+  var avgE = todayCi.length ? (todayCi.reduce(function(s,e){ return s+(e.energy||5); },0)/todayCi.length).toFixed(1) : '—';
+
+  $e('pkSummary').innerHTML =
+    '<div class="pk-sum-card"><div class="pk-sum-label">Today\'s Intake</div><div class="pk-sum-intake">'+intHtml+'</div></div>'
+   +'<div class="pk-sum-card"><div class="pk-sum-label">Predicted Peak</div>'+(pw?'<div class="pk-sum-value">'+fmt12(pw.start)+' – '+fmt12(pw.end)+'</div><div class="pk-sum-sub">Level: '+Math.round(pw.peak)+'/100</div>':'<div class="pk-sum-value" style="color:rgba(255,255,255,.3)">No peak yet</div>')+'</div>'
+   +'<div class="pk-sum-card"><div class="pk-sum-label">Check-ins</div><div class="pk-sum-value">Focus '+avgF+' / Energy '+avgE+'</div><div class="pk-sum-sub">'+todayCi.length+' today</div></div>'
+   +'<div class="pk-sum-card"><div class="pk-sum-label">Status</div><div class="pk-sum-value" style="font-size:12px;line-height:1.5">'+status+'</div></div>';
+
+  $e('pkStatus').textContent = status;
+  var pw2 = pw;
+  $e('pkPeakWindow').innerHTML = pw2 ? '<strong>Peak:</strong> '+fmt12(pw2.start)+' – '+fmt12(pw2.end) : 'No entries yet';
+}
+
+// ─── Timeline ─────────────────────────────────────────────────
+function renderTimeline() {
+  var today = todayStr();
+  var tl = entries.filter(function(e){ return e.timestamp&&e.timestamp.startsWith(today); })
+    .sort(function(a,b){ return a.timestamp.localeCompare(b.timestamp); });
+  var el = $e('pkTimeline');
+  if (!tl.length) {
+    el.innerHTML='<div style="font-size:13px;color:rgba(255,255,255,.22);padding:16px 0">No entries yet — tap a substance above to log.</div>';
+    return;
+  }
+  el.innerHTML = tl.map(function(e) {
+    var s = e.substance ? SUBS[e.substance] : null;
+    var col = s ? s.color : '#F59E0B';
+    var main='', meta='';
+    if (e.type==='intake') {
+      main = (s?s.icon:'💊')+' '+(s?s.label:e.substance)+' '+e.dose_mg+'mg'+(e.formulation?' ('+e.formulation.toUpperCase()+')':'');
+      if ((e.substance==='zyn'||e.substance==='zyn_mini') && e.timestamp_end) {
+        var dur = Math.round((new Date(e.timestamp_end)-new Date(e.timestamp))/60000);
+        meta = 'In: '+fmtIso(e.timestamp)+' → out: '+fmtIso(e.timestamp_end)+' ('+dur+'min)';
+      } else if (e.substance==='zyn'||e.substance==='zyn_mini') {
+        meta = 'In: '+fmtIso(e.timestamp)+' — pouch still active';
+      }
+      if (e.notes) meta+=(meta?' · ':'')+e.notes;
+    } else {
+      main = '⚡ Focus '+(e.focus||'—')+' | Energy '+(e.energy||'—')+' | Mood '+(e.mood||'—');
+      meta = 'Check-in at '+fmtIso(e.timestamp);
+    }
+    return '<div class="pk-tl-entry" id="tl-'+e.id+'">'
+      +'<div class="pk-tl-dot" style="border-color:'+col+'"></div>'
+      +'<div class="pk-tl-card">'
+      +'<div class="pk-tl-time">'+fmtIso(e.timestamp)+'</div>'
+      +'<div class="pk-tl-main">'+main+'</div>'
+      +(meta?'<div class="pk-tl-meta">'+meta+'</div>':'')
+      +'<div class="pk-tl-actions"><button class="pk-tl-btn del" data-id="'+e.id+'">Delete</button></div>'
+      +'</div></div>';
+  }).join('');
+
+  el.querySelectorAll('.pk-tl-btn.del').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var id = btn.dataset.id;
+      var orig = entries.slice();
+      entries = entries.filter(function(e){ return e.id!==id; });
+      Object.keys(pouchState).forEach(function(sub){ if (pouchState[sub].id===id) delete pouchState[sub]; });
+      saveEntries();
+      showToast('Entry deleted', function(){ entries=orig; saveEntries(); update(); });
+      update();
+    });
+  });
+}
+
+// ─── Check-in ─────────────────────────────────────────────────
+function openCI() {
+  $e('pkCiBg').style.display='flex';
+  ['pkCiFocus','pkCiEnergy','pkCiMood'].forEach(function(id) {
+    var el=$e(id); var ve=$e(id+'Val');
+    el.value=5; if(ve) ve.textContent='5';
+    el.oninput = function(){ if(ve) ve.textContent=el.value; };
+  });
+}
+function closeCI() { $e('pkCiBg').style.display='none'; }
+function submitCI() {
+  var focus=parseInt($e('pkCiFocus').value), energy=parseInt($e('pkCiEnergy').value), mood=parseInt($e('pkCiMood').value);
+  var iso = new Date().toISOString();
+  entries.push({ id:newId(), type:'checkin', focus:focus, energy:energy, mood:mood, timestamp:iso, created_at:iso, updated_at:iso });
+  saveEntries(); closeCI();
+  showToast('⚡ Check-in: Focus '+focus+' | Energy '+energy+' | Mood '+mood, null);
+  update();
+}
+$e('pkFab').addEventListener('click', openCI);
+$e('pkCiLog').addEventListener('click', submitCI);
+$e('pkCiCancel').addEventListener('click', closeCI);
+$e('pkCiBg').addEventListener('click', function(ev){ if(ev.target===$e('pkCiBg')) closeCI(); });
+document.addEventListener('keydown', function(ev){ if(ev.key==='Escape') closeCI(); });
+
+function updateFabSince() {
+  var today = todayStr();
+  var ci = entries.filter(function(e){ return e.type==='checkin'&&e.timestamp&&e.timestamp.startsWith(today); })
+    .sort(function(a,b){ return b.timestamp.localeCompare(a.timestamp); });
+  var el = $e('pkFabSince');
+  if (!el) return;
+  if (ci.length) {
+    var mins = Math.round((Date.now()-new Date(ci[0].timestamp).getTime())/60000);
+    el.textContent = mins<60?mins+'m ago':Math.floor(mins/60)+'h ago';
+  } else { el.textContent='no check-ins yet'; }
+}
+
+// ─── Toast ────────────────────────────────────────────────────
+function showToast(msg, undoFn) {
+  var el = $e('pkToast');
+  clearTimeout(_toastTimer);
+  el.innerHTML = '<span>'+msg+'</span>'+(undoFn?'<button class="pk-toast-undo" id="pkToastUndo">Undo</button>':'');
+  el.style.display='flex';
+  if (undoFn) $e('pkToastUndo').addEventListener('click', function(){ el.style.display='none'; undoFn(); });
+  _toastTimer = setTimeout(function(){ el.style.display='none'; }, 3500);
+}
+
+// ─── Biometrics ───────────────────────────────────────────────
+function loadBio() {
+  return fetch(SUPA_URL+'/rest/v1/health_snapshots?order=snapshot_date.desc&limit=1', {
+    headers:{ 'apikey':SUPA_KEY, 'Authorization':'Bearer '+SUPA_KEY }
+  }).then(function(r){ return r.ok?r.json():null; }).then(function(rows) {
+    if (!rows||!rows.length) return;
+    var r = rows[0];
+    bio = { sleepMin:parseFloat(r.sleep_min)||0, hrv:r.hrv_ms!=null?parseFloat(r.hrv_ms):null,
+            rhr:r.rhr_bpm!=null?parseFloat(r.rhr_bpm):null, activeCal:parseFloat(r.active_cal)||0 };
+    var badge = $e('pkBioBadge'); badge.style.display='';
+    var sl = (bio.sleepMin/60).toFixed(1);
+    var slEl = $e('pkSleepLabel');
+    slEl.textContent = 'Sleep: '+sl+'hr';
+    var poor = parseFloat(sl) < 6;
+    slEl.className = poor ? 'pk-sleep-warn' : '';
+    if (bio.hrv) { var hEl=$e('pkHrvLabel'); hEl.style.display=''; hEl.textContent='HRV: '+Math.round(bio.hrv)+'ms'; }
+    if (poor) {
+      var adjEl=$e('pkSleepAdj'); adjEl.style.display='';
+      adjEl.textContent='⚠️ Poor sleep — effects reduced '+(Math.round((1-sleepMult())*100))+'%';
+    }
+  }).catch(function(){});
+}
+
+// ─── Button wire-up ───────────────────────────────────────────
+Object.keys(SUBS).forEach(function(sub) {
+  var btn = $e('pkBtn-'+sub);
+  if (!btn) return;
+  btn.addEventListener('click', function(){ quickLog(sub); });
+  btn.addEventListener('contextmenu', function(ev){ ev.preventDefault(); openExpand(sub); });
+  var lp;
+  btn.addEventListener('touchstart', function(){ lp=setTimeout(function(){ openExpand(sub); },600); }, {passive:true});
+  btn.addEventListener('touchend',   function(){ clearTimeout(lp); }, {passive:true});
+  btn.addEventListener('touchmove',  function(){ clearTimeout(lp); }, {passive:true});
+});
+
+// ─── Pouch timer restore ──────────────────────────────────────
+function restorePouch() {
+  var today = todayStr();
+  ['zyn','zyn_mini'].forEach(function(sub) {
+    var act = entries.filter(function(e){ return e.type==='intake'&&e.substance===sub&&e.timestamp&&e.timestamp.startsWith(today)&&!e.timestamp_end; })
+      .sort(function(a,b){ return b.timestamp.localeCompare(a.timestamp); })[0];
+    if (act) {
+      pouchState[sub]={ id:act.id, ts:new Date(act.timestamp).getTime() };
+      var te=$e('pkTimer-'+sub);
+      var m=Math.floor((Date.now()-pouchState[sub].ts)/60000);
+      if(te){ te.textContent='IN '+m+'m'; te.style.display=''; }
+    }
+  });
+}
+
+// ─── Main update + init ───────────────────────────────────────
+function update() {
+  renderChart();
+  renderLegend();
+  renderSubBtns();
+  renderRecent();
+  renderSugg();
+  renderSummary();
+  renderTimeline();
+  updateFabSince();
+}
+
+window.addEventListener('resize', function(){ renderChart(); });
+
+loadEntries();
+loadDismissed();
+restorePouch();
+loadBio().then(function(){ update(); });
+setInterval(update, 60000);
+
+})();
+</script>
 </body>
 </html>
