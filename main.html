@@ -698,6 +698,13 @@ body::after {
 }
 .cal-task-item:hover .cal-task-del { opacity: 1; }
 .cal-task-del:hover { background: rgba(255,107,107,0.14); color: var(--danger); }
+.cal-task-edit {
+  background: none; border: none; cursor: pointer; flex-shrink: 0;
+  color: var(--text-tertiary); font-size: 13px; padding: 2px 5px;
+  border-radius: 5px; opacity: 0; transition: opacity 0.12s, background 0.12s; line-height: 1;
+}
+.cal-task-item:hover .cal-task-edit { opacity: 1; }
+.cal-task-edit:hover { background: rgba(91,141,239,0.14); color: #5B8DEF; }
 /* ── 2-week schedule picker ── */
 .cal-biweek-grid { display: flex; flex-direction: column; gap: 5px; }
 .cal-biweek-toprow { display: flex; padding-left: 42px; }
@@ -1871,12 +1878,20 @@ body::after {
             + (task.notes ? '<div class="cal-task-notes">' + esc(task.notes) + '</div>' : '')
             + (rec ? '<div class="cal-task-rec">' + rec + '</div>' : '')
           + '</div>'
+          + '<button class="cal-task-edit" data-id="' + task.id
+          + '" type="button" aria-label="Edit task">✎</button>'
           + '<button class="cal-task-del" data-id="' + task.id
           + '" type="button" aria-label="Delete task">✕</button>'
           + '</li>';
       }).join('');
       list.querySelectorAll('.cal-task-check').forEach(function(btn) {
         btn.addEventListener('click', function() { toggleDone(btn.dataset.id, btn.dataset.date); });
+      });
+      list.querySelectorAll('.cal-task-edit').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var task = load().find(function(t) { return t.id === btn.dataset.id; });
+          if (task) openModal(ds, task);
+        });
       });
       list.querySelectorAll('.cal-task-del').forEach(function(btn) {
         btn.addEventListener('click', function() { deleteTask(btn.dataset.id); });
