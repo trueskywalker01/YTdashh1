@@ -112,7 +112,8 @@ body.has-bottombar {
   padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important;
 }
 @media (max-width: 768px) {
-  .bottombar-tab-desktop { display: none; }
+  .bottombar { display: none; }
+  body.has-bottombar { padding-bottom: 0 !important; }
   .sidebar-brand { display: none; }
 }
 @media (min-width: 769px) {
@@ -234,9 +235,6 @@ body.topbar-modal-open { overflow: hidden; touch-action: none; }
     </a>
     <button class="topbar-water-add" id="topbarWaterAdd" aria-label="Log one drink" type="button">+</button>
   </div>
-  <a href="finance.html" class="topbar-finance-btn" id="topbarFinance" aria-label="Finance">
-    <span class="topbar-finance-icon">📊</span>
-  </a>
 </header>`;
 
   const bottombarHtml = `
