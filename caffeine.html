@@ -447,6 +447,10 @@ var _toastTimer  = null;
 var _chartPts    = [];
 var _chartStart  = 6*60;
 var _chartEnd    = 24*60;
+var _zoomStart   = 6*60;
+var _zoomEnd     = 24*60;
+var _svgW        = 300;
+var _dragging    = false;
 
 function $e(id) { return document.getElementById(id); }
 function todayStr() {
@@ -571,7 +575,7 @@ function buildCurve(stepMin) {
 // ─── Chart ────────────────────────────────────────────────────
 var CH = { x1:44, y1:28, y2:228, h:200, yMin:-20, yMax:105 };
 
-function xOf(t, W) { return CH.x1 + (t-_chartStart)/(_chartEnd-_chartStart) * (W-CH.x1-14); }
+function xOf(t, W) { return CH.x1 + (t-_zoomStart)/(_zoomEnd-_zoomStart) * (W-CH.x1-14); }
 function yOf(v)    { return CH.y2 - ((v-CH.yMin)/(CH.yMax-CH.yMin))*CH.h; }
 
 function catmull(pts) {
@@ -591,6 +595,7 @@ function renderChart() {
   var wrap = svg.parentElement;
   var W = Math.max(wrap.clientWidth||300, 300);
   var x2 = W - 14;
+  _svgW = W;
   svg.setAttribute('width', W);
   svg.setAttribute('viewBox','0 0 '+W+' 260');
   var baseY = yOf(0);
@@ -598,11 +603,11 @@ function renderChart() {
   var nowX = xOf(nM, W);
   var H = 260;
 
-  // Build curve
+  // Build curve (always full day; zoom only affects viewport)
   var pts = buildCurve(5);
   var svgPts = pts.map(function(p){ return { x:xOf(p.t,W), y:yOf(p.norm), norm:p.norm, perSub:p.normSub, t:p.t }; });
 
-  // Split at nowX
+  // Split at nowX (past = solid, future = dashed)
   var pastPts   = svgPts.filter(function(p){ return p.x <= nowX; });
   var futurePts = svgPts.filter(function(p){ return p.x >= nowX; });
   var midIdx = svgPts.findIndex(function(p){ return p.x >= nowX; });
@@ -629,7 +634,7 @@ function renderChart() {
     subPaths[sub] = catmull(sPts);
   });
 
-  // Crash zone (norm < 0)
+  // Crash zone
   var crashPath = '';
   var cpts = []; var inC = false;
   svgPts.forEach(function(p) {
@@ -648,6 +653,17 @@ function renderChart() {
   var intakeToday = entries.filter(function(e){ return e.type==='intake'&&e.timestamp&&e.timestamp.startsWith(today); });
   var ciToday     = entries.filter(function(e){ return e.type==='checkin'&&e.timestamp&&e.timestamp.startsWith(today); });
 
+  // Precompute HR scale
+  var yHR = null, hrMin = 45, hrMax = 120, hrStepPx = 0;
+  if (showCurves.hr && bioHR.length) {
+    var bpms = bioHR.map(function(h){ return h.bpm; });
+    hrMin = Math.max(30, Math.floor(Math.min.apply(null,bpms)) - 5);
+    hrMax = Math.ceil(Math.max.apply(null,bpms)) + 10;
+    hrStepPx = (hrMax-hrMin)/3;
+    yHR = function(bpm){ return CH.y2 - ((bpm-hrMin)/(hrMax-hrMin))*CH.h; };
+  }
+
+  // ── SVG ──────────────────────────────────────────────────────
   var out = '<defs>';
   out += '<linearGradient id="pkGP" x1="0" y1="'+CH.y1+'" x2="0" y2="'+CH.y2+'" gradientUnits="userSpaceOnUse">';
   out += '<stop offset="0%" stop-color="#C084FC" stop-opacity=".75"/>';
@@ -659,14 +675,10 @@ function renderChart() {
   out += '<stop offset="0%" stop-color="#C084FC" stop-opacity=".22"/>';
   out += '<stop offset="100%" stop-color="#64748B" stop-opacity=".05"/>';
   out += '</linearGradient>';
+  out += '<clipPath id="pkClip"><rect x="'+CH.x1+'" y="0" width="'+(x2-CH.x1)+'" height="'+H+'"/></clipPath>';
   out += '</defs>';
 
-  // Zone bands
-  var highY = yOf(65), peakY = yOf(85);
-  if (highY > CH.y1) out += '<rect x="'+CH.x1+'" y="'+Math.max(CH.y1,highY).toFixed(1)+'" width="'+(x2-CH.x1)+'" height="'+(Math.min(baseY,CH.y2)-Math.max(CH.y1,highY)).toFixed(1)+'" fill="rgba(91,141,239,.04)"/>';
-  if (peakY > CH.y1 && highY > CH.y1) out += '<rect x="'+CH.x1+'" y="'+CH.y1+'" width="'+(x2-CH.x1)+'" height="'+(Math.max(0,highY-CH.y1)).toFixed(1)+'" fill="rgba(192,132,252,.06)"/>';
-
-  // Grid + Y labels
+  // Static Y grid + labels (outside clip)
   [0,25,50,75,100].forEach(function(v) {
     var y=yOf(v);
     out += '<line x1="'+CH.x1+'" y1="'+y.toFixed(1)+'" x2="'+x2+'" y2="'+y.toFixed(1)+'" stroke="rgba(255,255,255,.05)" stroke-width="1"/>';
@@ -674,13 +686,25 @@ function renderChart() {
   });
   out += '<line x1="'+CH.x1+'" y1="'+baseY.toFixed(1)+'" x2="'+x2+'" y2="'+baseY.toFixed(1)+'" stroke="rgba(255,255,255,.12)" stroke-width="1"/>';
 
-  // X labels
-  [6,9,12,15,18,21,24].forEach(function(h) {
-    var x = xOf(h*60, W);
-    var lbl = h===0||h===24?'12AM':h===12?'12PM':h>12?(h-12)+'PM':h+'AM';
-    out += '<text x="'+x.toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" fill="rgba(255,255,255,.2)" font-size="9" font-family="ui-monospace,Menlo,monospace">'+lbl+'</text>';
-    out += '<line x1="'+x.toFixed(1)+'" y1="'+CH.y1+'" x2="'+x.toFixed(1)+'" y2="'+(CH.y2+8)+'" stroke="rgba(255,255,255,.04)" stroke-width="1"/>';
-  });
+  // ── Clipped chart content ─────────────────────────────────────
+  out += '<g clip-path="url(#pkClip)">';
+
+  // Zone bands
+  var highY = yOf(65), peakY = yOf(85);
+  if (highY > CH.y1) out += '<rect x="'+CH.x1+'" y="'+Math.max(CH.y1,highY).toFixed(1)+'" width="'+(x2-CH.x1)+'" height="'+(Math.min(baseY,CH.y2)-Math.max(CH.y1,highY)).toFixed(1)+'" fill="rgba(91,141,239,.04)"/>';
+  if (peakY > CH.y1 && highY > CH.y1) out += '<rect x="'+CH.x1+'" y="'+CH.y1+'" width="'+(x2-CH.x1)+'" height="'+(Math.max(0,highY-CH.y1)).toFixed(1)+'" fill="rgba(192,132,252,.06)"/>';
+
+  // X labels — density matches zoom level
+  var zSpan = _zoomEnd - _zoomStart;
+  var xStep = zSpan <= 120 ? 15 : zSpan <= 360 ? 60 : 180;
+  var tickStart = Math.ceil(_zoomStart / xStep) * xStep;
+  for (var tm = tickStart; tm <= _zoomEnd; tm += xStep) {
+    var tx = xOf(tm, W);
+    var th = Math.floor(tm/60) % 24;
+    var tlbl = xStep===15 ? fmt12(tm) : (th===0?'12AM':th===12?'12PM':th>12?(th-12)+'PM':th+'AM');
+    out += '<text x="'+tx.toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" fill="rgba(255,255,255,.2)" font-size="9" font-family="ui-monospace,Menlo,monospace">'+tlbl+'</text>';
+    out += '<line x1="'+tx.toFixed(1)+'" y1="'+CH.y1+'" x2="'+tx.toFixed(1)+'" y2="'+(CH.y2+8)+'" stroke="rgba(255,255,255,.04)" stroke-width="1"/>';
+  }
 
   // Crash
   if (crashPath) out += '<path d="'+crashPath+'" fill="rgba(239,68,68,.18)"/>';
@@ -701,23 +725,9 @@ function renderChart() {
   if (pastLine)   out += '<path d="'+pastLine+'"   fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
   if (futLine)    out += '<path d="'+futLine+'"    fill="none" stroke="rgba(255,255,255,.40)" stroke-width="2"   stroke-dasharray="6,4" stroke-linecap="round"/>';
 
-  // HR line + secondary Y axis
-  if (showCurves.hr && bioHR.length) {
-    var bpms = bioHR.map(function(h){ return h.bpm; });
-    var hrMin = Math.max(30, Math.floor(Math.min.apply(null, bpms)) - 5);
-    var hrMax = Math.ceil(Math.max.apply(null, bpms)) + 10;
-    var yHR = function(bpm){ return CH.y2 - ((bpm-hrMin)/(hrMax-hrMin))*CH.h; };
-
-    out += '<line x1="'+x2+'" y1="'+CH.y1+'" x2="'+x2+'" y2="'+CH.y2+'" stroke="rgba(248,113,113,.12)" stroke-width="1"/>';
-    var hrStep = (hrMax-hrMin)/3;
-    [0,1,2,3].forEach(function(i){
-      var v = hrMin + hrStep*i;
-      var y = yHR(v);
-      out += '<text x="'+(x2+4)+'" y="'+(y+3).toFixed(1)+'" text-anchor="start" fill="rgba(248,113,113,.45)" font-size="8.5" font-family="ui-monospace,Menlo,monospace">'+Math.round(v)+'</text>';
-    });
-
-    var hrPts = bioHR.map(function(h){ return { x:xOf(toMins(h.timestamp),W), y:yHR(h.bpm) }; })
-      .filter(function(p){ return p.x>=CH.x1 && p.x<=x2; });
+  // HR line (inside clip; secondary labels drawn outside below)
+  if (yHR) {
+    var hrPts = bioHR.map(function(h){ return { x:xOf(toMins(h.timestamp),W), y:yHR(h.bpm) }; });
     if (hrPts.length>=2) {
       out += '<path d="'+catmull(hrPts)+'" fill="none" stroke="#F87171" stroke-width="1.2" opacity=".4"/>';
     }
@@ -726,7 +736,7 @@ function renderChart() {
   // HRV dot
   if (showCurves.hrv && bio && bio.hrv!=null) {
     var hvColor = bio.hrv>=50?'#22C55E':bio.hrv>=30?'#F59E0B':'#EF4444';
-    var hvX = (nowX>=CH.x1&&nowX<=x2) ? nowX : xOf((_chartStart+_chartEnd)/2,W);
+    var hvX = (nowX>=CH.x1&&nowX<=x2) ? nowX : xOf((_zoomStart+_zoomEnd)/2,W);
     out += '<circle cx="'+hvX.toFixed(1)+'" cy="'+(CH.y2-8).toFixed(1)+'" r="4" fill="'+hvColor+'" opacity=".85"/>';
     out += '<text x="'+(hvX+8).toFixed(1)+'" y="'+(CH.y2-4).toFixed(1)+'" fill="'+hvColor+'" font-size="9" font-family="ui-monospace,Menlo,monospace" opacity=".75">'+Math.round(bio.hrv)+'ms</text>';
   }
@@ -769,19 +779,44 @@ function renderChart() {
     out += '<circle cx="'+nowX.toFixed(1)+'" cy="'+CH.y1+'" r="4" fill="white"/>';
   }
 
-  // Hit rect for crosshair
-  out += '<rect id="pkHit" x="'+CH.x1+'" y="'+CH.y1+'" width="'+(x2-CH.x1)+'" height="'+(CH.h+16)+'" fill="transparent" style="cursor:crosshair"/>';
+  out += '</g>'; // end clip
+
+  // HR secondary Y axis (outside clip so labels don't get cut)
+  if (yHR) {
+    out += '<line x1="'+x2+'" y1="'+CH.y1+'" x2="'+x2+'" y2="'+CH.y2+'" stroke="rgba(248,113,113,.12)" stroke-width="1"/>';
+    [0,1,2,3].forEach(function(i){
+      var v = hrMin + hrStepPx*i;
+      var y = yHR(v);
+      out += '<text x="'+(x2+4)+'" y="'+(y+3).toFixed(1)+'" text-anchor="start" fill="rgba(248,113,113,.45)" font-size="8.5" font-family="ui-monospace,Menlo,monospace">'+Math.round(v)+'</text>';
+    });
+  }
+
+  // Zoom indicator
+  var isZoomed = _zoomStart !== _chartStart || _zoomEnd !== _chartEnd;
+  if (isZoomed) {
+    var zHrs = (_zoomEnd-_zoomStart)/60;
+    var zLbl = zHrs < 1 ? Math.round(zHrs*60)+'m' : (zHrs % 1 === 0 ? zHrs+'h' : zHrs.toFixed(1)+'h');
+    out += '<rect x="'+(CH.x1+2)+'" y="'+(CH.y1+2)+'" width="84" height="16" rx="4" fill="rgba(0,0,0,.55)"/>';
+    out += '<text x="'+(CH.x1+8)+'" y="'+(CH.y1+13)+'" fill="rgba(255,255,255,.65)" font-size="9" font-family="ui-monospace,Menlo,monospace">'+zLbl+' window</text>';
+    out += '<rect id="pkZoomReset" x="'+(CH.x1+90)+'" y="'+(CH.y1+2)+'" width="40" height="16" rx="4" fill="rgba(255,255,255,.08)" style="cursor:pointer"/>';
+    out += '<text x="'+(CH.x1+110)+'" y="'+(CH.y1+13)+'" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="9" font-family="ui-monospace,Menlo,monospace" style="pointer-events:none">Reset</text>';
+  }
+
+  // Hit rect
+  var canPan = zSpan < _chartEnd - _chartStart;
+  out += '<rect id="pkHit" x="'+CH.x1+'" y="'+CH.y1+'" width="'+(x2-CH.x1)+'" height="'+(CH.h+16)+'" fill="transparent" style="cursor:'+(canPan?'grab':'crosshair')+'"/>';
 
   svg.innerHTML = out;
 
-  // Crosshair tooltip
+  // Crosshair tooltip (re-attached each render since innerHTML is replaced)
   var hitRect = $e('pkHit');
   var tip = $e('pkCrosshairTip');
   function showCH(clientX) {
+    if (_dragging) return;
     var rect = svg.getBoundingClientRect();
     var scaleX = W / rect.width;
     var svgX = (clientX - rect.left) * scaleX;
-    var t2 = _chartStart + (svgX - CH.x1) / (x2 - CH.x1) * (_chartEnd - _chartStart);
+    var t2 = _zoomStart + (svgX - CH.x1) / (x2 - CH.x1) * (_zoomEnd - _zoomStart);
     var near = svgPts.reduce(function(b,p){ return Math.abs(p.t-t2)<Math.abs(b.t-t2)?p:b; }, svgPts[0]);
     if (!near) return;
     var subs = Object.keys(near.perSub||{}).filter(function(k){ return (near.perSub[k]||0)>0.5; })
@@ -796,6 +831,17 @@ function renderChart() {
     hitRect.addEventListener('mouseleave', function(){ tip.style.display='none'; });
     hitRect.addEventListener('touchstart', function(e){ showCH(e.touches[0].clientX); }, {passive:true});
     hitRect.addEventListener('touchend', function(){ setTimeout(function(){ tip.style.display='none'; }, 1500); });
+  }
+
+  // Zoom reset button (re-attached each render)
+  var resetEl = $e('pkZoomReset');
+  if (resetEl) {
+    resetEl.addEventListener('click', function(e) {
+      e.stopPropagation();
+      _zoomStart = _chartStart;
+      _zoomEnd   = _chartEnd;
+      renderChart();
+    });
   }
 }
 
@@ -1227,6 +1273,111 @@ document.querySelectorAll('.pk-custom-input').forEach(function(inp) {
   });
 });
 
+// ─── Chart interactions (zoom / pan / pinch) ──────────────────
+function initChartInteractions() {
+  var svg = $e('pkSvg');
+  var dragX0 = 0, dragZS0 = 0, dragSpan = 0;
+  var pinchD0 = null, pinchZS0 = 0, pinchZE0 = 0, pinchMidT = 0;
+  var swipe1X = null, swipeZS0 = 0, swipeZE0 = 0;
+
+  function clampZoom(s, span) {
+    if (s < 0) s = 0;
+    else if (s + span > 1440) s = 1440 - span;
+    _zoomStart = s;
+    _zoomEnd   = s + span;
+  }
+
+  // Scroll to zoom (cursor-anchored)
+  svg.addEventListener('wheel', function(ev) {
+    ev.preventDefault();
+    var rect = svg.getBoundingClientRect();
+    var svgX = (ev.clientX - rect.left) * (_svgW / rect.width);
+    var tAtCursor = _zoomStart + (svgX - CH.x1) / (_svgW - CH.x1 - 14) * (_zoomEnd - _zoomStart);
+    var maxSpan = _chartEnd - _chartStart;
+    var newSpan = Math.max(120, Math.min(maxSpan, (_zoomEnd - _zoomStart) * (ev.deltaY < 0 ? 0.72 : 1.38)));
+    var ratio = (_zoomEnd > _zoomStart) ? (tAtCursor - _zoomStart) / (_zoomEnd - _zoomStart) : 0.5;
+    clampZoom(tAtCursor - ratio * newSpan, newSpan);
+    renderChart();
+  }, { passive: false });
+
+  // Double-click to reset
+  svg.addEventListener('dblclick', function() {
+    _zoomStart = _chartStart;
+    _zoomEnd   = _chartEnd;
+    renderChart();
+  });
+
+  // Desktop: drag to pan
+  svg.addEventListener('mousedown', function(ev) {
+    if (ev.button !== 0) return;
+    _dragging = true;
+    dragX0    = ev.clientX;
+    dragZS0   = _zoomStart;
+    dragSpan  = _zoomEnd - _zoomStart;
+    svg.style.cursor = 'grabbing';
+    ev.preventDefault();
+  });
+
+  window.addEventListener('mousemove', function(ev) {
+    if (!_dragging) return;
+    var rect = svg.getBoundingClientRect();
+    var dx = (ev.clientX - dragX0) * (_svgW / rect.width);
+    var dtMins = -dx / (_svgW - CH.x1 - 14) * dragSpan;
+    clampZoom(dragZS0 + dtMins, dragSpan);
+    renderChart();
+  });
+
+  window.addEventListener('mouseup', function() {
+    if (_dragging) {
+      _dragging = false;
+      svg.style.cursor = '';
+    }
+  });
+
+  // Mobile: pinch to zoom + swipe to pan
+  svg.addEventListener('touchstart', function(ev) {
+    if (ev.touches.length === 2) {
+      ev.preventDefault();
+      pinchD0  = Math.abs(ev.touches[1].clientX - ev.touches[0].clientX);
+      pinchZS0 = _zoomStart; pinchZE0 = _zoomEnd;
+      var rect = svg.getBoundingClientRect();
+      var midX = ((ev.touches[0].clientX + ev.touches[1].clientX) / 2 - rect.left) * (_svgW / rect.width);
+      pinchMidT = _zoomStart + (midX - CH.x1) / (_svgW - CH.x1 - 14) * (_zoomEnd - _zoomStart);
+      swipe1X = null;
+    } else if (ev.touches.length === 1) {
+      swipe1X  = ev.touches[0].clientX;
+      swipeZS0 = _zoomStart; swipeZE0 = _zoomEnd;
+      pinchD0  = null;
+    }
+  }, { passive: false });
+
+  svg.addEventListener('touchmove', function(ev) {
+    if (ev.touches.length === 2 && pinchD0 !== null) {
+      ev.preventDefault();
+      var d = Math.abs(ev.touches[1].clientX - ev.touches[0].clientX) || 1;
+      var origSpan = pinchZE0 - pinchZS0;
+      var newSpan = Math.max(120, Math.min(_chartEnd - _chartStart, origSpan * (pinchD0 / d)));
+      var ratio = origSpan > 0 ? (pinchMidT - pinchZS0) / origSpan : 0.5;
+      clampZoom(pinchMidT - ratio * newSpan, newSpan);
+      renderChart();
+    } else if (ev.touches.length === 1 && swipe1X !== null) {
+      var span = swipeZE0 - swipeZS0;
+      if (span >= _chartEnd - _chartStart) return;
+      ev.preventDefault();
+      var rect = svg.getBoundingClientRect();
+      var dx = (ev.touches[0].clientX - swipe1X) * (_svgW / rect.width);
+      var dtMins = -dx / (_svgW - CH.x1 - 14) * span;
+      clampZoom(swipeZS0 + dtMins, span);
+      renderChart();
+    }
+  }, { passive: false });
+
+  svg.addEventListener('touchend', function() {
+    pinchD0 = null;
+    swipe1X = null;
+  });
+}
+
 // ─── Main update + init ───────────────────────────────────────
 function update() {
   renderChart();
@@ -1244,6 +1395,7 @@ window.addEventListener('resize', function(){ renderChart(); });
 loadEntries();
 loadDismissed();
 loadBio().then(function(){ update(); });
+initChartInteractions();
 setInterval(update, 60000);
 
 })();
