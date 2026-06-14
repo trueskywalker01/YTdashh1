@@ -883,7 +883,7 @@ body::after {
         </div>
         <div class="cal-grid" id="calGrid"></div>
       </div>
-      <div class="cal-day-panel" id="calDayPanel" style="display:none;">
+      <div class="cal-day-panel" id="calDayPanel">
         <div class="cal-day-head">
           <span class="cal-day-title" id="calDayTitle"></span>
           <button class="cal-day-close" id="calDayClose" type="button" aria-label="Close">✕</button>
@@ -1922,7 +1922,7 @@ body::after {
   $('calPrev').addEventListener('click', function() { shiftWindow(-1); });
   $('calNext').addEventListener('click', function() { shiftWindow(1); });
   $('calDayClose').addEventListener('click', function() {
-    calSelected = null; $('calDayPanel').style.display = 'none'; calRender();
+    calSelected = todayStr; calRender(); renderPanel(todayStr);
   });
   $('calAddBtn').addEventListener('click', function() {
     openModal(calSelected || todayStr, null);
@@ -1941,8 +1941,10 @@ body::after {
     if (e.key === 'Escape') closeModal();
   });
 
-  // Boot
+  // Boot — open on today by default
+  calSelected = todayStr;
   calRender();
+  renderPanel(todayStr);
 
   // Re-render after cross-device sync applies
   window.addEventListener('goals-changed', calRender);
