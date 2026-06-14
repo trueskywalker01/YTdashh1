@@ -469,7 +469,18 @@ function fmtIso(iso) { return fmt12(toMins(iso)); }
 function newId() { return 'pk'+Date.now()+Math.random().toString(36).slice(2,6); }
 
 // ─── Storage ──────────────────────────────────────────────────
-function loadEntries() { try { entries=JSON.parse(localStorage.getItem(PK_KEY)||'[]'); } catch(e){ entries=[]; } }
+function loadEntries() {
+  try { entries=JSON.parse(localStorage.getItem(PK_KEY)||'[]'); } catch(e){ entries=[]; }
+  // Migrate old Zyn entries that never had timestamp_end set
+  var dirty = false;
+  entries.forEach(function(e) {
+    if ((e.substance==='zyn'||e.substance==='zyn_mini') && e.type==='intake' && !e.timestamp_end) {
+      e.timestamp_end = new Date(new Date(e.timestamp).getTime() + 60*60*1000).toISOString();
+      dirty = true;
+    }
+  });
+  if (dirty) localStorage.setItem(PK_KEY, JSON.stringify(entries));
+}
 function saveEntries() { localStorage.setItem(PK_KEY,JSON.stringify(entries)); }
 function loadDismissed() { try { dismissed=new Set(JSON.parse(localStorage.getItem(PK_DISC)||'[]')); } catch(e){} }
 function saveDismissed() { localStorage.setItem(PK_DISC,JSON.stringify([...dismissed])); }
