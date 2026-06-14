@@ -260,7 +260,7 @@ body.topbar-modal-open { overflow: hidden; touch-action: none; }
   <a href="caffeine.html" class="bottombar-tab bottombar-tab-desktop" data-page="caffeine">
     <span class="bottombar-tab-icon">☕</span><span>Peak</span>
   </a>
-  <a href="profile.html" class="bottombar-tab bottombar-tab-desktop" data-page="profile">
+  <a href="profile.html" class="bottombar-tab" data-page="profile">
     <span class="bottombar-tab-icon">👤</span><span>Profile</span>
   </a>
 </nav>`;
