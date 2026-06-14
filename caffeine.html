@@ -55,7 +55,9 @@ button { font-family: var(--font); cursor: pointer; }
 .pk-sleep-adj { font-size: 10px; color: #F59E0B; font-style: italic; margin-top: 2px; }
 
 /* ── Substance row ── */
-.pk-sub-row { display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+.pk-sub-row { display: flex; gap: 8px; align-items: flex-start; }
+.pk-sub-row > .pk-sub-wrap { flex: 1; }
+.pk-sub-row > .pk-nic-group { flex: 2; }
 .pk-sub-wrap { display: flex; flex-direction: column; gap: 5px; align-items: stretch; }
 .pk-sub-custom { display: flex; gap: 4px; }
 .pk-custom-input {
@@ -75,10 +77,11 @@ button { font-family: var(--font); cursor: pointer; }
 .pk-nic-group { display: flex; flex-direction: column; gap: 4px; }
 .pk-nic-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text-4); text-align: center; }
 .pk-nic-btns { display: flex; gap: 6px; }
+.pk-nic-btns > .pk-sub-wrap { flex: 1; }
 .pk-sub-btn {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 2px; padding: 10px 14px; border-radius: 12px; border: 2px solid;
-  background: transparent; min-width: 68px; transition: all 0.15s; position: relative; overflow: hidden;
+  gap: 2px; padding: 10px 8px; border-radius: 12px; border: 2px solid;
+  background: transparent; width: 100%; min-width: 0; transition: all 0.15s; position: relative; overflow: hidden;
 }
 .pk-sub-btn:hover { filter: brightness(1.2); }
 .pk-sub-btn:active { transform: scale(0.95); }
