@@ -695,6 +695,17 @@ body::after {
 }
 .cal-task-item:hover .cal-task-del { opacity: 1; }
 .cal-task-del:hover { background: rgba(255,107,107,0.14); color: var(--danger); }
+/* ── 2-week schedule picker ── */
+.cal-biweek-grid { display: flex; flex-direction: column; gap: 5px; }
+.cal-biweek-toprow { display: flex; padding-left: 42px; }
+.cal-biweek-headers { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; flex: 1; }
+.cal-biweek-dh { font-size: 10px; text-align: center; color: var(--text-quaternary); font-weight: 600; padding-bottom: 2px; }
+.cal-biweek-week { display: flex; align-items: center; gap: 6px; }
+.cal-biweek-wlabel { font-size: 10px; font-weight: 700; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.05em; width: 36px; flex-shrink: 0; text-align: right; }
+.cal-biweek-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; flex: 1; }
+.cal-biweek-btn { width: 100%; aspect-ratio: 1; border-radius: 8px; border: 1px solid rgba(255,255,255,0.09); background: rgba(255,255,255,0.04); color: var(--text-tertiary); font-size: 10px; font-weight: 600; cursor: pointer; font-family: var(--font); transition: background 0.12s, border-color 0.12s, color 0.12s; }
+.cal-biweek-btn.sel { background: rgba(91,141,239,0.28); border-color: #5B8DEF; color: #5B8DEF; }
+.cal-biweek-btn:hover:not(.sel) { background: rgba(255,255,255,0.09); }
 .cal-empty-msg { text-align: center; padding: 12px 0; font-size: 13px; color: var(--text-tertiary); }
 .cal-add-btn {
   margin-top: 10px; width: 100%; padding: 9px;
@@ -901,9 +912,13 @@ body::after {
       <option value="fortnightly">Every 2 weeks</option>
       <option value="monthly">Monthly (same day)</option>
       <option value="custom">Custom interval…</option>
+      <option value="biweek">2-week schedule…</option>
     </select>
     <div id="calCustomWrap" style="display:none;">
       <input class="cal-input" id="calCustomDays" type="number" min="1" max="365" placeholder="Repeat every X days">
+    </div>
+    <div id="calBiweekWrap" style="display:none;">
+      <div class="cal-biweek-grid" id="calBiweekGrid"></div>
     </div>
     <div class="cal-modal-actions">
       <button class="cal-btn-save" id="calSaveBtn" type="button">Save</button>
@@ -1677,6 +1692,10 @@ body::after {
   function recLabel(task) {
     var map = { daily:'Daily', weekly:'Weekly', fortnightly:'Every 2 wks', monthly:'Monthly' };
     if (task.recurrence === 'custom') return 'Every ' + task.customIntervalDays + 'd';
+    if (task.recurrence === 'biweek') {
+      var n = task.biweekDays ? task.biweekDays.length : 0;
+      return '2-wk (' + n + 'd)';
+    }
     return map[task.recurrence] || '';
   }
 
@@ -1692,6 +1711,13 @@ body::after {
       case 'custom': {
         var n = task.customIntervalDays || 1;
         return n > 0 && diff % n === 0;
+      }
+      case 'biweek': {
+        if (!task.biweekDays || !task.biweekDays.length) return false;
+        var pos = diff % 14;
+        var currentDow = fromKey(ds).getDay();
+        var thisWeek = Math.floor(pos / 7);
+        return task.biweekDays.some(function(s) { return s.week === thisWeek && s.dow === currentDow; });
       }
       default: return diff === 0;
     }
@@ -1821,6 +1847,8 @@ body::after {
     $('calTaskRec').value   = rec;
     $('calCustomWrap').style.display = rec === 'custom' ? '' : 'none';
     $('calCustomDays').value = (task && task.customIntervalDays) ? task.customIntervalDays : '';
+    $('calBiweekWrap').style.display = rec === 'biweek' ? '' : 'none';
+    buildBiweekGrid(task && task.biweekDays ? task.biweekDays : []);
     $('calModalBg').style.display = '';
     setTimeout(function() { $('calTaskName').focus(); }, 80);
   }
@@ -1832,13 +1860,14 @@ body::after {
     if (!title) { $('calTaskName').focus(); return; }
     var rec        = $('calTaskRec').value;
     var customDays = rec === 'custom' ? (parseInt($('calCustomDays').value, 10) || 1) : null;
+    var biweekDays = rec === 'biweek' ? readBiweekDays() : null;
     var startDate  = $('calStartDate').value || todayStr;
     var tasks = load();
     if (calEditing) {
       var t = tasks.find(function(x) { return x.id === calEditing.id; });
       if (t) {
         t.title = title; t.notes = $('calTaskNotes').value.trim();
-        t.recurrence = rec; t.customIntervalDays = customDays; t.date = startDate;
+        t.recurrence = rec; t.customIntervalDays = customDays; t.biweekDays = biweekDays; t.date = startDate;
       }
     } else {
       tasks.push({
@@ -1848,6 +1877,7 @@ body::after {
         date: startDate,
         recurrence: rec,
         customIntervalDays: customDays,
+        biweekDays: biweekDays,
         completed: {}
       });
     }
@@ -1855,6 +1885,37 @@ body::after {
     closeModal();
     calRender();
     if (calSelected) renderPanel(calSelected);
+  }
+
+  // ---- Biweek grid builder ----
+  var BIWEEK_DOW_ORDER  = [1,2,3,4,5,6,0];
+  var BIWEEK_DOW_LABELS = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+
+  function buildBiweekGrid(selectedDays) {
+    var sel = selectedDays || [];
+    var html = '<div class="cal-biweek-toprow"><div class="cal-biweek-headers">';
+    BIWEEK_DOW_LABELS.forEach(function(l) { html += '<div class="cal-biweek-dh">' + l + '</div>'; });
+    html += '</div></div>';
+    [0, 1].forEach(function(week) {
+      html += '<div class="cal-biweek-week"><div class="cal-biweek-wlabel">Wk ' + (week + 1) + '</div><div class="cal-biweek-days">';
+      BIWEEK_DOW_ORDER.forEach(function(dow) {
+        var isSel = sel.some(function(s) { return s.week === week && s.dow === dow; });
+        html += '<button type="button" class="cal-biweek-btn' + (isSel ? ' sel' : '') + '" data-week="' + week + '" data-dow="' + dow + '"></button>';
+      });
+      html += '</div></div>';
+    });
+    $('calBiweekGrid').innerHTML = html;
+    $('calBiweekGrid').querySelectorAll('.cal-biweek-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() { btn.classList.toggle('sel'); });
+    });
+  }
+
+  function readBiweekDays() {
+    var days = [];
+    $('calBiweekGrid').querySelectorAll('.cal-biweek-btn.sel').forEach(function(btn) {
+      days.push({ week: parseInt(btn.dataset.week, 10), dow: parseInt(btn.dataset.dow, 10) });
+    });
+    return days;
   }
 
   // ---- Events ----
@@ -1868,6 +1929,8 @@ body::after {
   });
   $('calTaskRec').addEventListener('change', function() {
     $('calCustomWrap').style.display = this.value === 'custom' ? '' : 'none';
+    $('calBiweekWrap').style.display = this.value === 'biweek' ? '' : 'none';
+    if (this.value === 'biweek') buildBiweekGrid([]);
   });
   $('calSaveBtn').addEventListener('click', doSave);
   $('calCancelBtn').addEventListener('click', closeModal);
