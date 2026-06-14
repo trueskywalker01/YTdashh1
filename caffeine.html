@@ -55,7 +55,23 @@ button { font-family: var(--font); cursor: pointer; }
 .pk-sleep-adj { font-size: 10px; color: #F59E0B; font-style: italic; margin-top: 2px; }
 
 /* ── Substance row ── */
-.pk-sub-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+.pk-sub-row { display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+.pk-sub-wrap { display: flex; flex-direction: column; gap: 5px; align-items: stretch; }
+.pk-sub-custom { display: flex; gap: 4px; }
+.pk-custom-input {
+  flex: 1; min-width: 0; padding: 5px 8px;
+  background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 7px;
+  color: var(--text-1); font-size: 12px; font-family: var(--font-mono);
+  outline: none; -webkit-appearance: none; text-align: center; width: 0;
+}
+.pk-custom-input::placeholder { color: var(--text-4); }
+.pk-custom-input:focus { border-color: rgba(255,255,255,0.25); }
+.pk-custom-log {
+  padding: 5px 10px; background: rgba(255,255,255,0.07); border: 1px solid var(--border);
+  border-radius: 7px; color: var(--text-3); font-size: 11px; font-weight: 700;
+  transition: all 0.12s; flex-shrink: 0;
+}
+.pk-custom-log:hover { background: rgba(255,255,255,0.14); color: var(--text-1); }
 .pk-nic-group { display: flex; flex-direction: column; gap: 4px; }
 .pk-nic-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text-4); text-align: center; }
 .pk-nic-btns { display: flex; gap: 6px; }
@@ -267,38 +283,73 @@ button { font-family: var(--font); cursor: pointer; }
 
   <!-- Substance quick-log row -->
   <div class="pk-sub-row" id="pkSubRow">
-    <button class="pk-sub-btn" id="pkBtn-caffeine" data-sub="caffeine" type="button">
-      <span class="pk-sub-icon">☕</span>
-      <span class="pk-sub-name">Caffeine</span>
-      <span class="pk-sub-dose" id="pkDose-caffeine">100mg</span>
-    </button>
+
+    <div class="pk-sub-wrap">
+      <button class="pk-sub-btn" id="pkBtn-caffeine" data-sub="caffeine" type="button">
+        <span class="pk-sub-icon">☕</span>
+        <span class="pk-sub-name">Caffeine</span>
+        <span class="pk-sub-dose" id="pkDose-caffeine">100mg</span>
+      </button>
+      <div class="pk-sub-custom">
+        <input type="number" class="pk-custom-input" id="pkCustom-caffeine" placeholder="mg" min="1" max="2000" step="1">
+        <button class="pk-custom-log" data-sub="caffeine" type="button">Log</button>
+      </div>
+    </div>
+
     <div class="pk-nic-group">
       <div class="pk-nic-label">Nicotine</div>
       <div class="pk-nic-btns">
-        <button class="pk-sub-btn" id="pkBtn-zyn" data-sub="zyn" type="button">
-          <span class="pk-sub-icon">🫧</span>
-          <span class="pk-sub-name">Zyn</span>
-          <span class="pk-sub-dose" id="pkDose-zyn">6mg</span>
-          <span class="pk-pouch-timer" id="pkTimer-zyn" style="display:none"></span>
-        </button>
-        <button class="pk-sub-btn" id="pkBtn-zyn_mini" data-sub="zyn_mini" type="button">
-          <span class="pk-sub-icon">🟢</span>
-          <span class="pk-sub-name">Mini</span>
-          <span class="pk-sub-dose" id="pkDose-zyn_mini">3mg</span>
-          <span class="pk-pouch-timer" id="pkTimer-zyn_mini" style="display:none"></span>
-        </button>
+        <div class="pk-sub-wrap">
+          <button class="pk-sub-btn" id="pkBtn-zyn" data-sub="zyn" type="button">
+            <span class="pk-sub-icon">🫧</span>
+            <span class="pk-sub-name">Zyn</span>
+            <span class="pk-sub-dose" id="pkDose-zyn">6mg</span>
+            <span class="pk-pouch-timer" id="pkTimer-zyn" style="display:none"></span>
+          </button>
+          <div class="pk-sub-custom">
+            <input type="number" class="pk-custom-input" id="pkCustom-zyn" placeholder="mg" min="0.5" max="50" step="0.5">
+            <button class="pk-custom-log" data-sub="zyn" type="button">Log</button>
+          </div>
+        </div>
+        <div class="pk-sub-wrap">
+          <button class="pk-sub-btn" id="pkBtn-zyn_mini" data-sub="zyn_mini" type="button">
+            <span class="pk-sub-icon">🟢</span>
+            <span class="pk-sub-name">Mini</span>
+            <span class="pk-sub-dose" id="pkDose-zyn_mini">3mg</span>
+            <span class="pk-pouch-timer" id="pkTimer-zyn_mini" style="display:none"></span>
+          </button>
+          <div class="pk-sub-custom">
+            <input type="number" class="pk-custom-input" id="pkCustom-zyn_mini" placeholder="mg" min="0.5" max="50" step="0.5">
+            <button class="pk-custom-log" data-sub="zyn_mini" type="button">Log</button>
+          </div>
+        </div>
       </div>
     </div>
-    <button class="pk-sub-btn" id="pkBtn-modafinil" data-sub="modafinil" type="button">
-      <span class="pk-sub-icon">💊</span>
-      <span class="pk-sub-name">Modafinil</span>
-      <span class="pk-sub-dose" id="pkDose-modafinil">100mg</span>
-    </button>
-    <button class="pk-sub-btn" id="pkBtn-adderall" data-sub="adderall" type="button">
-      <span class="pk-sub-icon">⚡</span>
-      <span class="pk-sub-name">Adderall</span>
-      <span class="pk-sub-dose" id="pkDose-adderall">20mg IR</span>
-    </button>
+
+    <div class="pk-sub-wrap">
+      <button class="pk-sub-btn" id="pkBtn-modafinil" data-sub="modafinil" type="button">
+        <span class="pk-sub-icon">💊</span>
+        <span class="pk-sub-name">Modafinil</span>
+        <span class="pk-sub-dose" id="pkDose-modafinil">100mg</span>
+      </button>
+      <div class="pk-sub-custom">
+        <input type="number" class="pk-custom-input" id="pkCustom-modafinil" placeholder="mg" min="1" max="1000" step="1">
+        <button class="pk-custom-log" data-sub="modafinil" type="button">Log</button>
+      </div>
+    </div>
+
+    <div class="pk-sub-wrap">
+      <button class="pk-sub-btn" id="pkBtn-adderall" data-sub="adderall" type="button">
+        <span class="pk-sub-icon">⚡</span>
+        <span class="pk-sub-name">Adderall</span>
+        <span class="pk-sub-dose" id="pkDose-adderall">20mg IR</span>
+      </button>
+      <div class="pk-sub-custom">
+        <input type="number" class="pk-custom-input" id="pkCustom-adderall" placeholder="mg" min="1" max="100" step="1">
+        <button class="pk-custom-log" data-sub="adderall" type="button">Log</button>
+      </div>
+    </div>
+
   </div>
 
   <div class="pk-recent" id="pkRecent"></div>
@@ -1107,6 +1158,59 @@ Object.keys(SUBS).forEach(function(sub) {
   btn.addEventListener('touchstart', function(){ lp=setTimeout(function(){ openExpand(sub); },600); }, {passive:true});
   btn.addEventListener('touchend',   function(){ clearTimeout(lp); }, {passive:true});
   btn.addEventListener('touchmove',  function(){ clearTimeout(lp); }, {passive:true});
+});
+
+// ─── Custom dose buttons ───────────────────────────────────────
+function logCustomDose(sub, dose) {
+  if (!dose || dose <= 0) return;
+  var s = SUBS[sub];
+  // Pouch-out logic for Zyn
+  if ((sub==='zyn'||sub==='zyn_mini') && pouchState[sub]) {
+    var eid = pouchState[sub].id;
+    var entry2 = entries.find(function(e){ return e.id===eid; });
+    if (entry2) {
+      entry2.timestamp_end = new Date().toISOString();
+      saveEntries(); delete pouchState[sub];
+      var te2 = $e('pkTimer-'+sub); if(te2) te2.style.display='none';
+      showToast(s.icon+' Pouch out — logged', null); update(); return;
+    }
+  }
+  var iso = new Date().toISOString();
+  var ne = { id:newId(), type:'intake', substance:sub, dose_mg:dose, timestamp:iso,
+             formulation:sub==='adderall'?expandedForm:undefined, created_at:iso, updated_at:iso };
+  entries.push(ne);
+  saveEntries();
+  if (sub==='zyn'||sub==='zyn_mini') pouchState[sub]={ id:ne.id, ts:Date.now() };
+  warnLate(sub, dose, iso);
+  var uid = ne.id;
+  showToast(s.icon+' '+s.label+' '+dose+'mg logged at '+fmtIso(iso), function() {
+    entries=entries.filter(function(e){ return e.id!==uid; });
+    if(pouchState[sub]&&pouchState[sub].id===uid) delete pouchState[sub];
+    saveEntries(); update();
+  });
+  // Clear input
+  var inp = $e('pkCustom-'+sub); if(inp) inp.value='';
+  update();
+}
+
+document.querySelectorAll('.pk-custom-log').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var sub = btn.dataset.sub;
+    var inp = $e('pkCustom-'+sub);
+    var dose = parseFloat(inp ? inp.value : 0);
+    if (!dose || dose <= 0) { if(inp) inp.focus(); return; }
+    logCustomDose(sub, dose);
+  });
+});
+
+document.querySelectorAll('.pk-custom-input').forEach(function(inp) {
+  inp.addEventListener('keydown', function(ev) {
+    if (ev.key !== 'Enter') return;
+    var sub = inp.id.replace('pkCustom-', '');
+    var dose = parseFloat(inp.value);
+    if (!dose || dose <= 0) return;
+    logCustomDose(sub, dose);
+  });
 });
 
 // ─── Pouch timer restore ──────────────────────────────────────
