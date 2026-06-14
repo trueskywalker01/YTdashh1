@@ -2729,9 +2729,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const panel = $('nutrPanel');
     if (!panel) return;
 
-    const openIds = new Set();
-    panel.querySelectorAll('.nutr-log-row:not([hidden])').forEach(r => openIds.add(r.dataset.id));
-
     panel.innerHTML = '';
 
     const nutrGoals = loadNutrGoals();
@@ -2754,24 +2751,12 @@ document.addEventListener('DOMContentLoaded', function () {
           '<div class="nutr-name">' + n.name + '</div>' +
           '<div class="nutr-amt">' + fmt(logged) + ' / ' + fmt(goal) + ' ' + n.unit + '</div>' +
           '<button class="nutr-goal-edit" data-id="' + n.id + '" title="Edit daily goal">✎</button>' +
-          '<button class="nutr-add-btn" data-id="' + n.id + '" aria-label="Log ' + n.name + '">+</button>' +
         '</div>' +
         '<div class="nutr-bar-indent">' +
           '<div class="nutr-bar-track"><div class="nutr-bar-fill" style="width:' + p + '%;background:' + n.color + '"></div></div>' +
         '</div>' +
-        (n.tip ? '<div class="nutr-tip">' + n.tip + '</div>' : '') +
-        '<div class="nutr-log-row" id="nutrLog_' + n.id + '"' + (openIds.has(n.id) ? '' : ' hidden') + ' data-id="' + n.id + '">' +
-          '<input type="number" class="nutr-log-input" id="nutrLogInput_' + n.id + '" placeholder="0" min="0" step="any" />' +
-          '<span class="nutr-log-unit">' + n.unit + '</span>' +
-          '<button class="nutr-log-ok" data-id="' + n.id + '">✓ Add</button>' +
-          '<button class="nutr-log-cancel" data-id="' + n.id + '" aria-label="Cancel">✕</button>' +
-        '</div>';
+        (n.tip ? '<div class="nutr-tip">' + n.tip + '</div>' : '');
       panel.appendChild(row);
-
-      if (openIds.has(n.id)) {
-        const inp = $('nutrLogInput_' + n.id);
-        if (inp) setTimeout(() => inp.focus(), 0);
-      }
     });
   }
 
@@ -2795,48 +2780,7 @@ document.addEventListener('DOMContentLoaded', function () {
           const cur = Number(goals[id]) || nutr.rda;
           const newVal = parseFloat(prompt('Daily goal for ' + nutr.name + ' (' + nutr.unit + '):', cur));
           if (!isNaN(newVal) && newVal > 0) { goals[id] = newVal; saveNutrGoals(goals); renderNutr(); }
-          return;
         }
-        const addBtn = e.target.closest('.nutr-add-btn');
-        if (addBtn) {
-          const id = addBtn.dataset.id;
-          panel.querySelectorAll('.nutr-log-row:not([hidden])').forEach(r => {
-            if (r.dataset.id !== id) r.hidden = true;
-          });
-          const logRow = $('nutrLog_' + id);
-          if (logRow) {
-            const wasHidden = logRow.hidden;
-            logRow.hidden = false;
-            if (wasHidden) { const inp = $('nutrLogInput_' + id); if (inp) { inp.value = ''; inp.focus(); } }
-          }
-          return;
-        }
-        const okBtn = e.target.closest('.nutr-log-ok');
-        if (okBtn) {
-          const id = okBtn.dataset.id;
-          const input = $('nutrLogInput_' + id);
-          const val = parseFloat(input.value);
-          if (val > 0) {
-            const log = loadNutrLog();
-            log[id] = (Number(log[id]) || 0) + val;
-            saveNutrLog(log);
-          }
-          renderNutr();
-          return;
-        }
-        const cancelBtn = e.target.closest('.nutr-log-cancel');
-        if (cancelBtn) {
-          const logRow = $('nutrLog_' + cancelBtn.dataset.id);
-          if (logRow) logRow.hidden = true;
-        }
-      });
-
-      panel.addEventListener('keydown', e => {
-        const input = e.target.closest('.nutr-log-input');
-        if (!input) return;
-        const id = input.id.replace('nutrLogInput_', '');
-        if (e.key === 'Enter') { const ok = panel.querySelector('.nutr-log-ok[data-id="' + id + '"]'); if (ok) ok.click(); }
-        if (e.key === 'Escape') { const row = $('nutrLog_' + id); if (row) row.hidden = true; }
       });
     }
 
