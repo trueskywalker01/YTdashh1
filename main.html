@@ -395,6 +395,9 @@ body::after {
 }
 .gm-row.gm-row-queued .gm-text { color: #FFE2A8; }
 .gm-row.is-drag-over { border-top: 2px solid #6BE3A4; }
+.gm-cal-divider { list-style: none; padding: 6px 0 3px; margin-top: 4px; }
+.gm-cal-label { font-size: 10px; font-weight: 700; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.09em; }
+.gm-cal-row { box-shadow: inset 3px 0 0 0 rgba(91,141,239,0.45); }
 .gm-row.is-queue-flashing { animation: gm-queue-flash 0.48s ease-out; }
 @keyframes gm-queue-flash {
   0%   { background: rgba(255,255,255,0.035); transform: scale(1); }
@@ -1449,13 +1452,71 @@ body::after {
     else                    renderTomorrowCount();
   }
 
+  // ── Calendar task occurrence check (mirrors calendar IIFE logic) ──
+  function taskOnDate(task, ds) {
+    function fk(s) { var p = s.split('-').map(Number); return new Date(p[0], p[1]-1, p[2]); }
+    var diff = Math.round((fk(ds) - fk(task.date)) / 864e5);
+    if (diff < 0) return false;
+    switch (task.recurrence) {
+      case 'daily': return true;
+      case 'weekly': return diff % 7 === 0;
+      case 'fortnightly': return diff % 14 === 0;
+      case 'monthly': return fk(task.date).getDate() === fk(ds).getDate();
+      case 'custom': var n = task.customIntervalDays || 1; return n > 0 && diff % n === 0;
+      case 'biweek':
+        if (!task.biweekDays || !task.biweekDays.length) return false;
+        var pos = diff % 14, dow = fk(ds).getDay(), wk = Math.floor(pos / 7);
+        return task.biweekDays.some(function(s) { return s.week === wk && s.dow === dow; });
+      default: return diff === 0;
+    }
+  }
+
+  function appendCalendarTasks(dateStr, listEl, emptyEl) {
+    var all;
+    try { all = JSON.parse(localStorage.getItem('calendar:tasks') || '[]'); } catch(e) { all = []; }
+    var tasks = all.filter(function(t) { return taskOnDate(t, dateStr); });
+    if (!tasks.length) return;
+    if (emptyEl) emptyEl.style.display = 'none';
+    var div = document.createElement('li');
+    div.className = 'gm-cal-divider';
+    div.innerHTML = '<span class="gm-cal-label">📅 Scheduled</span>';
+    listEl.appendChild(div);
+    tasks.forEach(function(task) {
+      var done = !!(task.completed && task.completed[dateStr]);
+      var li = document.createElement('li');
+      li.className = 'gm-row gm-cal-row' + (done ? ' gm-row-done' : '');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.className = 'gm-check'; cb.checked = done;
+      var textEl = document.createElement('span');
+      textEl.className = 'gm-text';
+      textEl.textContent = task.title;
+      cb.addEventListener('change', function() {
+        try {
+          var latest = JSON.parse(localStorage.getItem('calendar:tasks') || '[]');
+          var t = latest.find(function(x) { return x.id === task.id; });
+          if (!t) return;
+          if (!t.completed) t.completed = {};
+          t.completed[dateStr] = cb.checked;
+          localStorage.setItem('calendar:tasks', JSON.stringify(latest));
+          li.classList.toggle('gm-row-done', cb.checked);
+          window.dispatchEvent(new Event('calendar-tasks-updated'));
+        } catch(e) {}
+      });
+      li.appendChild(cb);
+      li.appendChild(textEl);
+      listEl.appendChild(li);
+    });
+  }
+
   function loadToday() {
     const goals = getGoals(todayKey());
     renderListInto(goals, document.getElementById('goalList'), document.getElementById('emptyState'), todayKey(), false);
+    appendCalendarTasks(getActiveDateString(), document.getElementById('goalList'), document.getElementById('emptyState'));
   }
   function loadTomorrow() {
     const goals = getGoals(tomorrowKey());
     renderListInto(goals, document.getElementById('tomorrowList'), document.getElementById('tomorrowEmpty'), tomorrowKey(), true);
+    appendCalendarTasks(getTomorrowDateString(), document.getElementById('tomorrowList'), document.getElementById('tomorrowEmpty'));
   }
 
   // ---------- Push remaining ----------
@@ -1640,6 +1701,7 @@ body::after {
     WAKE_HOUR  = updated.wakeHour;
     updateDayRing();
   });
+  window.addEventListener('calendar-tasks-updated', () => { loadToday(); loadTomorrow(); });
 })();
 </script>
 
@@ -1670,7 +1732,10 @@ body::after {
   function load() {
     try { return JSON.parse(localStorage.getItem(CAL_KEY) || '[]'); } catch (e) { return []; }
   }
-  function save(tasks) { localStorage.setItem(CAL_KEY, JSON.stringify(tasks)); }
+  function save(tasks) {
+    localStorage.setItem(CAL_KEY, JSON.stringify(tasks));
+    window.dispatchEvent(new Event('calendar-tasks-updated'));
+  }
 
   // Date helpers
   function toKey(d) {
