@@ -93,7 +93,6 @@ button { font-family: var(--font); cursor: pointer; }
 .pk-sub-icon { font-size: 18px; line-height: 1; }
 .pk-sub-name { font-size: 10px; font-weight: 700; color: var(--text-2); white-space: nowrap; }
 .pk-sub-dose { font-size: 9px; color: var(--text-4); font-family: var(--font-mono); }
-.pk-pouch-timer { font-size: 9px; color: var(--c-zyn); font-family: var(--font-mono); }
 .pk-sub-btn.pk-active::after {
   content: ''; position: absolute; top: 4px; right: 4px;
   width: 6px; height: 6px; border-radius: 50%; opacity: 0.8;
@@ -306,7 +305,6 @@ button { font-family: var(--font); cursor: pointer; }
             <span class="pk-sub-icon">🫧</span>
             <span class="pk-sub-name">Zyn</span>
             <span class="pk-sub-dose" id="pkDose-zyn">6mg</span>
-            <span class="pk-pouch-timer" id="pkTimer-zyn" style="display:none"></span>
           </button>
           <div class="pk-sub-custom">
             <input type="number" class="pk-custom-input" id="pkCustom-zyn" placeholder="mg" min="0.5" max="50" step="0.5">
@@ -318,7 +316,6 @@ button { font-family: var(--font); cursor: pointer; }
             <span class="pk-sub-icon">🟢</span>
             <span class="pk-sub-name">Mini</span>
             <span class="pk-sub-dose" id="pkDose-zyn_mini">3mg</span>
-            <span class="pk-pouch-timer" id="pkTimer-zyn_mini" style="display:none"></span>
           </button>
           <div class="pk-sub-custom">
             <input type="number" class="pk-custom-input" id="pkCustom-zyn_mini" placeholder="mg" min="0.5" max="50" step="0.5">
@@ -450,9 +447,7 @@ var showCurves   = { caffeine:false, zyn:false, zyn_mini:false, modafinil:false,
 var expandedSub  = null;
 var expandedForm = 'ir';
 var dismissed    = new Set();
-var pouchState   = {};
 var _toastTimer  = null;
-var _pouchInterval = null;
 var _chartPts    = [];
 var _chartStart  = 6*60;
 var _chartEnd    = 24*60;
@@ -794,43 +789,25 @@ function renderSubBtns() {
     var near = _chartPts.reduce(function(b,p){ return Math.abs(p.t-nM)<Math.abs(b.t-nM)?p:b; }, _chartPts[0]||{normSub:{}});
     var isActive = near && (near.normSub&&near.normSub[sub]||0) > 0.5;
     btn.classList.toggle('pk-active', !!isActive);
-    // Update pouch timer
-    if ((sub==='zyn'||sub==='zyn_mini') && pouchState[sub]) {
-      var mins = Math.floor((Date.now()-pouchState[sub].ts)/60000);
-      var te = $e('pkTimer-'+sub);
-      if (te) { te.textContent='IN '+mins+'m'; te.style.display=''; }
-    }
   });
 }
 
 // ─── Quick log ────────────────────────────────────────────────
+function zynEnd(iso) {
+  return new Date(new Date(iso).getTime() + 60*60*1000).toISOString();
+}
 function quickLog(sub) {
-  // Pouch out
-  if ((sub==='zyn'||sub==='zyn_mini') && pouchState[sub]) {
-    var eid = pouchState[sub].id;
-    var entry = entries.find(function(e){ return e.id===eid; });
-    if (entry) {
-      entry.timestamp_end = new Date().toISOString();
-      saveEntries();
-      delete pouchState[sub];
-      var te = $e('pkTimer-'+sub);
-      if (te) te.style.display='none';
-      showToast(SUBS[sub].icon+' Pouch out — logged', null);
-      update(); return;
-    }
-  }
   var s = SUBS[sub];
   var iso = new Date().toISOString();
   var ne = { id:newId(), type:'intake', substance:sub, dose_mg:s.defaultMg, timestamp:iso,
              formulation:sub==='adderall'?expandedForm:undefined, created_at:iso, updated_at:iso };
+  if (sub==='zyn'||sub==='zyn_mini') ne.timestamp_end = zynEnd(iso);
   entries.push(ne);
   saveEntries();
-  if (sub==='zyn'||sub==='zyn_mini') pouchState[sub] = { id:ne.id, ts:Date.now() };
   warnLate(sub, s.defaultMg, iso);
   var uid = ne.id;
   showToast(s.icon+' '+s.label+' '+s.defaultMg+'mg logged at '+fmtIso(iso), function() {
     entries = entries.filter(function(e){ return e.id!==uid; });
-    if (pouchState[sub]&&pouchState[sub].id===uid) delete pouchState[sub];
     saveEntries(); update();
   });
   update();
@@ -887,9 +864,9 @@ function openExpand(sub) {
     var ne = { id:newId(), type:'intake', substance:sub, dose_mg:dose, timestamp:iso,
                formulation:sub==='adderall'?expandedForm:undefined,
                notes:note||undefined, created_at:iso, updated_at:iso };
+    if (sub==='zyn'||sub==='zyn_mini') ne.timestamp_end = zynEnd(iso);
     entries.push(ne);
     saveEntries();
-    if (sub==='zyn'||sub==='zyn_mini') pouchState[sub]={ id:ne.id, ts:ts.getTime() };
     warnLate(sub, dose, iso);
     closeExpand();
     var uid = ne.id;
@@ -1047,11 +1024,8 @@ function renderTimeline() {
     var main='', meta='';
     if (e.type==='intake') {
       main = (s?s.icon:'💊')+' '+(s?s.label:e.substance)+' '+e.dose_mg+'mg'+(e.formulation?' ('+e.formulation.toUpperCase()+')':'');
-      if ((e.substance==='zyn'||e.substance==='zyn_mini') && e.timestamp_end) {
-        var dur = Math.round((new Date(e.timestamp_end)-new Date(e.timestamp))/60000);
-        meta = 'In: '+fmtIso(e.timestamp)+' → out: '+fmtIso(e.timestamp_end)+' ('+dur+'min)';
-      } else if (e.substance==='zyn'||e.substance==='zyn_mini') {
-        meta = 'In: '+fmtIso(e.timestamp)+' — pouch still active';
+      if (e.substance==='zyn'||e.substance==='zyn_mini') {
+        meta = 'Active for 60 min from '+fmtIso(e.timestamp);
       }
       if (e.notes) meta+=(meta?' · ':'')+e.notes;
     } else {
@@ -1073,7 +1047,6 @@ function renderTimeline() {
       var id = btn.dataset.id;
       var orig = entries.slice();
       entries = entries.filter(function(e){ return e.id!==id; });
-      Object.keys(pouchState).forEach(function(sub){ if (pouchState[sub].id===id) delete pouchState[sub]; });
       saveEntries();
       showToast('Entry deleted', function(){ entries=orig; saveEntries(); update(); });
       update();
@@ -1166,31 +1139,18 @@ Object.keys(SUBS).forEach(function(sub) {
 function logCustomDose(sub, dose) {
   if (!dose || dose <= 0) return;
   var s = SUBS[sub];
-  // Pouch-out logic for Zyn
-  if ((sub==='zyn'||sub==='zyn_mini') && pouchState[sub]) {
-    var eid = pouchState[sub].id;
-    var entry2 = entries.find(function(e){ return e.id===eid; });
-    if (entry2) {
-      entry2.timestamp_end = new Date().toISOString();
-      saveEntries(); delete pouchState[sub];
-      var te2 = $e('pkTimer-'+sub); if(te2) te2.style.display='none';
-      showToast(s.icon+' Pouch out — logged', null); update(); return;
-    }
-  }
   var iso = new Date().toISOString();
   var ne = { id:newId(), type:'intake', substance:sub, dose_mg:dose, timestamp:iso,
              formulation:sub==='adderall'?expandedForm:undefined, created_at:iso, updated_at:iso };
+  if (sub==='zyn'||sub==='zyn_mini') ne.timestamp_end = zynEnd(iso);
   entries.push(ne);
   saveEntries();
-  if (sub==='zyn'||sub==='zyn_mini') pouchState[sub]={ id:ne.id, ts:Date.now() };
   warnLate(sub, dose, iso);
   var uid = ne.id;
   showToast(s.icon+' '+s.label+' '+dose+'mg logged at '+fmtIso(iso), function() {
     entries=entries.filter(function(e){ return e.id!==uid; });
-    if(pouchState[sub]&&pouchState[sub].id===uid) delete pouchState[sub];
     saveEntries(); update();
   });
-  // Clear input
   var inp = $e('pkCustom-'+sub); if(inp) inp.value='';
   update();
 }
@@ -1215,21 +1175,6 @@ document.querySelectorAll('.pk-custom-input').forEach(function(inp) {
   });
 });
 
-// ─── Pouch timer restore ──────────────────────────────────────
-function restorePouch() {
-  var today = todayStr();
-  ['zyn','zyn_mini'].forEach(function(sub) {
-    var act = entries.filter(function(e){ return e.type==='intake'&&e.substance===sub&&e.timestamp&&e.timestamp.startsWith(today)&&!e.timestamp_end; })
-      .sort(function(a,b){ return b.timestamp.localeCompare(a.timestamp); })[0];
-    if (act) {
-      pouchState[sub]={ id:act.id, ts:new Date(act.timestamp).getTime() };
-      var te=$e('pkTimer-'+sub);
-      var m=Math.floor((Date.now()-pouchState[sub].ts)/60000);
-      if(te){ te.textContent='IN '+m+'m'; te.style.display=''; }
-    }
-  });
-}
-
 // ─── Main update + init ───────────────────────────────────────
 function update() {
   renderChart();
@@ -1246,7 +1191,6 @@ window.addEventListener('resize', function(){ renderChart(); });
 
 loadEntries();
 loadDismissed();
-restorePouch();
 loadBio().then(function(){ update(); });
 setInterval(update, 60000);
 
