@@ -768,19 +768,35 @@ function renderChart() {
     out += '<circle cx="'+x.toFixed(1)+'" cy="'+(baseY+13).toFixed(1)+'" r="4" fill="'+col+'"/>';
   });
 
-  // Check-in scatter
+  // Check-in scatter (with divergence detection)
   ciVis.sort(function(a,b){ return a.timestamp.localeCompare(b.timestamp); }).forEach(function(e, i) {
     var x = xOf(absMinutes(e.timestamp), W);
     if (x < CH.x1 || x > x2) return;
     var avg = ((e.focus||5)+(e.energy||5))/2/10*100;
     var y = yOf(avg);
-    out += '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="5" fill="white" stroke="#F59E0B" stroke-width="2"/>';
+
+    // Find predicted value at this check-in's time
+    var ciT = absMinutes(e.timestamp);
+    var nearPt = _chartPts.length ? _chartPts.reduce(function(b,p){ return Math.abs(p.t-ciT)<Math.abs(b.t-ciT)?p:b; }, _chartPts[0]) : null;
+    var predicted = nearPt ? nearPt.norm : 0;
+    var divergence = avg - predicted;
+    var isDivergent = Math.abs(divergence) > 25;
+    var dotStroke = isDivergent ? '#EF4444' : '#F59E0B';
+
     if (i > 0) {
       var prev = ciVis[i-1];
       var px = xOf(absMinutes(prev.timestamp), W);
       var pavg = ((prev.focus||5)+(prev.energy||5))/2/10*100;
       var py = yOf(pavg);
-      out += '<line x1="'+px.toFixed(1)+'" y1="'+py.toFixed(1)+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="#F59E0B" stroke-width="1" opacity=".5"/>';
+      out += '<line x1="'+px.toFixed(1)+'" y1="'+py.toFixed(1)+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="'+dotStroke+'" stroke-width="1" opacity=".5"/>';
+    }
+    out += '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="5" fill="white" stroke="'+dotStroke+'" stroke-width="2"/>';
+
+    if (isDivergent) {
+      var annColor = divergence > 0 ? '#22C55E' : '#EF4444';
+      var annText  = divergence > 0 ? '↑ Feeling higher' : '↓ Feeling lower';
+      var annY = (y - 14 < CH.y1 + 16) ? y + 20 : y - 9;
+      out += '<text x="'+x.toFixed(1)+'" y="'+annY.toFixed(1)+'" text-anchor="middle" fill="'+annColor+'" font-size="8" font-family="ui-monospace,Menlo,monospace" opacity=".9">'+annText+'</text>';
     }
   });
 
@@ -1115,11 +1131,18 @@ function renderSummary() {
   var status = getStatus();
   var avgF = todayCi.length ? (todayCi.reduce(function(s,e){ return s+(e.focus||5); },0)/todayCi.length).toFixed(1) : '—';
   var avgE = todayCi.length ? (todayCi.reduce(function(s,e){ return s+(e.energy||5); },0)/todayCi.length).toFixed(1) : '—';
+  var divCount = todayCi.filter(function(e) {
+    var ciT = absMinutes(e.timestamp);
+    var a = ((e.focus||5)+(e.energy||5))/2/10*100;
+    var near = _chartPts.length ? _chartPts.reduce(function(b,p){ return Math.abs(p.t-ciT)<Math.abs(b.t-ciT)?p:b; }, _chartPts[0]) : null;
+    return near && Math.abs(a - near.norm) > 25;
+  }).length;
+  var ciSubHtml = todayCi.length+' today'+(divCount?' &nbsp;<span style="color:#EF4444;font-weight:600">'+divCount+' divergent</span>':'');
 
   $e('pkSummary').innerHTML =
     '<div class="pk-sum-card"><div class="pk-sum-label">Today\'s Intake</div><div class="pk-sum-intake">'+intHtml+'</div></div>'
    +'<div class="pk-sum-card"><div class="pk-sum-label">Predicted Peak</div>'+(pw?'<div class="pk-sum-value">'+fmt12(pw.start)+' – '+fmt12(pw.end)+'</div><div class="pk-sum-sub">Level: '+Math.round(pw.peak)+'/100</div>':'<div class="pk-sum-value" style="color:rgba(255,255,255,.3)">No peak yet</div>')+'</div>'
-   +'<div class="pk-sum-card"><div class="pk-sum-label">Check-ins</div><div class="pk-sum-value">Focus '+avgF+' / Energy '+avgE+'</div><div class="pk-sum-sub">'+todayCi.length+' today</div></div>'
+   +'<div class="pk-sum-card"><div class="pk-sum-label">Check-ins</div><div class="pk-sum-value">Focus '+avgF+' / Energy '+avgE+'</div><div class="pk-sum-sub">'+ciSubHtml+'</div></div>'
    +'<div class="pk-sum-card"><div class="pk-sum-label">Status</div><div class="pk-sum-value" style="font-size:12px;line-height:1.5">'+status+'</div></div>';
 
   $e('pkStatus').textContent = status;
