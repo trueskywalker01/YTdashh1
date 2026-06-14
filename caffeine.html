@@ -445,10 +445,10 @@ var expandedForm = 'ir';
 var dismissed    = new Set();
 var _toastTimer  = null;
 var _chartPts    = [];
-var _chartStart  = 6*60;
-var _chartEnd    = 24*60;
-var _zoomStart   = 6*60;
-var _zoomEnd     = 24*60;
+var _chartStart  = Math.round(nowMins()) - 18*60;  // now − 18h
+var _chartEnd    = Math.round(nowMins()) + 18*60;  // now + 18h
+var _zoomStart   = _chartStart;
+var _zoomEnd     = _chartEnd;
 var _svgW        = 300;
 var _dragging    = false;
 
@@ -460,8 +460,14 @@ function todayStr() {
 function pad(n) { return n < 10 ? '0'+n : ''+n; }
 function nowMins() { var d=new Date(); return d.getHours()*60+d.getMinutes()+d.getSeconds()/60; }
 function toMins(iso) { var d=new Date(iso); return d.getHours()*60+d.getMinutes()+d.getSeconds()/60; }
+function absMinutes(iso) {
+  var d = new Date(iso);
+  var midnight = new Date(); midnight.setHours(0,0,0,0);
+  return (d - midnight) / 60000; // minutes from today's midnight; negative = yesterday, >1440 = tomorrow
+}
 function fmt12(m) {
-  var h24=Math.floor(m/60)%24, mn=Math.floor(m%60);
+  var h24 = ((Math.floor(m/60) % 24) + 24) % 24;
+  var mn  = ((Math.floor(m) % 60) + 60) % 60;
   var h=h24%12||12, ap=h24>=12?'PM':'AM';
   return h+(mn?':'+pad(mn):'')+' '+ap;
 }
@@ -506,11 +512,11 @@ function computeEffect(prof, mg, elapsed) {
 }
 
 function entryEffect(e, t) {
-  var tStart = toMins(e.timestamp);
+  var tStart = absMinutes(e.timestamp);
   var elapsed = t - tStart;
   if ((e.substance==='zyn'||e.substance==='zyn_mini') && e.timestamp_end) {
     if (t <= tStart) return 0;
-    var tEnd = toMins(e.timestamp_end);
+    var tEnd = absMinutes(e.timestamp_end);
     var prof = PROFILES[e.substance];
     if (t <= tEnd) return computeEffect(prof, e.dose_mg, elapsed);
     var eAtOut = computeEffect(prof, e.dose_mg, tEnd - tStart);
@@ -536,8 +542,12 @@ function sleepMult() {
 
 function buildCurve(stepMin) {
   if (!stepMin) stepMin = 5;
-  var today = todayStr();
-  var tEntries = entries.filter(function(e){ return e.type==='intake' && e.timestamp && e.timestamp.startsWith(today); });
+  // Include any intake entry whose abs-time falls within the chart window (+ PK tail buffer)
+  var tEntries = entries.filter(function(e){
+    if (e.type !== 'intake' || !e.timestamp) return false;
+    var am = absMinutes(e.timestamp);
+    return am >= _chartStart - 120 && am <= _chartEnd + 120;
+  });
   var sm = sleepMult() * (bio && bio.activeCal>300 ? 1.1 : 1);
   var pts = [];
   for (var t = _chartStart; t <= _chartEnd; t += stepMin) {
@@ -545,10 +555,10 @@ function buildCurve(stepMin) {
     var perSub = {};
     tEntries.forEach(function(e) {
       var eff = entryEffect(e,t) * sm;
-      if (eff === 0 && t < toMins(e.timestamp)) return;
+      if (eff === 0 && t < absMinutes(e.timestamp)) return;
       // Nicotine tolerance in rolling 180m window
       if (e.substance==='zyn'||e.substance==='zyn_mini') {
-        var cnt = tEntries.filter(function(x){ return (x.substance==='zyn'||x.substance==='zyn_mini') && (t-toMins(x.timestamp))>=0 && (t-toMins(x.timestamp))<=180; }).length;
+        var cnt = tEntries.filter(function(x){ return (x.substance==='zyn'||x.substance==='zyn_mini') && (t-absMinutes(x.timestamp))>=0 && (t-absMinutes(x.timestamp))<=180; }).length;
         if (cnt >= 3) eff *= Math.pow(0.8, Math.max(0,cnt-2));
       }
       perSub[e.substance] = (perSub[e.substance]||0) + eff;
@@ -649,9 +659,17 @@ function renderChart() {
     crashPath=cp+' Z';
   }
 
-  var today = todayStr();
-  var intakeToday = entries.filter(function(e){ return e.type==='intake'&&e.timestamp&&e.timestamp.startsWith(today); });
-  var ciToday     = entries.filter(function(e){ return e.type==='checkin'&&e.timestamp&&e.timestamp.startsWith(today); });
+  // Include entries from any day that are visible in the current zoom window
+  var intakeVis = entries.filter(function(e){
+    if (e.type!=='intake'||!e.timestamp) return false;
+    var am = absMinutes(e.timestamp);
+    return am >= _zoomStart - 30 && am <= _zoomEnd + 30;
+  });
+  var ciVis = entries.filter(function(e){
+    if (e.type!=='checkin'||!e.timestamp) return false;
+    var am = absMinutes(e.timestamp);
+    return am >= _zoomStart - 30 && am <= _zoomEnd + 30;
+  });
 
   // Precompute HR scale
   var yHR = null, hrMin = 45, hrMax = 120, hrStepPx = 0;
@@ -742,8 +760,8 @@ function renderChart() {
   }
 
   // Dose markers
-  intakeToday.forEach(function(e) {
-    var x = xOf(toMins(e.timestamp), W);
+  intakeVis.forEach(function(e) {
+    var x = xOf(absMinutes(e.timestamp), W);
     if (x < CH.x1 || x > x2) return;
     var col = SUBS[e.substance] ? SUBS[e.substance].color : '#fff';
     out += '<line x1="'+x.toFixed(1)+'" y1="'+(baseY+2).toFixed(1)+'" x2="'+x.toFixed(1)+'" y2="'+(baseY+12).toFixed(1)+'" stroke="'+col+'" stroke-width="1.5"/>';
@@ -751,18 +769,29 @@ function renderChart() {
   });
 
   // Check-in scatter
-  ciToday.sort(function(a,b){ return a.timestamp.localeCompare(b.timestamp); }).forEach(function(e, i) {
-    var x = xOf(toMins(e.timestamp), W);
+  ciVis.sort(function(a,b){ return a.timestamp.localeCompare(b.timestamp); }).forEach(function(e, i) {
+    var x = xOf(absMinutes(e.timestamp), W);
     if (x < CH.x1 || x > x2) return;
     var avg = ((e.focus||5)+(e.energy||5))/2/10*100;
     var y = yOf(avg);
     out += '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="5" fill="white" stroke="#F59E0B" stroke-width="2"/>';
     if (i > 0) {
-      var prev = ciToday[i-1];
-      var px = xOf(toMins(prev.timestamp), W);
+      var prev = ciVis[i-1];
+      var px = xOf(absMinutes(prev.timestamp), W);
       var pavg = ((prev.focus||5)+(prev.energy||5))/2/10*100;
       var py = yOf(pavg);
       out += '<line x1="'+px.toFixed(1)+'" y1="'+py.toFixed(1)+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="#F59E0B" stroke-width="1" opacity=".5"/>';
+    }
+  });
+
+  // Midnight separator (day boundary lines visible in multi-day view)
+  [-1440, 0, 1440, 2880].forEach(function(boundary) {
+    if (boundary > _zoomStart && boundary < _zoomEnd) {
+      var bx = xOf(boundary, W);
+      var dayLabel = boundary === 0 ? 'today' : boundary === 1440 ? 'tmrw' : boundary < 0 ? 'yday' : '+2d';
+      out += '<line x1="'+bx.toFixed(1)+'" y1="'+CH.y1+'" x2="'+bx.toFixed(1)+'" y2="'+CH.y2+'" stroke="rgba(255,255,255,.18)" stroke-width="1" stroke-dasharray="4,3"/>';
+      out += '<rect x="'+(bx-14).toFixed(1)+'" y="'+(CH.y1+5)+'" width="28" height="12" rx="3" fill="rgba(0,0,0,.55)"/>';
+      out += '<text x="'+bx.toFixed(1)+'" y="'+(CH.y1+14)+'" text-anchor="middle" fill="rgba(255,255,255,.35)" font-size="8" font-family="ui-monospace,Menlo,monospace">'+dayLabel+'</text>';
     }
   });
 
@@ -1281,8 +1310,8 @@ function initChartInteractions() {
   var swipe1X = null, swipeZS0 = 0, swipeZE0 = 0;
 
   function clampZoom(s, span) {
-    if (s < 0) s = 0;
-    else if (s + span > 1440) s = 1440 - span;
+    if (s < _chartStart) s = _chartStart;
+    else if (s + span > _chartEnd) s = _chartEnd - span;
     _zoomStart = s;
     _zoomEnd   = s + span;
   }
