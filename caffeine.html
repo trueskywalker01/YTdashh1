@@ -805,7 +805,11 @@ function renderChart() {
       out += '<rect x="'+(nowX-18).toFixed(1)+'" y="'+(ly-12).toFixed(1)+'" width="36" height="16" rx="4" fill="rgba(255,255,255,.12)"/>';
       out += '<text x="'+nowX.toFixed(1)+'" y="'+ly.toFixed(1)+'" text-anchor="middle" fill="white" font-size="10" font-weight="700" font-family="ui-monospace,Menlo,monospace">'+lv+'</text>';
     }
-    out += '<circle cx="'+nowX.toFixed(1)+'" cy="'+CH.y1+'" r="4" fill="white"/>';
+    out += '<circle cx="'+nowX.toFixed(1)+'" cy="'+CH.y1+'" r="7" fill="white" opacity="0.2"/>';
+    out += '<circle cx="'+nowX.toFixed(1)+'" cy="'+CH.y1+'" r="4" fill="white">'
+         + '<animate attributeName="r" values="4;7;4" dur="2s" repeatCount="indefinite"/>'
+         + '<animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>'
+         + '</circle>';
   }
 
   out += '</g>'; // end clip
