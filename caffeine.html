@@ -800,9 +800,7 @@ function openExpand(sub) {
   var d = new Date();
   var hh = pad(d.getHours()), mm = pad(d.getMinutes());
   var html = '<div class="pk-expand-title">'+s.icon+' Log '+s.label+'</div><div class="pk-expand-row">';
-  html += '<label>Dose<select id="pkExpDose">';
-  s.opts.forEach(function(o){ html+='<option value="'+o+'"'+(o===s.defaultMg?' selected':'')+'>'+o+'mg</option>'; });
-  html += '</select></label>';
+  html += '<label>Dose (mg)<input type="number" id="pkExpDose" value="'+s.defaultMg+'" min="1" max="5000" step="1" style="width:90px"></label>';
   if (sub==='caffeine') {
     html += '<label>Source<select id="pkCafSrc">';
     CAF_SRCS.forEach(function(c){ html+='<option value="'+c.mg+'">'+c.l+(c.mg?' ('+c.mg+'mg)':'')+' </option>'; });
