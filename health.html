@@ -1924,7 +1924,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (typeof initCloudSync !== 'function') return;
   initCloudSync({
     appKey: 'health',
-    syncedKeys: ['stack:items', 'stack:version', 'stack:low', 'po_water_v1', 'macro:goals', 'nutrients:goals'],
+    syncedKeys: ['stack:items', 'stack:version', 'stack:low', 'macro:goals', 'nutrients:goals'],
     syncedPrefixes: ['stack:taken:', 'macro:meals:', 'nutrients:log:'],
     onApplied: function () { window.dispatchEvent(new Event('storage')); }
   });

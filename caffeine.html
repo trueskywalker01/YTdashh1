@@ -490,6 +490,10 @@ function todayStr() {
   return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 }
 function pad(n) { return n < 10 ? '0'+n : ''+n; }
+function localDateOf(iso) {
+  var d = new Date(iso);
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
 function nowMins() { var d=new Date(); return d.getHours()*60+d.getMinutes()+d.getSeconds()/60; }
 function toMins(iso) { var d=new Date(iso); return d.getHours()*60+d.getMinutes()+d.getSeconds()/60; }
 function absMinutes(iso) {
@@ -1050,7 +1054,7 @@ function closeModal() {
 // ─── Recent chips ─────────────────────────────────────────────
 function renderRecent() {
   var today = todayStr();
-  var rec = entries.filter(function(e){ return e.type==='intake'&&e.timestamp&&e.timestamp.startsWith(today); })
+  var rec = entries.filter(function(e){ return e.type==='intake'&&e.timestamp&&localDateOf(e.timestamp)===today; })
     .sort(function(a,b){ return b.timestamp.localeCompare(a.timestamp); }).slice(0,3);
   var el = $e('pkRecent');
   el.innerHTML = rec.map(function(e) {
@@ -1064,7 +1068,7 @@ function computeSugg() {
   var suggs = [];
   var today = todayStr();
   var nM = nowMins();
-  var todayIn = entries.filter(function(e){ return e.type==='intake'&&e.timestamp&&e.timestamp.startsWith(today); });
+  var todayIn = entries.filter(function(e){ return e.type==='intake'&&e.timestamp&&localDateOf(e.timestamp)===today; });
   var curPt = _chartPts.reduce(function(b,p){ return Math.abs(p.t-nM)<Math.abs(b.t-nM)?p:b; }, _chartPts[0]||{norm:0});
   var cur = curPt ? curPt.norm : 0;
   var next30 = _chartPts.find(function(p){ return p.t>nM+28&&p.t<nM+32; });
@@ -1131,7 +1135,7 @@ function getStatus() {
     trend = next ? next.norm-cur : 0;
   }
   var today = todayStr();
-  if (!entries.some(function(e){ return e.type==='intake'&&e.timestamp&&e.timestamp.startsWith(today); })) return '😐 Baseline. Dose up or embrace the calm.';
+  if (!entries.some(function(e){ return e.type==='intake'&&e.timestamp&&localDateOf(e.timestamp)===today; })) return '😐 Baseline. Dose up or embrace the calm.';
   if (cur < -2)  return '💤 Crashed. Rest, eat, hydrate.';
   if (cur < 20)  return '😐 Baseline. Dose window open.';
   if (trend > 2) {
@@ -1148,8 +1152,8 @@ function getStatus() {
 
 function renderSummary() {
   var today = todayStr();
-  var todayIn = entries.filter(function(e){ return e.type==='intake'&&e.timestamp&&e.timestamp.startsWith(today); });
-  var todayCi = entries.filter(function(e){ return e.type==='checkin'&&e.timestamp&&e.timestamp.startsWith(today); });
+  var todayIn = entries.filter(function(e){ return e.type==='intake'&&e.timestamp&&localDateOf(e.timestamp)===today; });
+  var todayCi = entries.filter(function(e){ return e.type==='checkin'&&e.timestamp&&localDateOf(e.timestamp)===today; });
   var totals = {};
   todayIn.forEach(function(e){ totals[e.substance]=(totals[e.substance]||0)+e.dose_mg; });
   var intHtml = Object.keys(SUBS).map(function(sub) {
@@ -1182,7 +1186,7 @@ function renderSummary() {
 // ─── Timeline ─────────────────────────────────────────────────
 function renderTimeline() {
   var today = todayStr();
-  var tl = entries.filter(function(e){ return e.timestamp&&e.timestamp.startsWith(today); })
+  var tl = entries.filter(function(e){ return e.timestamp&&localDateOf(e.timestamp)===today; })
     .sort(function(a,b){ return a.timestamp.localeCompare(b.timestamp); });
   var el = $e('pkTimeline');
   if (!tl.length) {
@@ -1251,7 +1255,7 @@ document.addEventListener('keydown', function(ev){ if(ev.key==='Escape') closeCI
 
 function updateFabSince() {
   var today = todayStr();
-  var ci = entries.filter(function(e){ return e.type==='checkin'&&e.timestamp&&e.timestamp.startsWith(today); })
+  var ci = entries.filter(function(e){ return e.type==='checkin'&&e.timestamp&&localDateOf(e.timestamp)===today; })
     .sort(function(a,b){ return b.timestamp.localeCompare(a.timestamp); });
   var el = $e('pkFabSince');
   if (!el) return;
@@ -1535,6 +1539,16 @@ initChartInteractions();
 setInterval(update, 60000);
 
 })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof initCloudSync !== 'function') return;
+  initCloudSync({
+    appKey: 'caffeine',
+    syncedKeys: ['peak:entries', 'peak:dismissed'],
+    onApplied: function () { if (typeof update === 'function') update(); }
+  });
+});
 </script>
 </body>
 </html>
