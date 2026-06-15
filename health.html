@@ -2400,26 +2400,42 @@ document.addEventListener('DOMContentLoaded', function () {
   function parseProduct(p) {
     const n = p.nutriments || {};
     const perG = p.serving_quantity || 100;
+    const mg = v => v ? +((Number(v) * 1000).toFixed(1)) : 0;  // Open Food Facts stores minerals in g; convert to mg
     return {
-      name:    (p.product_name || 'Unknown').trim(),
-      brand:   (p.brands || '').split(',')[0].trim(),
+      name:         (p.product_name || 'Unknown').trim(),
+      brand:        (p.brands || '').split(',')[0].trim(),
       perG,
-      cal100:  n['energy-kcal_100g'] || n['energy_100g'] || 0,
-      prot100: n['proteins_100g']      || 0,
-      carb100: n['carbohydrates_100g'] || 0,
-      fat100:  n['fat_100g']           || 0,
-      fiber100:n['fiber_100g']         || 0,
+      cal100:       n['energy-kcal_100g'] || n['energy_100g'] || 0,
+      prot100:      n['proteins_100g']      || 0,
+      carb100:      n['carbohydrates_100g'] || 0,
+      fat100:       n['fat_100g']           || 0,
+      fiber100:     n['fiber_100g']         || 0,
+      potassium100: mg(n['potassium_100g']),
+      sodium100:    mg(n['sodium_100g']),
+      calcium100:   mg(n['calcium_100g']),
+      iron100:      mg(n['iron_100g']),
+      magnesium100: mg(n['magnesium_100g']),
+      vit_c100:     mg(n['vitamin-c_100g']),
+      zinc100:      mg(n['zinc_100g']),
     };
   }
 
   function macrosForQty(food, qty) {
     const s = food.perG * qty / 100;
+    const sc = (v) => +((+(v || 0) * s).toFixed(1));
     return {
-      cal:   Math.round(food.cal100   * s),
-      prot:  +((food.prot100  * s).toFixed(1)),
-      carb:  +((food.carb100  * s).toFixed(1)),
-      fat:   +((food.fat100   * s).toFixed(1)),
-      fiber: +((food.fiber100 * s).toFixed(1)),
+      cal:       Math.round((food.cal100 || 0) * s),
+      prot:      sc(food.prot100),
+      carb:      sc(food.carb100),
+      fat:       sc(food.fat100),
+      fiber:     sc(food.fiber100),
+      potassium: sc(food.potassium100),
+      sodium:    sc(food.sodium100),
+      calcium:   sc(food.calcium100),
+      iron:      sc(food.iron100),
+      magnesium: sc(food.magnesium100),
+      vit_c:     sc(food.vit_c100),
+      zinc:      sc(food.zinc100),
     };
   }
 
@@ -2532,13 +2548,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const key = todayStr();
     const meals = loadMeals(key);
     meals.push({
-      name:  pendingFood.name + ' (' + Math.round(pendingFood.perG * pendingQty) + 'g)',
-      cal:   m.cal,
-      prot:  m.prot,
-      carb:  m.carb,
-      fat:   m.fat,
-      fiber: m.fiber || 0,
-      note:  m.fiber ? m.fiber + 'g fibre' : undefined,
+      name:      pendingFood.name + ' (' + Math.round(pendingFood.perG * pendingQty) + 'g)',
+      cal:       m.cal,
+      prot:      m.prot,
+      carb:      m.carb,
+      fat:       m.fat,
+      fiber:     m.fiber     || 0,
+      note:      m.fiber ? m.fiber + 'g fibre' : undefined,
+      potassium: m.potassium || 0,
+      sodium:    m.sodium    || 0,
+      calcium:   m.calcium   || 0,
+      iron:      m.iron      || 0,
+      magnesium: m.magnesium || 0,
+      vit_c:     m.vit_c     || 0,
+      zinc:      m.zinc      || 0,
     });
     saveMeals(key, meals);
     $('macroResultCard').hidden = true;
@@ -2618,15 +2641,23 @@ document.addEventListener('DOMContentLoaded', function () {
       if (data.error) throw new Error(data.error);
       const grams = Math.max(1, Math.round(Number(data.grams) || 100));
       const scale = 100 / grams;
+      const sc100 = (v) => +((Number(v || 0) * scale).toFixed(1)) || 0;
       showConfirmCard({
-        name:    data.name    || 'Scanned food',
-        brand:   (data.servingDesc || '~1 serving') + ' · ~' + grams + 'g estimated',
-        perG:    grams,
-        cal100:  Math.round(Number(data.cal)   * scale) || 0,
-        prot100: +((Number(data.prot)  * scale).toFixed(1)) || 0,
-        carb100: +((Number(data.carb)  * scale).toFixed(1)) || 0,
-        fat100:  +((Number(data.fat)   * scale).toFixed(1)) || 0,
-        fiber100:+((Number(data.fiber) * scale).toFixed(1)) || 0,
+        name:         data.name    || 'Scanned food',
+        brand:        (data.servingDesc || '~1 serving') + ' · ~' + grams + 'g estimated',
+        perG:         grams,
+        cal100:       Math.round(Number(data.cal)   * scale) || 0,
+        prot100:      sc100(data.prot),
+        carb100:      sc100(data.carb),
+        fat100:       sc100(data.fat),
+        fiber100:     sc100(data.fiber),
+        potassium100: sc100(data.potassium),
+        sodium100:    sc100(data.sodium),
+        calcium100:   sc100(data.calcium),
+        iron100:      sc100(data.iron),
+        magnesium100: sc100(data.magnesium),
+        vit_c100:     sc100(data.vitamin_c),
+        zinc100:      sc100(data.zinc),
       });
     } catch (err) {
       alert('Scan failed: ' + err.message);
@@ -2746,13 +2777,16 @@ document.addEventListener('DOMContentLoaded', function () {
     return Math.round(val).toString();
   }
 
-  // Map from meal field → nutrient id (add more as food data expands)
+  // Map from meal field → nutrient id
   const MEAL_NUTR_MAP = {
     fiber:     'fiber',
     potassium: 'potassium',
     sodium:    'sodium',
     calcium:   'calcium',
     iron:      'iron',
+    magnesium: 'magnesium',
+    vit_c:     'vit_c',
+    zinc:      'zinc',
   };
 
   function nutrFromFood() {
