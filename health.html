@@ -1191,8 +1191,8 @@ main {
         <button class="macro-goals-btn" id="nutrResetBtn">↺ Reset</button>
       </div>
       <div class="nutr-tabs" role="tablist">
-        <button class="nutr-tab active" data-tab="vitamins" role="tab">Vitamins</button>
-        <button class="nutr-tab" data-tab="minerals" role="tab">Minerals &amp; Other</button>
+        <button class="nutr-tab" data-tab="vitamins" role="tab">Vitamins</button>
+        <button class="nutr-tab active" data-tab="minerals" role="tab">Minerals &amp; Other</button>
       </div>
       <div id="nutrPanel" class="nutr-panel" role="tabpanel"></div>
     </div>
@@ -2723,11 +2723,11 @@ document.addEventListener('DOMContentLoaded', function () {
     { id:'vit_d',      name:'Vitamin D',      unit:'mcg', rda:20,    tab:'vitamins', color:'#FFD60A', tip:'Fat-soluble — take with biggest meal. Pairs with K2 to direct calcium to bones. 20 mcg = 800 IU.' },
     { id:'vit_e',      name:'Vitamin E',      unit:'mg',  rda:15,    tab:'vitamins', color:'#FF9F0A', tip:'Fat-soluble — with fat. Mixed tocopherols preferred. High doses can interfere with K2.' },
     { id:'vit_k',      name:'Vitamin K',      unit:'mcg', rda:120,   tab:'vitamins', color:'#30D158', tip:'K2 (MK-7) pairs with D3 to prevent arterial calcification and direct calcium to bones.' },
+    { id:'pk_ratio',   name:'K : Na Ratio',   unit:':1',  rda:3,     tab:'minerals', color:'#30D158', tip:'Aim for 3:1 potassium to sodium. Avocado, banana, and leafy greens raise potassium; limiting processed food lowers sodium.' },
     { id:'calcium',    name:'Calcium',        unit:'mg',  rda:1000,  tab:'minerals', color:'#64D2FF', tip:'Take with food in ≤500 mg doses. Avoid taking alongside iron or zinc — competes for absorption.' },
     { id:'iron',       name:'Iron',           unit:'mg',  rda:8,     tab:'minerals', color:'#FF6B6B', tip:'Best on empty stomach with vitamin C. Avoid with calcium, coffee, or tea within 2 hours.' },
     { id:'magnesium',  name:'Magnesium',      unit:'mg',  rda:420,   tab:'minerals', color:'#BF5AF2', tip:'Glycinate/malate are gentlest on gut. Very common deficiency. Supports sleep, mood, and muscle.' },
     { id:'zinc',       name:'Zinc',           unit:'mg',  rda:11,    tab:'minerals', color:'#64D2FF', tip:'Take with food to reduce nausea. Avoid taking with iron or calcium. Competes with copper long-term.' },
-    { id:'pk_ratio',   name:'K : Na Ratio',   unit:':1',  rda:3,     tab:'minerals', color:'#30D158', tip:'Aim for 3:1 potassium to sodium. Avocado, banana, and leafy greens raise potassium; limiting processed food lowers sodium.' },
     { id:'phosphorus', name:'Phosphorus',     unit:'mg',  rda:700,   tab:'minerals', color:'#64D2FF', tip:'Protein-rich diets usually exceed RDA. Pairs with calcium for bone density.' },
     { id:'selenium',   name:'Selenium',       unit:'mcg', rda:55,    tab:'minerals', color:'#FFD60A', tip:'2 Brazil nuts ≈ 200 mcg. Toxicity possible above 400 mcg/day — do not over-supplement.' },
     { id:'iodine',     name:'Iodine',         unit:'mcg', rda:150,   tab:'minerals', color:'#64D2FF', tip:'Essential for thyroid function. Iodized salt covers most needs. Excess can suppress thyroid.' },
@@ -2736,7 +2736,7 @@ document.addEventListener('DOMContentLoaded', function () {
     { id:'fiber',      name:'Fiber',          unit:'g',   rda:38,    tab:'minerals', color:'#30D158', tip:'Aim for both soluble and insoluble types. Increase gradually to avoid bloating. Drink more water.' },
   ];
 
-  let nutrActiveTab = 'vitamins';
+  let nutrActiveTab = 'minerals';
 
   function fmt(val) {
     if (!val || val === 0) return '0';
