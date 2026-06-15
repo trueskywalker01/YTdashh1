@@ -2532,12 +2532,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const key = todayStr();
     const meals = loadMeals(key);
     meals.push({
-      name: pendingFood.name + ' (' + Math.round(pendingFood.perG * pendingQty) + 'g)',
-      cal:  m.cal,
-      prot: m.prot,
-      carb: m.carb,
-      fat:  m.fat,
-      note: m.fiber ? m.fiber + 'g fibre' : undefined,
+      name:  pendingFood.name + ' (' + Math.round(pendingFood.perG * pendingQty) + 'g)',
+      cal:   m.cal,
+      prot:  m.prot,
+      carb:  m.carb,
+      fat:   m.fat,
+      fiber: m.fiber || 0,
+      note:  m.fiber ? m.fiber + 'g fibre' : undefined,
     });
     saveMeals(key, meals);
     $('macroResultCard').hidden = true;
@@ -2761,7 +2762,13 @@ document.addEventListener('DOMContentLoaded', function () {
       const meals = JSON.parse(localStorage.getItem('macro:meals:' + todayStr())) || [];
       meals.forEach(m => {
         Object.entries(MEAL_NUTR_MAP).forEach(([field, id]) => {
-          if (m[field]) totals[id] = +(((totals[id] || 0) + Number(m[field])).toFixed(1));
+          let val = Number(m[field]) || 0;
+          // Fallback: parse fiber from legacy note string (e.g. "3.5g fibre")
+          if (!val && field === 'fiber' && m.note) {
+            const match = String(m.note).match(/^([\d.]+)g\s*fib/i);
+            if (match) val = parseFloat(match[1]) || 0;
+          }
+          if (val) totals[id] = +(((totals[id] || 0) + val).toFixed(1));
         });
       });
     } catch {}
