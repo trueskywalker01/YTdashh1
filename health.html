@@ -2746,8 +2746,31 @@ document.addEventListener('DOMContentLoaded', function () {
     return Math.round(val).toString();
   }
 
+  // Map from meal field → nutrient id (add more as food data expands)
+  const MEAL_NUTR_MAP = {
+    fiber:     'fiber',
+    potassium: 'potassium',
+    sodium:    'sodium',
+    calcium:   'calcium',
+    iron:      'iron',
+  };
+
+  function nutrFromFood() {
+    const totals = {};
+    try {
+      const meals = JSON.parse(localStorage.getItem('macro:meals:' + todayStr())) || [];
+      meals.forEach(m => {
+        Object.entries(MEAL_NUTR_MAP).forEach(([field, id]) => {
+          if (m[field]) totals[id] = +(((totals[id] || 0) + Number(m[field])).toFixed(1));
+        });
+      });
+    } catch {}
+    return totals;
+  }
+
   function renderNutr() {
-    const log = loadNutrLog();
+    const log      = loadNutrLog();
+    const fromFood = nutrFromFood();
     const d = new Date();
     const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     const lbl = $('nutrDateLbl');
@@ -2760,8 +2783,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const nutrGoals = loadNutrGoals();
     NUTR_DB.filter(n => n.tab === nutrActiveTab).forEach(n => {
-      const logged = Number(log[n.id]) || 0;
-      const goal   = Number(nutrGoals[n.id]) || n.rda;
+      const supplement = Number(log[n.id]) || 0;
+      const food       = Number(fromFood[n.id]) || 0;
+      const logged     = +(( supplement + food ).toFixed(1));
+      const goal       = Number(nutrGoals[n.id]) || n.rda;
       const p = goal > 0 ? Math.min(100, Math.round(logged / goal * 100)) : 0;
       const dotColor = logged === 0
         ? 'rgba(255,255,255,0.12)'
@@ -2769,13 +2794,17 @@ document.addEventListener('DOMContentLoaded', function () {
         : p >= 50  ? n.color
         : '#FF9F0A';
 
+      const foodNote = food > 0
+        ? '<span style="font-size:10px;color:var(--text-quaternary);margin-left:4px">(+' + fmt(food) + n.unit + ' food)</span>'
+        : '';
+
       const row = document.createElement('div');
       row.className = 'nutr-row';
       row.dataset.id = n.id;
       row.innerHTML =
         '<div class="nutr-row-top">' +
           '<div class="nutr-dot" style="background:' + dotColor + '"></div>' +
-          '<div class="nutr-name">' + n.name + '</div>' +
+          '<div class="nutr-name">' + n.name + foodNote + '</div>' +
           '<div class="nutr-amt">' + fmt(logged) + ' / ' + fmt(goal) + ' ' + n.unit + '</div>' +
           '<button class="nutr-goal-edit" data-id="' + n.id + '" title="Edit daily goal">✎</button>' +
         '</div>' +
