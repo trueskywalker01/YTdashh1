@@ -1364,6 +1364,7 @@ main {
     { name: 'Calcium', dose: '500mg', window: 'evening', note: 'With food — not with iron', icon: '🦴', aliases: ['calcium'] },
     { name: 'Selenium', dose: '100–200mcg', window: 'anytime', note: 'Thyroid + antioxidant', icon: '💊', aliases: ['selenium'] },
     { name: 'Iodine', dose: '150mcg', window: 'morning', note: 'Thyroid support', icon: '💊', aliases: ['iodine'] },
+    { name: 'Potassium Chloride (KCl)', dose: '300–600mg', window: 'anytime', note: 'Salt substitute · 52% elemental K · avoid in kidney disease', icon: '🧂', aliases: ['kcl', 'k-cl', 'potassium chloride', 'lite salt'] },
     { name: 'Omega-3 (Fish oil)', dose: '2–3g EPA+DHA', window: 'lunch', note: 'With biggest fatty meal', icon: '🐟', aliases: ['omega 3', 'omega3', 'fish oil', 'epa', 'dha'] },
     { name: 'Krill oil', dose: '500–1000mg', window: 'lunch', note: 'More absorbable than fish oil', icon: '🐟', aliases: ['krill'] },
     { name: 'MCT oil', dose: '1–2 tbsp', window: 'morning', note: 'Fast energy — start low', icon: '🥥', aliases: ['mct'] },
@@ -1492,6 +1493,7 @@ main {
     'iodine':              { iodine: 150 },
     'omega-3 (fish oil)':  { omega3: 2 },
     'krill oil':           { omega3: 0.5 },
+    'potassium chloride (kcl)': { potassium: 350 },
   };
 
   let todayKey = `stack:taken:${getActiveDate()}`;
@@ -2154,7 +2156,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function loadMeals() {
     try { return JSON.parse(localStorage.getItem(mealsKey())) || []; } catch(e) { return []; }
   }
-  function saveMeals(meals) { localStorage.setItem(mealsKey(), JSON.stringify(meals)); }
+  function saveMeals(meals) { localStorage.setItem(mealsKey(), JSON.stringify(meals)); window.dispatchEvent(new Event('storage')); }
 
   function totals(meals) {
     return meals.reduce((acc, m) => ({
@@ -2227,6 +2229,7 @@ document.addEventListener('DOMContentLoaded', function () {
         meals2.splice(Number(btn.dataset.i), 1);
         saveMeals(meals2);
         render();
+        window.dispatchEvent(new Event('storage'));
       }, { once: true });
     }
   }
