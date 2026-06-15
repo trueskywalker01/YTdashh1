@@ -631,11 +631,6 @@ main {
   cursor: pointer; font-family: inherit; letter-spacing: 0.04em; transition: all 0.15s;
 }
 .macro-goals-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
-/* ── AI scan button ── */
-.macro-scan-btn { display:inline-flex; align-items:center; justify-content:center; width:40px; height:38px; border-radius:9px; border:1px solid rgba(255,255,255,0.10); background:rgba(255,255,255,0.05); color:var(--text-secondary); font-size:17px; cursor:pointer; transition:background 0.2s; flex-shrink:0; }
-.macro-scan-btn:hover { background:rgba(255,255,255,0.10); }
-.macro-scan-btn.scanning { animation:scanPulse 0.9s ease-in-out infinite; pointer-events:none; }
-@keyframes scanPulse { 0%,100%{opacity:0.45} 50%{opacity:1} }
 /* ── Nutrient goal edit ── */
 .nutr-goal-edit { font-size:10px; padding:1px 5px; border-radius:5px; border:1px solid rgba(255,255,255,0.08); background:transparent; color:var(--text-quaternary); cursor:pointer; font-family:var(--font); }
 .nutr-goal-edit:hover { background:rgba(255,255,255,0.06); color:var(--text-tertiary); }
@@ -1130,8 +1125,6 @@ main {
           <input id="macroSearchInput" type="search" class="stack-input macro-search-input" placeholder="Search food (e.g. chicken breast, banana)…" autocomplete="off" spellcheck="false" />
           <button id="macroSearchBtn" class="macro-search-submit">Search</button>
           <button id="macroHistoryBtn" class="macro-history-btn" title="Meal history">🗂</button>
-          <button id="macroScanBtn" class="macro-scan-btn" title="Scan food with AI">📷</button>
-          <input id="macroScanInput" type="file" accept="image/*" hidden />
         </div>
         <div id="macroSearchResults" class="macro-search-results" hidden></div>
 
@@ -2514,65 +2507,6 @@ document.addEventListener('DOMContentLoaded', function () {
   ['macroManualName','macroManualCal','macroManualProt','macroManualCarb','macroManualFat']
     .forEach(id => { $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('macroManualAdd').click(); }); });
 
-  // 2.6 — AI food photo scanner (Claude vision)
-  $('macroScanBtn').addEventListener('click', () => $('macroScanInput').click());
-  $('macroScanInput').addEventListener('change', async function (e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    let apiKey = localStorage.getItem('claude:apiKey');
-    if (!apiKey) {
-      apiKey = prompt('Enter your Claude API key to enable photo food scanning (stored locally only):');
-      if (!apiKey) return;
-      localStorage.setItem('claude:apiKey', apiKey.trim());
-    }
-    const btn = $('macroScanBtn');
-    btn.classList.add('scanning'); btn.textContent = '⏳';
-    try {
-      const base64 = await new Promise((res, rej) => {
-        const r = new FileReader();
-        r.onload = () => res(r.result.split(',')[1]);
-        r.onerror = rej;
-        r.readAsDataURL(file);
-      });
-      const resp = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-allow-from-browser': 'true',
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 256,
-          messages: [{ role: 'user', content: [
-            { type: 'image', source: { type: 'base64', media_type: file.type || 'image/jpeg', data: base64 } },
-            { type: 'text', text: 'Identify the food in this photo and estimate its nutritional content for the serving shown. Reply with ONLY valid JSON (no markdown): {"name":"food name","cal":0,"prot":0,"carb":0,"fat":0,"servingDesc":"e.g. 1 slice / 100g"}' }
-          ]}]
-        })
-      });
-      if (!resp.ok) { const t = await resp.text(); throw new Error(resp.status + ' — ' + t.slice(0,120)); }
-      const data = await resp.json();
-      const raw  = (data.content[0].text || '').replace(/```json
-?/g,'').replace(/```/g,'').trim();
-      const parsed = JSON.parse(raw);
-      showConfirmCard({
-        name:    parsed.name || 'Scanned food',
-        brand:   parsed.servingDesc || '~1 serving',
-        perG:    100,
-        cal100:  Number(parsed.cal)  || 0,
-        prot100: Number(parsed.prot) || 0,
-        carb100: Number(parsed.carb) || 0,
-        fat100:  Number(parsed.fat)  || 0,
-        fiber100:0,
-      });
-    } catch(err) {
-      alert('Scan failed: ' + err.message);
-    } finally {
-      btn.classList.remove('scanning'); btn.textContent = '📷';
-      this.value = '';
-    }
-  });
 
   function setLoadingState(on) {
     $('macroLoadingCard').hidden = !on;
