@@ -675,6 +675,11 @@ main {
 .macro-meal-del { background: transparent; border: none; color: var(--text-quaternary); cursor: pointer; font-size: 14px; padding: 2px 5px; line-height: 1; border-radius: 4px; transition: color 0.15s; font-family: inherit; }
 .macro-meal-del:hover { color: #FF6B6B; }
 .macro-empty { font-size: 12px; color: var(--text-quaternary); font-style: italic; padding: 6px 10px; }
+/* ── AI scan button ── */
+.macro-scan-btn { display:inline-flex; align-items:center; justify-content:center; width:40px; height:38px; border-radius:9px; border:1px solid rgba(255,255,255,0.10); background:rgba(255,255,255,0.05); color:var(--text-secondary); font-size:17px; cursor:pointer; transition:background 0.2s; flex-shrink:0; }
+.macro-scan-btn:hover { background:rgba(255,255,255,0.10); }
+.macro-scan-btn.scanning { animation:scanPulse 0.9s ease-in-out infinite; pointer-events:none; }
+@keyframes scanPulse { 0%,100%{opacity:0.45} 50%{opacity:1} }
 .macro-scan-note-input {
   width: 100%; padding: 9px 12px; border-radius: 10px;
   background: rgba(255,255,255,0.04); border: 1px solid var(--border-strong);
@@ -1125,6 +1130,8 @@ main {
           <input id="macroSearchInput" type="search" class="stack-input macro-search-input" placeholder="Search food (e.g. chicken breast, banana)…" autocomplete="off" spellcheck="false" />
           <button id="macroSearchBtn" class="macro-search-submit">Search</button>
           <button id="macroHistoryBtn" class="macro-history-btn" title="Meal history">🗂</button>
+          <button id="macroScanBtn" class="macro-scan-btn" title="Scan food with AI">📷</button>
+          <input id="macroScanInput" type="file" accept="image/*" capture="environment" hidden />
         </div>
         <div id="macroSearchResults" class="macro-search-results" hidden></div>
 
@@ -2507,6 +2514,51 @@ document.addEventListener('DOMContentLoaded', function () {
   ['macroManualName','macroManualCal','macroManualProt','macroManualCarb','macroManualFat']
     .forEach(id => { $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('macroManualAdd').click(); }); });
 
+  // ── AI food photo scanner (Supabase Edge Function) ────────────────────
+  const SCAN_URL = 'https://irchofgefxpgohqfngyo.supabase.co/functions/v1/scan-food';
+  const SUPA_ANON = 'sb_publishable_sNUOPZ-EBvdFBqUpO2N1Fw_-g6DWPst';
+
+  $('macroScanBtn').addEventListener('click', () => $('macroScanInput').click());
+  $('macroScanInput').addEventListener('change', async function () {
+    const file = this.files[0];
+    if (!file) return;
+    const btn = $('macroScanBtn');
+    btn.classList.add('scanning'); btn.textContent = '⏳';
+    try {
+      const base64 = await new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result.split(',')[1]);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+      const resp = await fetch(SCAN_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPA_ANON,
+          'Authorization': 'Bearer ' + SUPA_ANON,
+        },
+        body: JSON.stringify({ image: base64, mimeType: file.type || 'image/jpeg' })
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error);
+      showConfirmCard({
+        name:    data.name    || 'Scanned food',
+        brand:   data.servingDesc || '~1 serving',
+        perG:    100,
+        cal100:  Number(data.cal)   || 0,
+        prot100: Number(data.prot)  || 0,
+        carb100: Number(data.carb)  || 0,
+        fat100:  Number(data.fat)   || 0,
+        fiber100:Number(data.fiber) || 0,
+      });
+    } catch (err) {
+      alert('Scan failed: ' + err.message);
+    } finally {
+      btn.classList.remove('scanning'); btn.textContent = '📷';
+      this.value = '';
+    }
+  });
 
   function setLoadingState(on) {
     $('macroLoadingCard').hidden = !on;
