@@ -2615,15 +2615,17 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       const data = await resp.json();
       if (data.error) throw new Error(data.error);
+      const grams = Math.max(1, Math.round(Number(data.grams) || 100));
+      const scale = 100 / grams;
       showConfirmCard({
         name:    data.name    || 'Scanned food',
-        brand:   data.servingDesc || '~1 serving',
-        perG:    100,
-        cal100:  Number(data.cal)   || 0,
-        prot100: Number(data.prot)  || 0,
-        carb100: Number(data.carb)  || 0,
-        fat100:  Number(data.fat)   || 0,
-        fiber100:Number(data.fiber) || 0,
+        brand:   (data.servingDesc || '~1 serving') + ' · ~' + grams + 'g estimated',
+        perG:    grams,
+        cal100:  Math.round(Number(data.cal)   * scale) || 0,
+        prot100: +((Number(data.prot)  * scale).toFixed(1)) || 0,
+        carb100: +((Number(data.carb)  * scale).toFixed(1)) || 0,
+        fat100:  +((Number(data.fat)   * scale).toFixed(1)) || 0,
+        fiber100:+((Number(data.fiber) * scale).toFixed(1)) || 0,
       });
     } catch (err) {
       alert('Scan failed: ' + err.message);
