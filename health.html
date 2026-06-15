@@ -2526,10 +2526,20 @@ document.addEventListener('DOMContentLoaded', function () {
     btn.classList.add('scanning'); btn.textContent = '⏳';
     try {
       const base64 = await new Promise((res, rej) => {
-        const r = new FileReader();
-        r.onload = () => res(r.result.split(',')[1]);
-        r.onerror = rej;
-        r.readAsDataURL(file);
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          const MAX = 800;
+          const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+          const canvas = document.createElement('canvas');
+          canvas.width  = Math.round(img.width  * scale);
+          canvas.height = Math.round(img.height * scale);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          res(canvas.toDataURL('image/jpeg', 0.72).split(',')[1]);
+        };
+        img.onerror = rej;
+        img.src = url;
       });
       const resp = await fetch(SCAN_URL, {
         method: 'POST',
@@ -2538,7 +2548,7 @@ document.addEventListener('DOMContentLoaded', function () {
           'apikey': SUPA_ANON,
           'Authorization': 'Bearer ' + SUPA_ANON,
         },
-        body: JSON.stringify({ image: base64, mimeType: file.type || 'image/jpeg' })
+        body: JSON.stringify({ image: base64, mimeType: 'image/jpeg' })
       });
       const data = await resp.json();
       if (data.error) throw new Error(data.error);
