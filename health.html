@@ -2727,8 +2727,7 @@ document.addEventListener('DOMContentLoaded', function () {
     { id:'iron',       name:'Iron',           unit:'mg',  rda:8,     tab:'minerals', color:'#FF6B6B', tip:'Best on empty stomach with vitamin C. Avoid with calcium, coffee, or tea within 2 hours.' },
     { id:'magnesium',  name:'Magnesium',      unit:'mg',  rda:420,   tab:'minerals', color:'#BF5AF2', tip:'Glycinate/malate are gentlest on gut. Very common deficiency. Supports sleep, mood, and muscle.' },
     { id:'zinc',       name:'Zinc',           unit:'mg',  rda:11,    tab:'minerals', color:'#64D2FF', tip:'Take with food to reduce nausea. Avoid taking with iron or calcium. Competes with copper long-term.' },
-    { id:'potassium',  name:'Potassium',      unit:'mg',  rda:3500,  tab:'minerals', color:'#30D158', tip:'Best sourced from food (avocado, banana, greens). Supplement overdose can be dangerous.' },
-    { id:'sodium',     name:'Sodium',         unit:'mg',  rda:2300,  tab:'minerals', color:'#FF6B6B', tip:'Athletes may need more due to sweat loss. Processed food is the main source — limit if sedentary.' },
+    { id:'pk_ratio',   name:'K : Na Ratio',   unit:':1',  rda:3,     tab:'minerals', color:'#30D158', tip:'Aim for 3:1 potassium to sodium. Avocado, banana, and leafy greens raise potassium; limiting processed food lowers sodium.' },
     { id:'phosphorus', name:'Phosphorus',     unit:'mg',  rda:700,   tab:'minerals', color:'#64D2FF', tip:'Protein-rich diets usually exceed RDA. Pairs with calcium for bone density.' },
     { id:'selenium',   name:'Selenium',       unit:'mcg', rda:55,    tab:'minerals', color:'#FFD60A', tip:'2 Brazil nuts ≈ 200 mcg. Toxicity possible above 400 mcg/day — do not over-supplement.' },
     { id:'iodine',     name:'Iodine',         unit:'mcg', rda:150,   tab:'minerals', color:'#64D2FF', tip:'Essential for thyroid function. Iodized salt covers most needs. Excess can suppress thyroid.' },
@@ -2790,35 +2789,60 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const nutrGoals = loadNutrGoals();
     NUTR_DB.filter(n => n.tab === nutrActiveTab).forEach(n => {
-      const supplement = Number(log[n.id]) || 0;
-      const food       = Number(fromFood[n.id]) || 0;
-      const logged     = +(( supplement + food ).toFixed(1));
-      const goal       = Number(nutrGoals[n.id]) || n.rda;
-      const p = goal > 0 ? Math.min(100, Math.round(logged / goal * 100)) : 0;
-      const dotColor = logged === 0
-        ? 'rgba(255,255,255,0.12)'
-        : p >= 100 ? '#30D158'
-        : p >= 50  ? n.color
-        : '#FF9F0A';
-
-      const foodNote = food > 0
-        ? '<span style="font-size:10px;color:var(--text-quaternary);margin-left:4px">(+' + fmt(food) + n.unit + ' food)</span>'
-        : '';
-
       const row = document.createElement('div');
       row.className = 'nutr-row';
       row.dataset.id = n.id;
-      row.innerHTML =
-        '<div class="nutr-row-top">' +
-          '<div class="nutr-dot" style="background:' + dotColor + '"></div>' +
-          '<div class="nutr-name">' + n.name + foodNote + '</div>' +
-          '<div class="nutr-amt">' + fmt(logged) + ' / ' + fmt(goal) + ' ' + n.unit + '</div>' +
-          '<button class="nutr-goal-edit" data-id="' + n.id + '" title="Edit daily goal">✎</button>' +
-        '</div>' +
-        '<div class="nutr-bar-indent">' +
-          '<div class="nutr-bar-track"><div class="nutr-bar-fill" style="width:' + p + '%;background:' + n.color + '"></div></div>' +
-        '</div>' +
-        (n.tip ? '<div class="nutr-tip">' + n.tip + '</div>' : '');
+
+      if (n.id === 'pk_ratio') {
+        const k  = (Number(log['potassium']) || 0) + (Number(fromFood['potassium']) || 0);
+        const na = (Number(log['sodium'])    || 0) + (Number(fromFood['sodium'])    || 0);
+        const ratio   = na > 0 ? k / na : null;
+        const p       = ratio !== null ? Math.min(100, Math.round(ratio / 3 * 100)) : 0;
+        const dotColor = ratio === null   ? 'rgba(255,255,255,0.12)'
+                       : ratio >= 3       ? '#30D158'
+                       : ratio >= 1.5     ? n.color
+                       : '#FF9F0A';
+        const ratioLbl = ratio !== null ? ratio.toFixed(1) + ' : 1' : '— : 1';
+        const detail   = (k > 0 || na > 0)
+          ? '<span style="font-size:10px;color:var(--text-quaternary);margin-left:4px">(' + Math.round(k) + 'mg K / ' + Math.round(na) + 'mg Na)</span>'
+          : '';
+        row.innerHTML =
+          '<div class="nutr-row-top">' +
+            '<div class="nutr-dot" style="background:' + dotColor + '"></div>' +
+            '<div class="nutr-name">' + n.name + detail + '</div>' +
+            '<div class="nutr-amt">' + ratioLbl + ' / 3 : 1</div>' +
+          '</div>' +
+          '<div class="nutr-bar-indent">' +
+            '<div class="nutr-bar-track"><div class="nutr-bar-fill" style="width:' + p + '%;background:' + n.color + '"></div></div>' +
+          '</div>' +
+          (n.tip ? '<div class="nutr-tip">' + n.tip + '</div>' : '');
+      } else {
+        const supplement = Number(log[n.id]) || 0;
+        const food       = Number(fromFood[n.id]) || 0;
+        const logged     = +(( supplement + food ).toFixed(1));
+        const goal       = Number(nutrGoals[n.id]) || n.rda;
+        const p = goal > 0 ? Math.min(100, Math.round(logged / goal * 100)) : 0;
+        const dotColor = logged === 0
+          ? 'rgba(255,255,255,0.12)'
+          : p >= 100 ? '#30D158'
+          : p >= 50  ? n.color
+          : '#FF9F0A';
+        const foodNote = food > 0
+          ? '<span style="font-size:10px;color:var(--text-quaternary);margin-left:4px">(+' + fmt(food) + n.unit + ' food)</span>'
+          : '';
+        row.innerHTML =
+          '<div class="nutr-row-top">' +
+            '<div class="nutr-dot" style="background:' + dotColor + '"></div>' +
+            '<div class="nutr-name">' + n.name + foodNote + '</div>' +
+            '<div class="nutr-amt">' + fmt(logged) + ' / ' + fmt(goal) + ' ' + n.unit + '</div>' +
+            '<button class="nutr-goal-edit" data-id="' + n.id + '" title="Edit daily goal">✎</button>' +
+          '</div>' +
+          '<div class="nutr-bar-indent">' +
+            '<div class="nutr-bar-track"><div class="nutr-bar-fill" style="width:' + p + '%;background:' + n.color + '"></div></div>' +
+          '</div>' +
+          (n.tip ? '<div class="nutr-tip">' + n.tip + '</div>' : '');
+      }
+
       panel.appendChild(row);
     });
   }
@@ -2838,6 +2862,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const goalEditBtn = e.target.closest('.nutr-goal-edit');
         if (goalEditBtn) {
           const id = goalEditBtn.dataset.id;
+          if (id === 'pk_ratio') return;
           const nutr = NUTR_DB.find(n => n.id === id);
           const goals = loadNutrGoals();
           const cur = Number(goals[id]) || nutr.rda;
