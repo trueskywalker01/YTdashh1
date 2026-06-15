@@ -3,7 +3,7 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const PROMPT = 'What food is this? Estimate grams shown and total nutrition for that portion. JSON only, no markdown: {"name":"","grams":0,"cal":0,"prot":0,"carb":0,"fat":0,"fiber":0,"servingDesc":""}'
+const PROMPT = 'What food is this? Estimate grams shown and total nutrition for that portion. All mineral/vitamin values in mg. JSON only, no markdown: {"name":"","grams":0,"cal":0,"prot":0,"carb":0,"fat":0,"fiber":0,"servingDesc":"","potassium":0,"sodium":0,"calcium":0,"iron":0,"magnesium":0,"vitamin_c":0,"zinc":0}'
 
 async function queryModel(model: string, image: string, mimeType: string, apiKey: string) {
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -15,7 +15,7 @@ async function queryModel(model: string, image: string, mimeType: string, apiKey
         { type: 'image_url', image_url: { url: `data:${mimeType || 'image/jpeg'};base64,${image}` } },
         { type: 'text', text: PROMPT }
       ]}],
-      max_tokens: 80,
+      max_tokens: 150,
     })
   })
   if (!res.ok) throw new Error(`${model} ${res.status}`)
