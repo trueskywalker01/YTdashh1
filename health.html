@@ -906,14 +906,11 @@ main {
 .macro-modal-field label { display: block; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 5px; }
 .macro-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
 .macro-modal-section { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary); margin: 14px 0 7px; }
-.macro-pace-row { display: flex; gap: 7px; margin-bottom: 14px; }
-.macro-pace-btn { flex: 1; padding: 9px 4px; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.04); color: var(--text-tertiary); font-size: 11px; font-weight: 700; font-family: inherit; cursor: pointer; text-align: center; transition: all 0.15s; line-height: 1.5; }
-.macro-pace-btn small { display: block; font-size: 10px; font-weight: 500; color: var(--text-quaternary); }
-.macro-pace-btn.active { border-color: rgba(255,255,255,0.38); background: rgba(255,255,255,0.10); color: var(--text-primary); }
-.macro-pace-btn.active small { color: var(--text-tertiary); }
-.macro-calc-preview { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; font-size: 12px; color: var(--text-secondary); line-height: 1.7; }
-.macro-calc-preview strong { color: var(--text-primary); font-weight: 700; }
-.macro-calc-preview .mcp-mode { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; color: var(--text-tertiary); }
+.macro-profile-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; font-size: 12px; color: var(--text-secondary); line-height: 1.7; }
+.macro-profile-card strong { color: var(--text-primary); font-weight: 700; }
+.macro-profile-card .mpc-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 4px; }
+.macro-profile-card .mpc-apply { margin-top: 10px; padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.07); color: var(--text-primary); font-size: 11px; font-family: inherit; font-weight: 600; cursor: pointer; }
+.macro-profile-card .mpc-apply:hover { background: rgba(255,255,255,0.12); }
 .macro-modal-divider { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 14px 0 10px; }
 .macro-modal-cancel { padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-secondary); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
 .macro-modal-save { padding: 9px 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.85); background: linear-gradient(180deg,#FFFFFF 0%,#E8E5DD 100%); color: #0A0A0B; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 4px 14px rgba(0,0,0,0.3); }
@@ -1265,29 +1262,16 @@ main {
   <div class="macro-modal" role="dialog" aria-modal="true" aria-labelledby="macroModalTitle">
     <div class="macro-modal-title" id="macroModalTitle">Daily Goals</div>
 
-    <div class="macro-modal-section">Your body</div>
-    <div class="macro-modal-grid">
-      <div class="macro-modal-field">
-        <label for="profileWeight">Current weight (lbs)</label>
-        <input id="profileWeight" type="number" class="stack-input" placeholder="175" min="50" max="700" step="0.1" inputmode="decimal" />
-      </div>
-      <div class="macro-modal-field">
-        <label for="profileGoalWeight">Goal weight (lbs)</label>
-        <input id="profileGoalWeight" type="number" class="stack-input" placeholder="160" min="50" max="700" step="0.1" inputmode="decimal" />
-      </div>
+    <div id="macroProfileCard" class="macro-profile-card" style="display:none">
+      <div class="mpc-label">From your profile</div>
+      <div id="macroProfileCardBody"></div>
+      <button class="mpc-apply" id="macroProfileApply" type="button">Apply these goals</button>
+    </div>
+    <div id="macroProfileMissing" style="display:none;font-size:12px;color:var(--text-tertiary);margin-bottom:14px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:10px;">
+      No profile data yet — set your weight &amp; goal in the <strong style="color:var(--text-secondary)">Profile</strong> tab, then come back.
     </div>
 
-    <div class="macro-modal-section">Pace</div>
-    <div class="macro-pace-row">
-      <button class="macro-pace-btn" data-pace="slow" type="button">Slow<small>~0.5 lb/wk</small></button>
-      <button class="macro-pace-btn active" data-pace="moderate" type="button">Moderate<small>~1 lb/wk</small></button>
-      <button class="macro-pace-btn" data-pace="fast" type="button">Fast<small>~1.5 lb/wk</small></button>
-    </div>
-
-    <div class="macro-calc-preview" id="macroCalcPreview" style="display:none"></div>
-
-    <hr class="macro-modal-divider">
-    <div class="macro-modal-section" style="margin-top:0">Manual override</div>
+    <div class="macro-modal-section" style="margin-top:0">Goals</div>
     <div class="macro-modal-grid">
       <div class="macro-modal-field">
         <label for="goalCal">Calories (kcal)</label>
@@ -2253,63 +2237,70 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ── Goals modal ───────────────────────────────────────────────────────
   const modalBg = $('macroModalBg');
-  let _pace = 'moderate';
 
-  const PACE_DEFICIT = { slow: 250, moderate: 500, fast: 750 };
-  const PACE_LABEL   = { slow: '~0.5 lb/wk', moderate: '~1 lb/wk', fast: '~1.5 lb/wk' };
-
-  function calcFromProfile(wLbs, gLbs, pace) {
-    if (!wLbs || wLbs <= 0) return null;
-    const wKg   = wLbs / 2.205;
-    const gKg   = gLbs ? gLbs / 2.205 : null;
-    const tdee  = Math.round(wKg * 33);
-    const delta = PACE_DEFICIT[pace] || 500;
-    const cutting = gKg && gKg < wKg - 0.5;
-    const bulking  = gKg && gKg > wKg + 0.5;
-    const cal  = cutting ? Math.max(1200, tdee - delta) : bulking ? tdee + delta : tdee;
-    const prot = Math.round(wKg * 2.2);
-    const fat  = Math.round(cal * 0.25 / 9);
-    const carb = Math.max(0, Math.round((cal - prot * 4 - fat * 9) / 4));
-    const mode = cutting ? 'Cut — ' + PACE_LABEL[pace] + ' loss'
-               : bulking  ? 'Bulk — ' + PACE_LABEL[pace] + ' gain'
-               : 'Maintenance';
-    return { cal, prot, carb, fat, tdee, delta, mode, cutting, bulking };
+  function toKgGoal(val, unit) {
+    return unit === 'lbs' ? val / 2.205 : val;
+  }
+  function toWeeksGoal(val, unit) {
+    if (!val) return null;
+    if (unit === 'months') return val * 4.345;
+    return val; // weeks
+  }
+  function fmtWeight(kg, unit) {
+    const v = unit === 'lbs' ? kg * 2.205 : kg;
+    return Math.round(v * 10) / 10 + ' ' + (unit || 'kg');
   }
 
-  function refreshPreview() {
-    const wLbs = parseFloat($('profileWeight').value);
-    const gLbs = parseFloat($('profileGoalWeight').value);
-    const res  = calcFromProfile(wLbs, gLbs, _pace);
-    const pre  = $('macroCalcPreview');
-    if (!res) { pre.style.display = 'none'; return; }
-    const sign = res.cutting ? '−' : res.bulking ? '+' : '';
-    const kcalNote = res.cutting || res.bulking
-      ? ' (' + sign + res.delta + ' kcal/day vs TDEE ' + res.tdee + ')' : '';
-    pre.innerHTML =
-      '<div class="mcp-mode">' + res.mode + '</div>' +
-      '<strong>' + res.cal + ' kcal</strong>' + kcalNote + '<br>' +
-      res.prot + 'g protein · ' + res.carb + 'g carbs · ' + res.fat + 'g fat';
-    pre.style.display = '';
-    // auto-fill manual inputs
+  function calcFromProfile() {
+    try {
+      const p = JSON.parse(localStorage.getItem('profile:data')) || {};
+      const wRaw = parseFloat(p.weight);
+      const gRaw = parseFloat(p.goalWeight);
+      const tRaw = parseFloat(p.timeframe);
+      if (!wRaw) return null;
+      const wUnit = p.weightUnit || 'kg';
+      const wKg = toKgGoal(wRaw, wUnit);
+      const gKg = gRaw ? toKgGoal(gRaw, wUnit) : null;
+      const weeks = toWeeksGoal(tRaw, p.timeframeUnit);
+
+      const tdee = Math.round(wKg * 33);
+      const cutting = gKg && gKg < wKg - 0.3;
+      const bulking  = gKg && gKg > wKg + 0.3;
+
+      let dailyDelta = 0;
+      let ratePerWk  = null;
+      if ((cutting || bulking) && gKg && weeks && weeks > 0) {
+        const diffKg = Math.abs(wKg - gKg);
+        const rateKg = diffKg / weeks;
+        ratePerWk = rateKg;
+        dailyDelta = Math.round(rateKg * 7700 / 7);
+      }
+
+      const cal  = cutting ? Math.max(1200, tdee - dailyDelta)
+                 : bulking  ? tdee + dailyDelta
+                 : tdee;
+      const prot = Math.round(wKg * 2.2);
+      const fat  = Math.round(cal * 0.25 / 9);
+      const carb = Math.max(0, Math.round((cal - prot * 4 - fat * 9) / 4));
+
+      const sign = cutting ? '−' : bulking ? '+' : '';
+      const modeLabel = cutting ? 'Cut' : bulking ? 'Bulk' : 'Maintenance';
+      const rateLabel = ratePerWk
+        ? (wUnit === 'lbs' ? (ratePerWk * 2.205).toFixed(2) + ' lb/wk' : ratePerWk.toFixed(2) + ' kg/wk')
+        : null;
+
+      return { cal, prot, carb, fat, tdee, dailyDelta, cutting, bulking, modeLabel, sign, rateLabel,
+               wDisp: fmtWeight(wKg, wUnit), gDisp: gKg ? fmtWeight(gKg, wUnit) : null,
+               weeks: weeks ? Math.round(weeks) : null };
+    } catch { return null; }
+  }
+
+  function applyProfileToInputs(res) {
     $('goalCal').value  = res.cal;
     $('goalProt').value = res.prot;
     $('goalCarb').value = res.carb;
     $('goalFat').value  = res.fat;
   }
-
-  // Pace buttons
-  document.querySelectorAll('.macro-pace-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      _pace = btn.dataset.pace;
-      document.querySelectorAll('.macro-pace-btn').forEach(b => b.classList.toggle('active', b === btn));
-      refreshPreview();
-    });
-  });
-
-  // Weight inputs → live recalc
-  ['profileWeight', 'profileGoalWeight'].forEach(id => {
-    $(id).addEventListener('input', refreshPreview);
-  });
 
   $('macroGoalsBtn').addEventListener('click', () => {
     const g = loadGoals();
@@ -2318,36 +2309,35 @@ document.addEventListener('DOMContentLoaded', function () {
     $('goalCarb').value = g.carb || '';
     $('goalFat').value  = g.fat  || '';
 
-    // Load saved profile
-    try {
-      const p = JSON.parse(localStorage.getItem('profile:data')) || {};
-      if (p.weightLbs)     $('profileWeight').value     = p.weightLbs;
-      else if (p.weightKg) $('profileWeight').value     = Math.round(p.weightKg * 2.205 * 10) / 10;
-      if (p.goalWeightLbs)     $('profileGoalWeight').value = p.goalWeightLbs;
-      else if (p.goalWeightKg) $('profileGoalWeight').value = Math.round(p.goalWeightKg * 2.205 * 10) / 10;
-      if (p.pace) {
-        _pace = p.pace;
-        document.querySelectorAll('.macro-pace-btn').forEach(b => b.classList.toggle('active', b.dataset.pace === _pace));
-      }
-    } catch {}
+    const res = calcFromProfile();
+    const card = $('macroProfileCard');
+    const miss = $('macroProfileMissing');
+    if (res) {
+      const kcalNote = (res.cutting || res.bulking) && res.dailyDelta
+        ? ' (' + res.sign + res.dailyDelta + ' kcal vs TDEE ' + res.tdee + ')' : '';
+      const rateNote = res.rateLabel ? ' · ' + res.rateLabel : '';
+      const timeline = res.weeks ? ' over ' + res.weeks + ' weeks' : '';
+      $('macroProfileCardBody').innerHTML =
+        '<strong>' + res.modeLabel + '</strong> · ' + res.wDisp +
+        (res.gDisp ? ' → ' + res.gDisp : '') + timeline + rateNote + '<br>' +
+        '<strong>' + res.cal + ' kcal</strong>' + kcalNote + '<br>' +
+        res.prot + 'g protein · ' + res.carb + 'g carbs · ' + res.fat + 'g fat';
+      $('macroProfileApply').onclick = () => applyProfileToInputs(res);
+      card.style.display = '';
+      miss.style.display = 'none';
+    } else {
+      card.style.display = 'none';
+      miss.style.display = '';
+    }
 
-    refreshPreview();
     modalBg.hidden = false;
+    $('goalCal').focus();
   });
 
   $('macroModalCancel').addEventListener('click', () => { modalBg.hidden = true; });
   modalBg.addEventListener('click', e => { if (e.target === modalBg) modalBg.hidden = true; });
 
   $('macroModalSave').addEventListener('click', () => {
-    const wLbs = parseFloat($('profileWeight').value) || null;
-    const gLbs = parseFloat($('profileGoalWeight').value) || null;
-    // Persist profile
-    const p = {};
-    if (wLbs) { p.weightLbs = wLbs; p.weightKg = Math.round(wLbs / 2.205 * 10) / 10; }
-    if (gLbs) { p.goalWeightLbs = gLbs; p.goalWeightKg = Math.round(gLbs / 2.205 * 10) / 10; }
-    p.pace = _pace;
-    localStorage.setItem('profile:data', JSON.stringify(p));
-
     saveGoals({
       cal:  Number($('goalCal').value)  || 0,
       prot: Number($('goalProt').value) || 0,
@@ -2358,17 +2348,12 @@ document.addEventListener('DOMContentLoaded', function () {
     render();
   });
 
-  // 2.7 — auto-apply profile goals if none saved yet
+  // auto-apply profile goals if none saved yet
   (function () {
     const g = loadGoals();
     if (!g.cal) {
-      try {
-        const p = JSON.parse(localStorage.getItem('profile:data')) || {};
-        const wLbs = p.weightLbs || (p.weightKg ? p.weightKg * 2.205 : null);
-        const gLbs = p.goalWeightLbs || (p.goalWeightKg ? p.goalWeightKg * 2.205 : null);
-        const res = calcFromProfile(wLbs, gLbs, p.pace || 'moderate');
-        if (res) saveGoals({ cal: res.cal, prot: res.prot, carb: res.carb, fat: res.fat });
-      } catch {}
+      const res = calcFromProfile();
+      if (res) saveGoals({ cal: res.cal, prot: res.prot, carb: res.carb, fat: res.fat });
     }
   })();
 
