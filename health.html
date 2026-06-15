@@ -1043,16 +1043,6 @@ main {
             <span class="aw-bio-label">Wrist temp</span>
             <span class="aw-bio-val" id="awWristTemp">—</span>
           </div>
-          <div class="aw-bio-item">
-            <span class="aw-zone" id="zSpo2"></span>
-            <span class="aw-bio-label">Blood O₂</span>
-            <span class="aw-bio-val" id="awSpo2">—</span>
-          </div>
-          <div class="aw-bio-item">
-            <span class="aw-zone" id="zResp"></span>
-            <span class="aw-bio-label">Resp rate</span>
-            <span class="aw-bio-val" id="awResp">—</span>
-          </div>
         </div>
 
         <!-- Zone legend -->
@@ -2089,11 +2079,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if(d.hrv!==null) zone($('zHrv'), d.hrv>=50?'good':d.hrv>=30?'norm':d.hrv>=20?'warn':'bad');
     $('awRhr').textContent=d.rhr!==null?Math.round(d.rhr):'—';
     if(d.rhr!==null) zone($('zRhr'), d.rhr<=60?'good':d.rhr<=72?'norm':d.rhr<=85?'warn':'bad');
-    if(d.spo2!==null||d.resp!==null||d.wristTemp!==null){
+    if(d.wristTemp!==null){
       $('awBio').style.display='';
-      if(d.wristTemp!==null){ $('awWristTemp').textContent=(d.wristTemp>=0?'+':'')+d.wristTemp.toFixed(1)+'°C'; zone($('zWrist'),Math.abs(d.wristTemp)<=0.5?'good':Math.abs(d.wristTemp)<=1?'norm':'warn'); }
-      if(d.spo2!==null){ $('awSpo2').textContent=d.spo2+'%'; zone($('zSpo2'),d.spo2>=96?'good':d.spo2>=93?'norm':d.spo2>=90?'warn':'bad'); }
-      if(d.resp!==null){ $('awResp').textContent=d.resp.toFixed(1)+' rpm'; zone($('zResp'),d.resp>=12&&d.resp<=18?'good':d.resp>=10&&d.resp<=22?'norm':'warn'); }
+      $('awWristTemp').textContent=(d.wristTemp>=0?'+':'')+d.wristTemp.toFixed(1)+'°C'; zone($('zWrist'),Math.abs(d.wristTemp)<=0.5?'good':Math.abs(d.wristTemp)<=1?'norm':'warn');
     }
     generateVerdict(d);
   }
