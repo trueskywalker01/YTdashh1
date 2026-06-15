@@ -2594,13 +2594,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const url = URL.createObjectURL(file);
         img.onload = () => {
           URL.revokeObjectURL(url);
-          const MAX = 800;
+          const MAX = 512;
           const scale = Math.min(1, MAX / Math.max(img.width, img.height));
           const canvas = document.createElement('canvas');
           canvas.width  = Math.round(img.width  * scale);
           canvas.height = Math.round(img.height * scale);
           canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-          res(canvas.toDataURL('image/jpeg', 0.72).split(',')[1]);
+          res(canvas.toDataURL('image/jpeg', 0.60).split(',')[1]);
         };
         img.onerror = rej;
         img.src = url;
