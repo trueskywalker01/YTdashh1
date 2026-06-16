@@ -217,6 +217,16 @@ button { font-family: var(--font); cursor: pointer; }
 .pk-sum-intake { display: flex; flex-direction: column; gap: 3px; }
 .pk-sum-intake span { font-size: 12px; font-family: var(--font-mono); }
 
+/* ── Bedtime card ── */
+.pk-bedtime-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 13px 16px; border-left: 3px solid #30D158;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.pk-bedtime-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .10em; color: var(--text-4); margin-bottom: 2px; }
+.pk-bedtime-time { font-size: 20px; font-weight: 700; color: var(--text-1); line-height: 1.2; }
+.pk-bedtime-sub { font-size: 11px; color: var(--text-3); line-height: 1.5; }
+
 /* ── Timeline ── */
 .pk-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--text-4); padding: 4px 0 2px; }
 .pk-timeline { display: flex; flex-direction: column; position: relative; padding-left: 20px; }
@@ -394,6 +404,9 @@ button { font-family: var(--font); cursor: pointer; }
 
   <!-- Suggestions -->
   <div class="pk-sugg-row" id="pkSuggRow"></div>
+
+  <!-- Bedtime estimate -->
+  <div id="pkBedtime"></div>
 
   <!-- Summary grid -->
   <div class="pk-summary" id="pkSummary"></div>
@@ -1115,6 +1128,78 @@ function renderSugg() {
   });
 }
 
+// ─── Bedtime estimate ─────────────────────────────────────────
+function computeBedtime() {
+  var SLEEP_THR = 20;       // composite level below which sleep is realistic
+  var EARLIEST  = 18 * 60; // don't call bedtime before 6 pm
+  var nM = nowMins();
+
+  // Need at least one intake today
+  var today = todayStr();
+  var todayIn = entries.filter(function(e){
+    return e.type==='intake' && e.timestamp && localDateOf(e.timestamp)===today;
+  });
+  if (!todayIn.length) return null;
+
+  // Walk _chartPts forward from 6 pm to find first sustained dip below threshold
+  var pts = _chartPts.filter(function(p){ return p.t >= EARLIEST; });
+  for (var i = 0; i < pts.length; i++) {
+    if (pts[i].norm >= SLEEP_THR) continue;
+    // Confirm it stays below threshold for at least 60 min
+    var ok = true;
+    for (var j = i + 1; j < pts.length && pts[j].t <= pts[i].t + 60; j++) {
+      if (pts[j].norm >= SLEEP_THR) { ok = false; break; }
+    }
+    if (!ok) continue;
+    // Identify the dominant substance at this clearance point
+    var dominant = null, domVal = 0;
+    var ps = pts[i].perSub || {};
+    Object.keys(ps).forEach(function(sub){ if ((ps[sub]||0) > domVal) { domVal = ps[sub]; dominant = sub; } });
+    return { t: pts[i].t, dominant: dominant };
+  }
+  return { t: null, dominant: null }; // still active past chart range
+}
+
+function renderBedtime() {
+  var el = $e('pkBedtime');
+  if (!el) return;
+  var today = todayStr();
+  var todayIn = entries.filter(function(e){
+    return e.type==='intake' && e.timestamp && localDateOf(e.timestamp)===today;
+  });
+  if (!todayIn.length) { el.innerHTML = ''; return; }
+
+  var result = computeBedtime();
+  var nM = nowMins();
+  var timeStr, subLine, borderColor;
+
+  if (!result || result.t === null) {
+    timeStr    = 'After 4 AM';
+    subLine    = 'Stimulants remain active past chart range — sleep heavily disrupted';
+    borderColor = '#FF453A';
+  } else if (result.t <= nM + 30) {
+    timeStr    = 'Now';
+    subLine    = 'Stimulant levels low — you\'re clear to wind down';
+    borderColor = '#30D158';
+  } else {
+    var minsUntil = Math.round(result.t - nM);
+    var hLeft = Math.floor(minsUntil / 60), mLeft = minsUntil % 60;
+    timeStr     = fmt12(result.t);
+    var until   = (hLeft ? hLeft + 'h ' : '') + (mLeft ? mLeft + 'm' : '');
+    var domName = result.dominant ? (SUBS[result.dominant] || {label: result.dominant}).label : null;
+    subLine  = until + ' from now';
+    if (domName) subLine += ' · held up by ' + domName;
+    borderColor = result.t > 24*60 ? '#FF453A' : result.t > 23*60 ? '#FF9F0A' : '#30D158';
+  }
+
+  el.innerHTML =
+    '<div class="pk-bedtime-card" style="border-left-color:' + borderColor + '">' +
+      '<div class="pk-bedtime-label">Estimated Bedtime</div>' +
+      '<div class="pk-bedtime-time">😴 ' + timeStr + '</div>' +
+      '<div class="pk-bedtime-sub">' + subLine + '</div>' +
+    '</div>';
+}
+
 // ─── Summary ──────────────────────────────────────────────────
 function findPeakWin() {
   if (!_chartPts.length) return null;
@@ -1525,6 +1610,7 @@ function update() {
   renderSubBtns();
   renderRecent();
   renderSugg();
+  renderBedtime();
   renderSummary();
   renderTimeline();
   updateFabSince();
