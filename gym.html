@@ -3520,6 +3520,42 @@ img, video, canvas, svg { max-width: 100%; }
         pcMaybeApplyRemote(payload.new.data);
       })
       .subscribe();
+
+    // Retry photos that were saved locally but failed to upload (no url yet).
+    // Happens when the device was offline at capture time.
+    const pendingUpload = photos.filter(p => p.dataUrl && !p.url);
+    if (pendingUpload.length) {
+      let anyUploaded = false;
+      for (const p of pendingUpload) {
+        const url = await uploadPhotoToStorage(p.dataUrl);
+        if (!url) continue;
+        const entry = photos.find(x => x.id === p.id);
+        if (!entry) continue;
+        entry.url = url;
+        delete entry.dataUrl;
+        anyUploaded = true;
+      }
+      if (anyUploaded) {
+        _pcOrigSet(PHOTO_KEY, JSON.stringify(photos));
+        pcSchedulePush();
+        photosRender();
+      }
+    }
+
+    // Read-only pull of supplement and caffeine data from their own cloud slots
+    // into localStorage so that health.html / caffeine.html find fresh data
+    // even on devices where those pages haven't been loaded yet.
+    for (const slot of ['health', 'caffeine']) {
+      try {
+        const { data: sd } = await pcSupa
+          .from('app_state').select('data').eq('key', slot).maybeSingle();
+        if (!sd || !sd.data) continue;
+        Object.keys(sd.data).forEach(k => {
+          const v = JSON.stringify(sd.data[k]);
+          if (localStorage.getItem(k) !== v) _pcOrigSet(k, v);
+        });
+      } catch (_) {}
+    }
   })();
 
   document.addEventListener('focusout', () => {
