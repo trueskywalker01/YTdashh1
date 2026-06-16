@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mentor</title>
+  <script src="topbar.js" defer></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0b;
+      --surface: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+      --text-1: #FAFAFA;
+      --text-2: rgba(255,255,255,0.75);
+      --text-3: rgba(255,255,255,0.45);
+      --accent: #14B8A6;
+      --radius: 14px;
+      --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    }
+    html, body { height: 100%; background: var(--bg); color: var(--text-1); font-family: var(--font); overflow: hidden; }
+
+    .mentor-root {
+      display: flex; flex-direction: column;
+      height: 100vh;
+      max-width: 700px; margin: 0 auto;
+    }
+
+    /* ── Messages ── */
+    .mentor-messages {
+      flex: 1; overflow-y: auto;
+      padding: 16px 16px 8px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .mentor-messages::-webkit-scrollbar { width: 0; }
+
+    .mentor-welcome {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 40px 0 20px; gap: 12px; text-align: center;
+    }
+    .mentor-avatar {
+      font-size: 32px; width: 64px; height: 64px;
+      background: rgba(20,184,166,0.10);
+      border: 1px solid rgba(20,184,166,0.22);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mentor-welcome-title { font-size: 18px; font-weight: 700; }
+    .mentor-welcome-sub { font-size: 13px; color: var(--text-3); line-height: 1.6; }
+
+    .mentor-msg { display: flex; flex-direction: column; max-width: 88%; }
+    .mentor-msg.user { align-self: flex-end; align-items: flex-end; }
+    .mentor-msg.ai   { align-self: flex-start; align-items: flex-start; }
+
+    .mentor-bubble {
+      padding: 10px 14px; border-radius: var(--radius);
+      font-size: 14px; line-height: 1.6; white-space: pre-wrap;
+    }
+    .mentor-msg.user .mentor-bubble {
+      background: rgba(20,184,166,0.14);
+      border: 1px solid rgba(20,184,166,0.28);
+      color: var(--text-1); border-bottom-right-radius: 4px;
+    }
+    .mentor-msg.ai .mentor-bubble {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text-1); border-bottom-left-radius: 4px;
+    }
+    .mentor-msg-time { font-size: 10px; color: var(--text-3); margin-top: 3px; padding: 0 3px; }
+
+    /* Typing indicator */
+    .mentor-typing {
+      display: flex; align-items: center; gap: 5px;
+      padding: 12px 16px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); border-bottom-left-radius: 4px;
+      align-self: flex-start;
+    }
+    .mentor-typing-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--text-3);
+      animation: mentor-bounce 1.3s ease-in-out infinite;
+    }
+    .mentor-typing-dot:nth-child(2) { animation-delay: 0.18s; }
+    .mentor-typing-dot:nth-child(3) { animation-delay: 0.36s; }
+    @keyframes mentor-bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+      30%           { transform: translateY(-5px); opacity: 1; }
+    }
+
+    /* ── Bottom bar ── */
+    .mentor-bottom {
+      padding: 8px 12px max(14px, env(safe-area-inset-bottom));
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+
+    .mentor-prompts { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+    .mentor-prompts::-webkit-scrollbar { display: none; }
+    .mentor-prompt-btn {
+      flex-shrink: 0; padding: 6px 12px; border-radius: 20px;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text-2); font-size: 12px; font-weight: 500;
+      cursor: pointer; white-space: nowrap;
+      font-family: var(--font);
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+    .mentor-prompt-btn:hover, .mentor-prompt-btn:active {
+      background: rgba(20,184,166,0.10);
+      border-color: rgba(20,184,166,0.30);
+      color: var(--text-1);
+    }
+
+    .mentor-input-row { display: flex; align-items: flex-end; gap: 8px; }
+    .mentor-input {
+      flex: 1; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 10px 16px;
+      color: var(--text-1); font-size: 14px; font-family: var(--font);
+      resize: none; line-height: 1.45; max-height: 120px; outline: none;
+      transition: border-color 0.15s;
+    }
+    .mentor-input::placeholder { color: var(--text-3); }
+    .mentor-input:focus { border-color: rgba(20,184,166,0.45); }
+    .mentor-send {
+      width: 40px; height: 40px; flex-shrink: 0;
+      border-radius: 50%; background: var(--accent); border: none;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #fff; font-weight: 700; font-family: var(--font);
+      transition: transform 0.1s, opacity 0.15s;
+    }
+    .mentor-send:active { transform: scale(0.90); }
+    .mentor-send:disabled { opacity: 0.35; cursor: default; }
+
+    /* Clear chat */
+    .mentor-clear-row {
+      display: none; justify-content: flex-end; padding: 0 4px 4px;
+    }
+    .mentor-clear-row.visible { display: flex; }
+    .mentor-clear {
+      background: none; border: none; color: var(--text-3);
+      font-size: 11px; cursor: pointer; padding: 2px 6px;
+      border-radius: 6px; font-family: var(--font);
+    }
+    .mentor-clear:hover { color: var(--text-2); background: var(--surface); }
+  </style>
+</head>
+<body>
+<div class="mentor-root">
+  <div class="mentor-messages" id="mentorMessages">
+    <div class="mentor-welcome" id="mentorWelcome">
+      <div class="mentor-avatar">🧠</div>
+      <div class="mentor-welcome-title">Your Mentor</div>
+      <div class="mentor-welcome-sub">Ask me anything about your<br>health, training, or nutrition.</div>
+    </div>
+  </div>
+
+  <div class="mentor-bottom">
+    <div class="mentor-clear-row" id="mentorClearRow">
+      <button class="mentor-clear" id="mentorClear" type="button">Clear chat</button>
+    </div>
+    <div class="mentor-prompts" id="mentorPrompts">
+      <button class="mentor-prompt-btn" data-q="How is my day looking overall?">How's my day?</button>
+      <button class="mentor-prompt-btn" data-q="What should I eat next based on my macros so far?">What to eat next?</button>
+      <button class="mentor-prompt-btn" data-q="Am I on track with my fitness goals this week?">On track?</button>
+      <button class="mentor-prompt-btn" data-q="Which supplements should I prioritise right now and why?">Supplements?</button>
+      <button class="mentor-prompt-btn" data-q="How is my recovery looking based on sleep and today's stimulant load?">Recovery?</button>
+    </div>
+    <div class="mentor-input-row">
+      <textarea class="mentor-input" id="mentorInput" placeholder="Ask your mentor…" rows="1"></textarea>
+      <button class="mentor-send" id="mentorSend" type="button">↑</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+const SUPA_URL   = 'https://irchofgefxpgohqfngyo.supabase.co';
+const SUPA_ANON  = 'sb_publishable_sNUOPZ-EBvdFBqUpO2N1Fw_-g6DWPst';
+const MENTOR_URL = SUPA_URL + '/functions/v1/mentor-chat';
+const HISTORY_KEY = 'mentor:history';
+const MAX_HISTORY = 40;
+
+// ─── Helpers ──────────────────────────────────────────────
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+function localDateOf(iso) {
+  var d = new Date(iso);
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+
+// ─── Context from localStorage ────────────────────────────
+function buildContext() {
+  var todayKey = todayStr();
+  var now      = new Date();
+  var timeStr  = now.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+  var dateStr  = now.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  var ctx      = 'DATE / TIME: ' + dateStr + ' at ' + timeStr + '\n\n';
+
+  // Nutrition
+  try {
+    var meals = JSON.parse(localStorage.getItem('macro:meals:' + todayKey) || '[]');
+    var goals = JSON.parse(localStorage.getItem('macro:goals') || '{}');
+    var tot   = meals.reduce(function(a, m) {
+      return { cal: a.cal + (+m.cal||0), prot: a.prot + (+m.prot||0),
+               carb: a.carb + (+m.carb||0), fat: a.fat + (+m.fat||0) };
+    }, { cal:0, prot:0, carb:0, fat:0 });
+    if (meals.length) {
+      ctx += 'NUTRITION: ' + Math.round(tot.cal) + ' kcal';
+      if (goals.cal)  ctx += ' / ' + goals.cal  + ' target';
+      ctx += '. Protein ' + tot.prot.toFixed(0) + 'g';
+      if (goals.prot) ctx += '/' + goals.prot + 'g';
+      ctx += ', Carbs ' + tot.carb.toFixed(0) + 'g, Fat ' + tot.fat.toFixed(0) + 'g.\n';
+      ctx += 'Meals: ' + meals.map(function(m){ return m.name; }).join('; ') + '\n\n';
+    } else {
+      ctx += 'NUTRITION: No food logged yet today.\n\n';
+    }
+  } catch(e) {}
+
+  // Supplements
+  try {
+    var items = JSON.parse(localStorage.getItem('stack:items') || '[]');
+    var taken = JSON.parse(localStorage.getItem('stack:taken:' + todayKey) || '{}');
+    if (items.length) {
+      var yes = items.filter(function(i){ return taken[i.id]; }).map(function(i){ return i.name; });
+      var no  = items.filter(function(i){ return !taken[i.id]; }).map(function(i){ return i.name; });
+      ctx += 'SUPPLEMENTS:\n';
+      if (yes.length) ctx += '  Taken: ' + yes.join(', ') + '\n';
+      if (no.length)  ctx += '  Not yet: ' + no.join(', ') + '\n';
+      ctx += '\n';
+    }
+  } catch(e) {}
+
+  // Hydration
+  try {
+    var w      = JSON.parse(localStorage.getItem('po_water_v1') || '{}');
+    var wDone  = (w.logs || {})[todayKey] || 0;
+    var wKg    = ((w.profile || {}).weightKg) || 75;
+    var unitVol = w.unit === 'glass' ? (w.glassMl || 250) : (w.bottleMl || 500);
+    var wTotal  = Math.max(1, Math.ceil(wKg * 35 / unitVol));
+    ctx += 'HYDRATION: ' + wDone + '/' + wTotal + ' ' + (w.unit || 'bottle') + 's.\n\n';
+  } catch(e) {}
+
+  // Workout
+  try {
+    var st       = JSON.parse(localStorage.getItem('po_coach_v1') || '{}');
+    var doneDays = JSON.parse(localStorage.getItem('po_coach_workout_done') || '{}');
+    if (st.phase || st.plan) {
+      ctx += 'TRAINING: ';
+      if (st.phase) ctx += 'Phase ' + st.phase;
+      if (st.block) ctx += ' · ' + st.block + ' block';
+      ctx += '. Today: ' + (doneDays[todayKey] ? 'DONE ✓' : 'NOT YET DONE') + '\n\n';
+    }
+  } catch(e) {}
+
+  // Stimulants
+  try {
+    var peakEntries = JSON.parse(localStorage.getItem('peak:entries') || '[]');
+    var todayIn = peakEntries.filter(function(e){
+      return e.type === 'intake' && e.timestamp && localDateOf(e.timestamp) === todayKey;
+    });
+    if (todayIn.length) {
+      ctx += 'STIMULANTS TODAY:\n';
+      todayIn.forEach(function(e) {
+        var t = new Date(e.timestamp);
+        ctx += '  ' + e.substance + ' ' + e.dose_mg + 'mg at ' +
+               t.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' }) + '\n';
+      });
+      ctx += '\n';
+    }
+  } catch(e) {}
+
+  return ctx.trim();
+}
+
+// ─── History ──────────────────────────────────────────────
+function loadHistory()  { try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(e) { return []; } }
+function saveHistory(h) { try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(-MAX_HISTORY))); } catch(e) {} }
+
+// ─── State ────────────────────────────────────────────────
+var messages  = loadHistory();
+var isLoading = false;
+
+// ─── Render ───────────────────────────────────────────────
+function fmtTime(ts) {
+  return new Date(ts).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+}
+
+function renderMessages() {
+  var el = document.getElementById('mentorMessages');
+  // Show/hide welcome
+  var welcome = document.getElementById('mentorWelcome');
+  if (welcome) welcome.style.display = messages.length ? 'none' : '';
+  // Show/hide clear
+  var clearRow = document.getElementById('mentorClearRow');
+  if (clearRow) clearRow.classList.toggle('visible', messages.length > 0);
+  // Remove existing bubbles
+  Array.prototype.forEach.call(el.querySelectorAll('.mentor-msg'), function(n){ n.remove(); });
+  messages.forEach(function(m) { el.appendChild(makeBubble(m)); });
+  el.scrollTop = el.scrollHeight;
+}
+
+function makeBubble(m) {
+  var wrap   = document.createElement('div');
+  wrap.className = 'mentor-msg ' + (m.role === 'user' ? 'user' : 'ai');
+  var bubble = document.createElement('div');
+  bubble.className = 'mentor-bubble';
+  bubble.textContent = m.content;
+  var time   = document.createElement('div');
+  time.className = 'mentor-msg-time';
+  time.textContent = fmtTime(m.ts || Date.now());
+  wrap.appendChild(bubble);
+  wrap.appendChild(time);
+  return wrap;
+}
+
+function showTyping() {
+  var el = document.getElementById('mentorMessages');
+  var ind = document.createElement('div');
+  ind.id = 'mentorTyping';
+  ind.className = 'mentor-typing';
+  ind.innerHTML = '<div class="mentor-typing-dot"></div><div class="mentor-typing-dot"></div><div class="mentor-typing-dot"></div>';
+  el.appendChild(ind);
+  el.scrollTop = el.scrollHeight;
+}
+function hideTyping() {
+  var ind = document.getElementById('mentorTyping');
+  if (ind) ind.remove();
+}
+
+// ─── Send ─────────────────────────────────────────────────
+async function send(text) {
+  text = (text || '').trim();
+  if (!text || isLoading) return;
+  isLoading = true;
+  setSendDisabled(true);
+
+  messages.push({ role: 'user', content: text, ts: Date.now() });
+  saveHistory(messages);
+  renderMessages();
+  clearInput();
+
+  var prompts = document.getElementById('mentorPrompts');
+  if (prompts) prompts.style.display = 'none';
+
+  showTyping();
+  try {
+    var apiMsgs = messages.slice(-20).map(function(m){ return { role: m.role, content: m.content }; });
+    var resp = await fetch(MENTOR_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPA_ANON,
+        'Authorization': 'Bearer ' + SUPA_ANON,
+      },
+      body: JSON.stringify({ messages: apiMsgs, context: buildContext() }),
+    });
+    var data = await resp.json();
+    if (data.error) throw new Error(data.error);
+    messages.push({ role: 'assistant', content: data.reply || '…', ts: Date.now() });
+  } catch(err) {
+    messages.push({ role: 'assistant', content: '⚠️ ' + (err.message || 'Something went wrong.'), ts: Date.now() });
+  }
+  saveHistory(messages);
+  hideTyping();
+  renderMessages();
+  isLoading = false;
+  setSendDisabled(false);
+}
+
+function setSendDisabled(on) { var b = document.getElementById('mentorSend'); if (b) b.disabled = on; }
+function clearInput() {
+  var inp = document.getElementById('mentorInput');
+  if (!inp) return; inp.value = ''; inp.style.height = 'auto';
+}
+
+// ─── Boot ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  renderMessages();
+
+  var input   = document.getElementById('mentorInput');
+  var sendBtn = document.getElementById('mentorSend');
+  var clearBtn = document.getElementById('mentorClear');
+
+  if (input) {
+    input.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(this.value); }
+    });
+  }
+  if (sendBtn) sendBtn.addEventListener('click', function() { send(input ? input.value : ''); });
+  if (clearBtn) clearBtn.addEventListener('click', function() {
+    messages = []; saveHistory(messages); renderMessages();
+    var prompts = document.getElementById('mentorPrompts');
+    if (prompts) prompts.style.display = '';
+  });
+  document.querySelectorAll('.mentor-prompt-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() { send(this.dataset.q); });
+  });
+});
+
+})();
+</script>
+</body>
+</html>

@@ -188,6 +188,8 @@ body.has-bottombar {
   .bottombar-tab[data-page="caffeine"].active .bottombar-tab-icon { filter: none; opacity: 1; }
   .bottombar-tab[data-page="profile"].active { color: #E879F9; background: rgba(232,121,249,0.10); }
   .bottombar-tab[data-page="profile"].active .bottombar-tab-icon { filter: none; opacity: 1; }
+  .bottombar-tab[data-page="mentor"].active  { color: #14B8A6; background: rgba(20,184,166,0.10); }
+  .bottombar-tab[data-page="mentor"].active  .bottombar-tab-icon { filter: none; opacity: 1; }
 }
 @media (max-width: 480px) {
   .topbar { padding-left: 10px; padding-right: 10px; gap: 6px; }
@@ -240,6 +242,9 @@ body.topbar-modal-open { overflow: hidden; touch-action: none; }
   const bottombarHtml = `
 <nav class="bottombar" id="bottombar" role="navigation" aria-label="Main tabs">
   <div class="sidebar-brand">Lucas' Dashboard</div>
+  <a href="mentor.html" class="bottombar-tab" data-page="mentor">
+    <span class="bottombar-tab-icon">🧠</span><span>Mentor</span>
+  </a>
   <a href="main.html" class="bottombar-tab" data-page="main">
     <span class="bottombar-tab-icon">🏠</span><span>Main</span>
   </a>
@@ -269,6 +274,7 @@ body.topbar-modal-open { overflow: hidden; touch-action: none; }
   function shouldShowChrome() { return !isEmbedded(); }
   function currentPageKey() {
     const p = (window.location.pathname || '').toLowerCase();
+    if (p.endsWith('mentor.html'))    return 'mentor';
     if (p.endsWith('health.html'))    return 'health';
     if (p.endsWith('gym.html'))       return 'fitness';
     if (p.endsWith('po-water.html'))  return 'water';
