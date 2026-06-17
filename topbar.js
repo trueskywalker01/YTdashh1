@@ -112,8 +112,8 @@ body.has-bottombar {
   padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important;
 }
 @media (max-width: 768px) {
-  .bottombar { display: none; }
-  body.has-bottombar { padding-bottom: 0 !important; }
+  .bottombar-tab-desktop { display: none; }
+  body.has-bottombar { padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important; }
   .sidebar-brand { display: none; }
 }
 @media (min-width: 769px) {
@@ -242,9 +242,6 @@ body.topbar-modal-open { overflow: hidden; touch-action: none; }
   const bottombarHtml = `
 <nav class="bottombar" id="bottombar" role="navigation" aria-label="Main tabs">
   <div class="sidebar-brand">Lucas' Dashboard</div>
-  <a href="mentor.html" class="bottombar-tab" data-page="mentor">
-    <span class="bottombar-tab-icon">🧠</span><span>Mentor</span>
-  </a>
   <a href="main.html" class="bottombar-tab" data-page="main">
     <span class="bottombar-tab-icon">🏠</span><span>Main</span>
   </a>
@@ -262,6 +259,9 @@ body.topbar-modal-open { overflow: hidden; touch-action: none; }
   </a>
   <a href="caffeine.html" class="bottombar-tab bottombar-tab-desktop" data-page="caffeine">
     <span class="bottombar-tab-icon">☕</span><span>Peak</span>
+  </a>
+  <a href="mentor.html" class="bottombar-tab" data-page="mentor">
+    <span class="bottombar-tab-icon">🧠</span><span>Mentor</span>
   </a>
   <a href="profile.html" class="bottombar-tab" data-page="profile">
     <span class="bottombar-tab-icon">👤</span><span>Profile</span>
