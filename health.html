@@ -2922,6 +2922,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const detail   = (k > 0 || na > 0)
           ? '<span style="font-size:10px;color:var(--text-quaternary);margin-left:4px">(' + Math.round(k) + 'mg K / ' + Math.round(na) + 'mg Na)</span>'
           : '';
+        const total   = k + na;
+        const kPct    = total > 0 ? Math.round(k  / total * 100) : 0;
+        const naPct   = total > 0 ? Math.round(na / total * 100) : 0;
+        const seg = (pct: number, color: string) =>
+          '<div style="width:' + pct + '%;height:100%;background:' + color + ';transition:width 0.5s cubic-bezier(0.22,1,0.36,1)"></div>';
         row.innerHTML =
           '<div class="nutr-row-top">' +
             '<div class="nutr-dot" style="background:' + dotColor + '"></div>' +
@@ -2929,7 +2934,10 @@ document.addEventListener('DOMContentLoaded', function () {
             '<div class="nutr-amt">' + ratioLbl + ' / 3 : 1</div>' +
           '</div>' +
           '<div class="nutr-bar-indent">' +
-            '<div class="nutr-bar-track"><div class="nutr-bar-fill" style="width:' + p + '%;background:' + n.color + '"></div></div>' +
+            '<div class="nutr-bar-track" style="display:flex">' +
+              seg(kPct, '#30D158') +
+              seg(naPct, '#FF6B6B') +
+            '</div>' +
           '</div>' +
           (n.tip ? '<div class="nutr-tip">' + n.tip + '</div>' : '');
       } else {
