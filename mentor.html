@@ -382,6 +382,14 @@ function clearInput() {
 document.addEventListener('DOMContentLoaded', function() {
   renderMessages();
 
+  // Auto-send if opened with #q=... from main page quick prompts
+  var hash = window.location.hash;
+  if (hash && hash.indexOf('#q=') === 0) {
+    var autoQ = decodeURIComponent(hash.slice(3));
+    history.replaceState(null, '', window.location.pathname);
+    if (autoQ) setTimeout(function() { send(autoQ); }, 300);
+  }
+
   var input   = document.getElementById('mentorInput');
   var sendBtn = document.getElementById('mentorSend');
   var clearBtn = document.getElementById('mentorClear');
