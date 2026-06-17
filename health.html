@@ -1572,15 +1572,12 @@ main {
     const wasTaken = !!taken[id];
     if (wasTaken) delete taken[id]; else taken[id] = Date.now();
     setTaken(taken);
-    // 2.8 — auto-log micronutrients when supplement is checked
-    if (!wasTaken) {
-      const item = getItems().find(i => i.id === id);
-      if (item) {
-        const key = item.name.toLowerCase().trim();
-        const amounts = SUPPLEMENT_NUTR_MAP[key];
-        if (amounts && typeof window.applyNutrientAmounts === 'function') {
-          window.applyNutrientAmounts(amounts);
-        }
+    const item = getItems().find(i => i.id === id);
+    if (item) {
+      const key = item.name.toLowerCase().trim();
+      const amounts = SUPPLEMENT_NUTR_MAP[key];
+      if (amounts && typeof window.applyNutrientAmounts === 'function') {
+        window.applyNutrientAmounts(amounts, wasTaken ? -1 : 1);
       }
     }
     render();
@@ -3007,11 +3004,15 @@ document.addEventListener('DOMContentLoaded', function () {
     renderNutr();
   }
 
-  window.applyNutrientAmounts = function (amounts) {
+  window.applyNutrientAmounts = function (amounts, sign) {
+    const dir = sign === -1 ? -1 : 1;
     const log = loadNutrLog();
     Object.entries(amounts).forEach(([id, val]) => {
       const v = Number(val);
-      if (v > 0) log[id] = (Number(log[id]) || 0) + v;
+      if (!v) return;
+      const next = Math.max(0, (Number(log[id]) || 0) + v * dir);
+      if (next === 0) delete log[id];
+      else log[id] = +next.toFixed(1);
     });
     saveNutrLog(log);
     renderNutr();
