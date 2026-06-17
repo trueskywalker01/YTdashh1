@@ -1520,30 +1520,41 @@ main {
     { name: 'Methylene Blue', dose: '1–4mg/kg', window: 'morning', note: 'Oral solution · mitochondrial function · neuroprotection research', icon: '🔬', aliases: ['methylene blue', 'mb'] },
   ];
 
-  // 2.8 — Supplement → micronutrient amounts (applied on "taken")
+  // Supplement → micronutrient amounts (added on tick, subtracted on untick)
   const SUPPLEMENT_NUTR_MAP = {
-    'vitamin d3':          { vit_d: 50 },
-    'vitamin d':           { vit_d: 25 },
-    'vitamin k2 (mk-7)':   { vit_k: 200 },
-    'vitamin c':           { vit_c: 500 },
-    'vitamin b12':         { vit_b12: 0.5 },
-    'b-complex':           { vit_b1: 1.2, vit_b2: 1.3, vit_b3: 16, vit_b6: 1.7, vit_b12: 2.4, vit_b9: 400, vit_b7: 30 },
-    'folate':              { vit_b9: 400 },
-    'biotin':              { vit_b7: 30 },
-    'vitamin a':           { vit_a: 1500 },
-    'vitamin e':           { vit_e: 15 },
-    'multivitamin':        { vit_a:900, vit_c:90, vit_d:20, vit_e:15, vit_k:120, vit_b1:1.2, vit_b2:1.3, vit_b3:16, vit_b6:1.7, vit_b12:2.4, vit_b9:400, calcium:200, iron:8, magnesium:100, zinc:11, selenium:55 },
-    'magnesium glycinate':   { magnesium: 200 },
-    'magnesium l-threonate': { magnesium: 144 },
-    'magnesium citrate':     { magnesium: 200 },
-    'zinc':                { zinc: 25 },
-    'iron':                { iron: 18 },
-    'calcium':             { calcium: 500 },
-    'selenium':            { selenium: 150 },
-    'iodine':              { iodine: 150 },
-    'omega-3 (fish oil)':  { omega3: 2 },
-    'krill oil':           { omega3: 0.5 },
-    'potassium chloride (kcl)': { potassium: 350 },
+    // ── Vitamins ───────────────────────────────────────────────────────────
+    'vitamin d3':             { vit_d: 50 },          // 2000 IU = 50 mcg
+    'vitamin d':              { vit_d: 25 },
+    'vitamin k2 (mk-7)':      { vit_k: 200 },         // 200 mcg MK-7
+    'vitamin c':              { vit_c: 500 },          // 500 mg
+    'vitamin b12':            { vit_b12: 500 },        // 500 mcg (methylcobalamin)
+    'b-complex':              { vit_b1: 1.2, vit_b2: 1.3, vit_b3: 16, vit_b5: 5, vit_b6: 1.7, vit_b7: 30, vit_b9: 400, vit_b12: 2.4 },
+    'folate':                 { vit_b9: 400 },         // 400 mcg
+    'biotin':                 { vit_b7: 30 },          // 30 mcg
+    'vitamin a':              { vit_a: 1500 },         // 1500 mcg (~5000 IU)
+    'vitamin e':              { vit_e: 15 },           // 15 mg (400 IU ≈ 15 mg α-T equiv)
+    'multivitamin':           { vit_a:900, vit_c:90, vit_d:20, vit_e:15, vit_k:120, vit_b1:1.2, vit_b2:1.3, vit_b3:16, vit_b5:5, vit_b6:1.7, vit_b7:30, vit_b9:400, vit_b12:2.4, calcium:200, iron:8, magnesium:100, zinc:11, selenium:55 },
+    // ── Minerals ───────────────────────────────────────────────────────────
+    'magnesium glycinate':    { magnesium: 200 },
+    'magnesium l-threonate':  { magnesium: 144 },
+    'magnesium citrate':      { magnesium: 200 },
+    'zinc':                   { zinc: 25 },
+    'iron':                   { iron: 18 },
+    'calcium':                { calcium: 500 },
+    'selenium':               { selenium: 150 },       // 150 mcg
+    'iodine':                 { iodine: 150 },         // 150 mcg
+    'potassium chloride (kcl)': { potassium: 350 },   // 350 mg elemental K
+    // ── Fatty acids ────────────────────────────────────────────────────────
+    'omega-3 (fish oil)':     { omega3: 2 },           // 2 g EPA+DHA
+    'krill oil':              { omega3: 0.5 },
+    'flaxseed oil':           { omega3: 1.3 },         // 1.3 g ALA per typical dose
+    // ── Protein sources ────────────────────────────────────────────────────
+    'whey protein':           { calcium: 130, sodium: 110, potassium: 180, phosphorus: 150 },
+    'casein protein':         { calcium: 290, sodium: 190, potassium: 210, phosphorus: 200 },
+    'collagen peptides':      { calcium: 20, sodium: 35 },
+    // ── Algae ──────────────────────────────────────────────────────────────
+    'spirulina':              { iron: 1.7, calcium: 8, magnesium: 6, potassium: 95, sodium: 27, vit_b1: 0.07, vit_b2: 0.1, vit_b3: 0.5, vit_b9: 7 },
+    'chlorella':              { iron: 1.5, calcium: 9, magnesium: 9, potassium: 62, vit_b2: 0.08 },
   };
 
   let todayKey = `stack:taken:${getActiveDate()}`;
