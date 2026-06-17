@@ -239,7 +239,11 @@ body { height: 100%; overflow: hidden; background: var(--bg); color: var(--fg);
 var KEY_LS      = 'nova_or_key';
 var HISTORY_KEY = 'mentor:history';
 var MAX_HIST    = 40;
-var MODEL       = 'meta-llama/llama-3.3-70b-instruct:free';
+var MODELS = [
+  'meta-llama/llama-3.3-70b-instruct:free',
+  'google/gemma-3-27b-it:free',
+  'mistralai/mistral-7b-instruct:free',
+];
 
 var wrap      = document.getElementById('messagesWrap');
 var feed      = document.getElementById('feed');
@@ -396,18 +400,27 @@ async function ask(text){
     var apiMsgs=[
       {role:'system',content:'You are Nova, a personal health and performance mentor.\n\nDASHBOARD DATA:\n'+buildContext()+'\n\nGive honest, specific, short advice. Use bullet points starting with "- ". Wrap key numbers in **double asterisks**. End with "- Do today:" plus one action.'},
     ].concat(messages.slice(-20).map(function(m){return{role:m.role==='assistant'?'assistant':m.role,content:m.content};}));
-    var res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key,'HTTP-Referer':'https://lucasdashboard.app','X-Title':'Lucas Dashboard Nova'},
-      body:JSON.stringify({model:MODEL,messages:apiMsgs,max_tokens:500}),
-    });
-    var json=await res.json();
-    if(json.error) throw new Error(json.error.message||'OpenRouter error');
-    var reply=(json.choices&&json.choices[0]&&json.choices[0].message&&json.choices[0].message.content)||'…';
-    messages.push({role:'assistant',content:reply.trim(),ts:Date.now()});
+
+    var reply=null;
+    var lastErr='';
+    for(var mi=0;mi<MODELS.length;mi++){
+      try{
+        var res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+key,'HTTP-Referer':'https://lucasdashboard.app','X-Title':'Lucas Dashboard Nova'},
+          body:JSON.stringify({model:MODELS[mi],messages:apiMsgs,max_tokens:500}),
+        });
+        var json=await res.json();
+        if(json.error){ lastErr=json.error.message||'provider error'; continue; }
+        var r=(json.choices&&json.choices[0]&&json.choices[0].message&&json.choices[0].message.content)||'';
+        if(r){ reply=r.trim(); break; }
+      }catch(e){ lastErr=e.message; }
+    }
+    if(!reply) throw new Error(lastErr||'All models unavailable');
+    messages.push({role:'assistant',content:reply,ts:Date.now()});
     setOrb('happy'); setTimeout(function(){setOrb('');},2500);
   }catch(err){
-    messages.push({role:'assistant',content:'- Could not reach OpenRouter — check your key and connection.\n- Error: '+err.message,ts:Date.now()});
+    messages.push({role:'assistant',content:'- Nova couldn\'t get a response right now — the free model tier is busy.\n- Try again in a moment, or check that your OpenRouter key is valid.',ts:Date.now()});
     setOrb('');
   }
 
