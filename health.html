@@ -2836,7 +2836,7 @@ document.addEventListener('DOMContentLoaded', function () {
     { id:'vit_d',      name:'Vitamin D',      unit:'mcg', rda:20,    tab:'vitamins', color:'#FFD60A', tip:'Fat-soluble — take with biggest meal. Pairs with K2 to direct calcium to bones. 20 mcg = 800 IU.' },
     { id:'vit_e',      name:'Vitamin E',      unit:'mg',  rda:15,    tab:'vitamins', color:'#FF9F0A', tip:'Fat-soluble — with fat. Mixed tocopherols preferred. High doses can interfere with K2.' },
     { id:'vit_k',      name:'Vitamin K',      unit:'mcg', rda:120,   tab:'vitamins', color:'#30D158', tip:'K2 (MK-7) pairs with D3 to prevent arterial calcification and direct calcium to bones.' },
-    { id:'pk_ratio',   name:'K : Na Ratio',   unit:':1',  rda:3,     tab:'minerals', color:'#30D158', tip:'Aim for 3:1 potassium to sodium. Avocado, banana, and leafy greens raise potassium; limiting processed food lowers sodium.' },
+    { id:'pk_ratio',   name:'K : Na Ratio',   unit:':1',  rda:4,     tab:'minerals', color:'#30D158', tip:'Aim for 4:1 potassium to sodium. Avocado, banana, and leafy greens raise potassium; limiting processed food lowers sodium.' },
     { id:'calcium',    name:'Calcium',        unit:'mg',  rda:1000,  tab:'minerals', color:'#64D2FF', tip:'Take with food in ≤500 mg doses. Avoid taking alongside iron or zinc — competes for absorption.' },
     { id:'iron',       name:'Iron',           unit:'mg',  rda:8,     tab:'minerals', color:'#FF6B6B', tip:'Best on empty stomach with vitamin C. Avoid with calcium, coffee, or tea within 2 hours.' },
     { id:'magnesium',  name:'Magnesium',      unit:'mg',  rda:420,   tab:'minerals', color:'#BF5AF2', tip:'Glycinate/malate are gentlest on gut. Very common deficiency. Supports sleep, mood, and muscle.' },
@@ -2913,10 +2913,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const k  = (Number(log['potassium']) || 0) + (Number(fromFood['potassium']) || 0);
         const na = (Number(log['sodium'])    || 0) + (Number(fromFood['sodium'])    || 0);
         const ratio   = na > 0 ? k / na : null;
-        const p       = ratio !== null ? Math.min(100, Math.round(ratio / 3 * 100)) : 0;
+        const p       = ratio !== null ? Math.min(100, Math.round(ratio / 4 * 100)) : 0;
         const dotColor = ratio === null   ? 'rgba(255,255,255,0.12)'
-                       : ratio >= 3       ? '#30D158'
-                       : ratio >= 1.5     ? n.color
+                       : ratio >= 4       ? '#30D158'
+                       : ratio >= 2       ? n.color
                        : '#FF9F0A';
         const ratioLbl = ratio !== null ? ratio.toFixed(1) + ' : 1' : '— : 1';
         const detail   = (k > 0 || na > 0)
@@ -2931,7 +2931,7 @@ document.addEventListener('DOMContentLoaded', function () {
           '<div class="nutr-row-top">' +
             '<div class="nutr-dot" style="background:' + dotColor + '"></div>' +
             '<div class="nutr-name">' + n.name + detail + '</div>' +
-            '<div class="nutr-amt">' + ratioLbl + ' / 3 : 1</div>' +
+            '<div class="nutr-amt">' + ratioLbl + ' / 4 : 1</div>' +
           '</div>' +
           '<div class="nutr-bar-indent">' +
             '<div class="nutr-bar-track" style="display:flex">' +
