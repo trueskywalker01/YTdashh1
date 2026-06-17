@@ -784,22 +784,43 @@ img, video, canvas, svg { max-width: 100%; }
 }
 .po-tw-list {
   list-style: none; margin: 0; padding: 0;
-  display: flex; flex-direction: column; gap: 6px;
+  display: flex; flex-direction: column; gap: 8px;
 }
-.po-tw-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 12px;
+.po-tw-ex-block {
   background: rgba(255,255,255,0.025);
   border: 1px solid var(--border);
   border-radius: 10px;
-  font-size: 13px;
+  overflow: hidden;
 }
-.po-tw-row-name { font-weight: 600; color: var(--text-1); }
-.po-tw-row-meta {
-  font-size: 11px; color: var(--text-3);
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+.po-tw-ex-name {
+  font-size: 11px; font-weight: 700; color: var(--text-2);
+  padding: 8px 12px 7px;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.04em; text-transform: uppercase;
 }
+.po-tw-set-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 8px 7px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.po-tw-set-row:last-child { border-bottom: none; }
+.po-tw-set-num {
+  font-size: 10px; font-weight: 700; color: var(--text-4);
+  font-family: var(--font-mono); letter-spacing: 0.06em;
+  min-width: 34px; flex-shrink: 0;
+}
+.po-tw-set-val {
+  flex: 1; font-size: 13px; font-weight: 600; color: var(--text-1);
+  font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+}
+.po-tw-set-del {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-4); font-size: 18px; line-height: 1;
+  padding: 4px 8px; border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.po-tw-set-del:hover, .po-tw-set-del:active { color: var(--bad); background: rgba(248,113,113,0.12); }
 .po-tw-empty {
   text-align: center; padding: 14px 0;
   font-size: 12px; color: var(--text-3); font-style: italic;
@@ -2105,10 +2126,10 @@ img, video, canvas, svg { max-width: 100%; }
   function logsByDay() {
     const byDay = {};
     state.exercises.forEach(ex => {
-      (state.logs[ex.id] || []).forEach(l => {
+      (state.logs[ex.id] || []).forEach((l, logIdx) => {
         const dk = l.date.slice(0, 10);
         if (!byDay[dk]) byDay[dk] = [];
-        byDay[dk].push({ ex, log: l });
+        byDay[dk].push({ ex, log: l, logIdx });
       });
     });
     return byDay;
@@ -2123,11 +2144,10 @@ img, video, canvas, svg { max-width: 100%; }
   }
 
   function summarizeDay(daySets) {
-    // daySets: [{ex, log}]. Group by exercise, return {sets: N, vol: kg, perEx: [...]}.
     const byEx = {};
-    daySets.forEach(({ex, log}) => {
+    daySets.forEach(({ex, log, logIdx}) => {
       if (!byEx[ex.id]) byEx[ex.id] = { ex, sets: [], vol: 0 };
-      byEx[ex.id].sets.push(log);
+      byEx[ex.id].sets.push({ log, logIdx });
       byEx[ex.id].vol += (log.weight || 0) * (log.reps || 0);
     });
     const perEx = Object.values(byEx);
@@ -2160,18 +2180,45 @@ img, video, canvas, svg { max-width: 100%; }
       empty.classList.remove('hidden');
     } else {
       empty.classList.add('hidden');
-      list.innerHTML = sum.perEx.map(e => {
-        const top = e.ex.bw
-          ? 'top ' + Math.max.apply(null, e.sets.map(s => s.reps)) + ' reps'
-          : 'top ' + Math.max.apply(null, e.sets.map(s => s.weight)) + u;
-        const meta = e.ex.bw
-          ? (e.sets.length + ' set' + (e.sets.length === 1 ? '' : 's') + ' · ' + top)
-          : (e.sets.length + ' set' + (e.sets.length === 1 ? '' : 's') + ' · ' + top + ' · ' + Math.round(e.vol) + u + ' total');
-        return '<li class="po-tw-row">'
-          + '<span class="po-tw-row-name">' + escape(e.ex.name) + '</span>'
-          + '<span class="po-tw-row-meta">' + meta + '</span>'
-          + '</li>';
-      }).join('');
+      list.innerHTML = '';
+      sum.perEx.forEach(e => {
+        const li = document.createElement('li');
+        li.className = 'po-tw-ex-block';
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'po-tw-ex-name';
+        nameDiv.textContent = e.ex.name;
+        li.appendChild(nameDiv);
+        e.sets.forEach(({ log, logIdx }, si) => {
+          const row = document.createElement('div');
+          row.className = 'po-tw-set-row';
+          const num = document.createElement('span');
+          num.className = 'po-tw-set-num';
+          num.textContent = 'SET ' + (si + 1);
+          const val = document.createElement('span');
+          val.className = 'po-tw-set-val';
+          val.textContent = e.ex.bw ? (log.reps + ' reps') : (log.weight + u + ' × ' + log.reps);
+          const del = document.createElement('button');
+          del.className = 'po-tw-set-del';
+          del.setAttribute('aria-label', 'Delete set');
+          del.textContent = '×';
+          del.dataset.exid = e.ex.id;
+          del.dataset.logidx = logIdx;
+          del.addEventListener('click', () => {
+            const arr = state.logs[e.ex.id] || [];
+            arr.splice(parseInt(del.dataset.logidx, 10), 1);
+            if (!arr.length) delete state.logs[e.ex.id];
+            else state.logs[e.ex.id] = arr;
+            saveState();
+            renderTodaysWorkout();
+            renderPastWorkouts();
+          });
+          row.appendChild(num);
+          row.appendChild(val);
+          row.appendChild(del);
+          li.appendChild(row);
+        });
+        list.appendChild(li);
+      });
     }
 
     // Done button state
