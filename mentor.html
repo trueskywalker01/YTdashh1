@@ -1,418 +1,418 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Mentor</title>
-  <script src="topbar.js" defer></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #0a0a0b;
-      --surface: rgba(255,255,255,0.04);
-      --border: rgba(255,255,255,0.08);
-      --text-1: #FAFAFA;
-      --text-2: rgba(255,255,255,0.75);
-      --text-3: rgba(255,255,255,0.45);
-      --accent: #14B8A6;
-      --radius: 14px;
-      --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
-    }
-    html, body { height: 100%; background: var(--bg); color: var(--text-1); font-family: var(--font); overflow: hidden; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Nova · AI Mentor</title>
+<script src="topbar.js" defer></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --accent: #6EE7B7; --accent-2: #67E8F9;
+  --bg: #05060c; --fg: #e9ecf5;
+  --muted: rgba(233,236,245,.55); --line: rgba(255,255,255,.10);
+  --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+}
+html, body { background: var(--bg); color: var(--fg); font-family: var(--font);
+  min-height: 100vh; -webkit-text-size-adjust: 100%; }
 
-    .mentor-root {
-      display: flex; flex-direction: column;
-      height: 100vh;
-      max-width: 700px; margin: 0 auto;
-    }
+.wrap { max-width: 600px; margin: 0 auto; padding: 16px 16px 120px; }
 
-    /* ── Messages ── */
-    .mentor-messages {
-      flex: 1; overflow-y: auto;
-      padding: 16px 16px 8px;
-      display: flex; flex-direction: column; gap: 12px;
-    }
-    .mentor-messages::-webkit-scrollbar { width: 0; }
+/* ── top bar ── */
+.top { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.key-toggle { margin-left: auto; border: 1px solid var(--line); background: rgba(255,255,255,.03);
+  border-radius: 10px; padding: 7px 10px; cursor: pointer; font-size: 15px; line-height: 1;
+  opacity: .55; transition: opacity .15s; color: var(--fg); }
+.key-toggle:hover { opacity: 1; }
+.key-toggle.has-key { opacity: 1; border-color: var(--accent); }
+.keypanel { display: none; margin-bottom: 14px; }
+.keypanel.open { display: block; }
 
-    .mentor-welcome {
-      display: flex; flex-direction: column; align-items: center;
-      padding: 40px 0 20px; gap: 12px; text-align: center;
-    }
-    .mentor-avatar {
-      font-size: 32px; width: 64px; height: 64px;
-      background: rgba(20,184,166,0.10);
-      border: 1px solid rgba(20,184,166,0.22);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .mentor-welcome-title { font-size: 18px; font-weight: 700; }
-    .mentor-welcome-sub { font-size: 13px; color: var(--text-3); line-height: 1.6; }
+/* ── flat CSS orb ── */
+.orb { width: 56px; height: 56px; border-radius: 50%; position: relative; flex-shrink: 0;
+  background: radial-gradient(circle at 32% 28%, #eafff6, var(--accent) 42%, #1f8f66 100%);
+  box-shadow: 0 0 22px -2px var(--accent), inset 0 -6px 14px rgba(0,0,0,.25);
+  animation: orbFloat 4s ease-in-out infinite; }
+.orb::before, .orb::after { content: ''; position: absolute; top: 38%; width: 9px; height: 9px;
+  border-radius: 50%; background: #06281d; box-shadow: 0 0 6px rgba(0,0,0,.4); transition: height .15s; }
+.orb::before { left: 30%; } .orb::after { right: 30%; }
+.orb.think { animation: orbFloat 1.1s ease-in-out infinite, orbPulse 1.1s ease-in-out infinite; }
+.orb.happy::before, .orb.happy::after { height: 4px; border-radius: 0 0 9px 9px; }
+@keyframes orbFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes orbPulse { 0%,100%{box-shadow:0 0 22px -2px var(--accent)} 50%{box-shadow:0 0 34px 2px var(--accent)} }
 
-    .mentor-msg { display: flex; flex-direction: column; max-width: 88%; }
-    .mentor-msg.user { align-self: flex-end; align-items: flex-end; }
-    .mentor-msg.ai   { align-self: flex-start; align-items: flex-start; }
+.title h1 { font-family: 'Times New Roman', Georgia, serif; font-style: italic; font-size: 24px; font-weight: 500;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.title .role { font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--muted); margin-top: 3px; }
 
-    .mentor-bubble {
-      padding: 10px 14px; border-radius: var(--radius);
-      font-size: 14px; line-height: 1.6; white-space: pre-wrap;
-    }
-    .mentor-msg.user .mentor-bubble {
-      background: rgba(20,184,166,0.14);
-      border: 1px solid rgba(20,184,166,0.28);
-      color: var(--text-1); border-bottom-right-radius: 4px;
-    }
-    .mentor-msg.ai .mentor-bubble {
-      background: var(--surface); border: 1px solid var(--border);
-      color: var(--text-1); border-bottom-left-radius: 4px;
-    }
-    .mentor-msg-time { font-size: 10px; color: var(--text-3); margin-top: 3px; padding: 0 3px; }
+/* ── key panel ── */
+.keybar { display: flex; gap: 8px; margin-bottom: 10px; }
+.keybar input { flex: 1; background: rgba(255,255,255,.03); border: 1px solid var(--line);
+  color: var(--fg); border-radius: 10px; padding: 11px 13px; font-size: 13px; outline: none;
+  font-family: var(--font); }
+.keybar input:focus { border-color: var(--accent); }
+.keybar button { border: 0; border-radius: 10px; padding: 0 16px; cursor: pointer;
+  color: #04140d; background: var(--accent); font-weight: 600; font-size: 13px; white-space: nowrap; }
+.hint { font-size: 12px; color: var(--muted); line-height: 1.55; }
+.hint.saved { color: var(--accent); }
 
-    /* Typing indicator */
-    .mentor-typing {
-      display: flex; align-items: center; gap: 5px;
-      padding: 12px 16px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); border-bottom-left-radius: 4px;
-      align-self: flex-start;
-    }
-    .mentor-typing-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--text-3);
-      animation: mentor-bounce 1.3s ease-in-out infinite;
-    }
-    .mentor-typing-dot:nth-child(2) { animation-delay: 0.18s; }
-    .mentor-typing-dot:nth-child(3) { animation-delay: 0.36s; }
-    @keyframes mentor-bounce {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
-      30%           { transform: translateY(-5px); opacity: 1; }
-    }
+/* ── quick prompts ── */
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip { padding: 6px 12px; border-radius: 18px; background: rgba(255,255,255,.04);
+  border: 1px solid var(--line); color: var(--muted); font-size: 12px; font-weight: 500;
+  cursor: pointer; white-space: nowrap; font-family: var(--font);
+  transition: background .12s, border-color .12s, color .12s; }
+.chip:hover, .chip:active { background: rgba(110,231,183,.10); border-color: rgba(110,231,183,.28); color: var(--fg); }
 
-    /* ── Bottom bar ── */
-    .mentor-bottom {
-      padding: 8px 12px max(14px, env(safe-area-inset-bottom));
-      border-top: 1px solid var(--border);
-      background: var(--bg);
-      display: flex; flex-direction: column; gap: 8px;
-    }
+/* ── feed ── */
+.feed { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+.msg { max-width: 92%; }
+.msg.user { align-self: flex-end; }
+.msg.coach { align-self: flex-start; width: 100%; }
+.bubble { border-radius: 14px; padding: 12px 15px; font-size: 14px; line-height: 1.58; }
+.msg.user .bubble { background: rgba(255,255,255,.05); border: 1px solid var(--line); }
+.msg.coach .bubble { background: rgba(255,255,255,.04);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-left: 3px solid var(--accent); }
+.tag { display: inline-block; margin-bottom: 8px; font-family: ui-monospace, monospace;
+  font-size: 9.5px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase;
+  color: #04140d; background: var(--accent); padding: 3px 9px; border-radius: 999px; }
+.pill { color: var(--accent); background: color-mix(in srgb, var(--accent) 15%, transparent);
+  padding: 1px 6px; border-radius: 6px; font-weight: 600; }
+.reply-list { margin: 6px 0 0; padding-left: 16px; display: grid; gap: 5px; }
+.reply-list li { line-height: 1.5; }
+.msg-time { font-size: 10px; color: var(--muted); margin-top: 4px; padding: 0 3px; text-align: right; }
+.msg.coach .msg-time { text-align: left; }
 
-    .mentor-prompts { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
-    .mentor-prompts::-webkit-scrollbar { display: none; }
-    .mentor-prompt-btn {
-      flex-shrink: 0; padding: 6px 12px; border-radius: 20px;
-      background: var(--surface); border: 1px solid var(--border);
-      color: var(--text-2); font-size: 12px; font-weight: 500;
-      cursor: pointer; white-space: nowrap;
-      font-family: var(--font);
-      transition: background 0.12s, border-color 0.12s, color 0.12s;
-    }
-    .mentor-prompt-btn:hover, .mentor-prompt-btn:active {
-      background: rgba(20,184,166,0.10);
-      border-color: rgba(20,184,166,0.30);
-      color: var(--text-1);
-    }
+/* ── typing dots ── */
+.dots { display: inline-flex; gap: 5px; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: .35;
+  animation: d 1.2s ease-in-out infinite; font-style: normal; }
+.dots i:nth-child(2){animation-delay:.2s} .dots i:nth-child(3){animation-delay:.4s}
+@keyframes d { 0%,100%{opacity:.35;transform:scale(1)} 50%{opacity:1;transform:scale(1.4)} }
 
-    .mentor-input-row { display: flex; align-items: flex-end; gap: 8px; }
-    .mentor-input {
-      flex: 1; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 20px; padding: 10px 16px;
-      color: var(--text-1); font-size: 14px; font-family: var(--font);
-      resize: none; line-height: 1.45; max-height: 120px; outline: none;
-      transition: border-color 0.15s;
-    }
-    .mentor-input::placeholder { color: var(--text-3); }
-    .mentor-input:focus { border-color: rgba(20,184,166,0.45); }
-    .mentor-send {
-      width: 40px; height: 40px; flex-shrink: 0;
-      border-radius: 50%; background: var(--accent); border: none;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      font-size: 18px; color: #fff; font-weight: 700; font-family: var(--font);
-      transition: transform 0.1s, opacity 0.15s;
-    }
-    .mentor-send:active { transform: scale(0.90); }
-    .mentor-send:disabled { opacity: 0.35; cursor: default; }
+/* ── composer ── */
+.composer-wrap { position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--bg); border-top: 1px solid var(--line);
+  padding: 10px 16px max(14px, env(safe-area-inset-bottom)); z-index: 30; }
+.composer { display: flex; gap: 9px; max-width: 600px; margin: 0 auto; }
+.composer textarea { flex: 1; background: rgba(255,255,255,.03); border: 1px solid var(--line);
+  color: var(--fg); border-radius: 20px; padding: 11px 16px; font-size: 14px; outline: none;
+  resize: none; line-height: 1.45; max-height: 100px; font-family: var(--font);
+  transition: border-color .15s; }
+.composer textarea:focus { border-color: var(--accent); }
+.composer textarea::placeholder { color: var(--muted); }
+.composer button { width: 44px; height: 44px; border: 0; border-radius: 50%; cursor: pointer;
+  color: #04140d; background: var(--accent); font-size: 18px; flex-shrink: 0; align-self: flex-end;
+  transition: transform .1s, opacity .15s; }
+.composer button:active { transform: scale(.92); }
+.composer button:disabled { opacity: .35; cursor: default; }
 
-    /* Clear chat */
-    .mentor-clear-row {
-      display: none; justify-content: flex-end; padding: 0 4px 4px;
-    }
-    .mentor-clear-row.visible { display: flex; }
-    .mentor-clear {
-      background: none; border: none; color: var(--text-3);
-      font-size: 11px; cursor: pointer; padding: 2px 6px;
-      border-radius: 6px; font-family: var(--font);
-    }
-    .mentor-clear:hover { color: var(--text-2); background: var(--surface); }
-  </style>
+/* ── clear ── */
+.clear-row { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.clear-btn { background: none; border: none; color: var(--muted); font-size: 11px;
+  cursor: pointer; padding: 2px 6px; border-radius: 6px; font-family: var(--font); }
+.clear-btn:hover { color: var(--fg); background: rgba(255,255,255,.05); }
+</style>
 </head>
 <body>
-<div class="mentor-root">
-  <div class="mentor-messages" id="mentorMessages">
-    <div class="mentor-welcome" id="mentorWelcome">
-      <div class="mentor-avatar">🧠</div>
-      <div class="mentor-welcome-title">Your Mentor</div>
-      <div class="mentor-welcome-sub">Ask me anything about your<br>health, training, or nutrition.</div>
+<div class="wrap">
+  <!-- top -->
+  <div class="top">
+    <div class="orb" id="orb"></div>
+    <div class="title"><h1>Nova</h1><div class="role">your mentor</div></div>
+    <button id="keyToggle" class="key-toggle" title="OpenRouter API key">🔑</button>
+  </div>
+
+  <!-- key panel -->
+  <div class="keypanel" id="keypanel">
+    <div class="keybar">
+      <input id="keyInput" type="password" placeholder="paste your OpenRouter key (sk-or-…)" autocomplete="off" />
+      <button id="keySave">Save</button>
+    </div>
+    <div class="hint" id="hint">
+      Stored only in this browser. Get a free key at <b>openrouter.ai</b> → API keys.
     </div>
   </div>
 
-  <div class="mentor-bottom">
-    <div class="mentor-clear-row" id="mentorClearRow">
-      <button class="mentor-clear" id="mentorClear" type="button">Clear chat</button>
-    </div>
-    <div class="mentor-prompts" id="mentorPrompts">
-      <button class="mentor-prompt-btn" data-q="How is my day looking overall?">How's my day?</button>
-      <button class="mentor-prompt-btn" data-q="What should I eat next based on my macros so far?">What to eat next?</button>
-      <button class="mentor-prompt-btn" data-q="Am I on track with my fitness goals this week?">On track?</button>
-      <button class="mentor-prompt-btn" data-q="Which supplements should I prioritise right now and why?">Supplements?</button>
-      <button class="mentor-prompt-btn" data-q="How is my recovery looking based on sleep and today's stimulant load?">Recovery?</button>
-    </div>
-    <div class="mentor-input-row">
-      <textarea class="mentor-input" id="mentorInput" placeholder="Ask your mentor…" rows="1"></textarea>
-      <button class="mentor-send" id="mentorSend" type="button">↑</button>
-    </div>
+  <!-- quick prompts -->
+  <div class="chips" id="chips">
+    <button class="chip" data-q="How is my day looking overall?">How's my day?</button>
+    <button class="chip" data-q="What should I eat next based on my macros?">What to eat next?</button>
+    <button class="chip" data-q="Am I on track with my fitness goals this week?">On track?</button>
+    <button class="chip" data-q="Which supplements should I prioritise right now?">Supplements?</button>
+    <button class="chip" data-q="How is my recovery looking today?">Recovery?</button>
+  </div>
+
+  <!-- clear row -->
+  <div class="clear-row" id="clearRow" style="display:none;">
+    <button class="clear-btn" id="clearBtn">Clear chat</button>
+  </div>
+
+  <!-- messages -->
+  <div class="feed" id="feed"></div>
+</div>
+
+<!-- fixed composer -->
+<div class="composer-wrap">
+  <div class="composer">
+    <textarea id="chatInput" placeholder="ask Nova anything…" rows="1"></textarea>
+    <button id="send" aria-label="Send">↑</button>
   </div>
 </div>
 
 <script>
-(function () {
+(function(){
 'use strict';
 
-const SUPA_URL   = 'https://irchofgefxpgohqfngyo.supabase.co';
-const SUPA_ANON  = 'sb_publishable_sNUOPZ-EBvdFBqUpO2N1Fw_-g6DWPst';
-const MENTOR_URL = SUPA_URL + '/functions/v1/mentor-chat';
-const HISTORY_KEY = 'mentor:history';
-const MAX_HISTORY = 40;
+var KEY_LS      = 'nova_or_key';
+var HISTORY_KEY = 'mentor:history';
+var MAX_HIST    = 40;
+var MODEL       = 'meta-llama/llama-3.3-70b-instruct:free';
 
-// ─── Helpers ──────────────────────────────────────────────
-function pad(n) { return n < 10 ? '0' + n : '' + n; }
-function todayStr() {
+var feed      = document.getElementById('feed');
+var input     = document.getElementById('chatInput');
+var orbEl     = document.getElementById('orb');
+var keyInput  = document.getElementById('keyInput');
+var hintEl    = document.getElementById('hint');
+var keypanel  = document.getElementById('keypanel');
+var keyToggle = document.getElementById('keyToggle');
+var clearRow  = document.getElementById('clearRow');
+var chips     = document.getElementById('chips');
+
+// ─── Utils ────────────────────────────────────────────────
+function pad(n){ return n < 10 ? '0' + n : '' + n; }
+function todayStr(){
   var d = new Date();
-  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
 }
-function localDateOf(iso) {
-  var d = new Date(iso);
-  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+function localDateOf(iso){ var d = new Date(iso); return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+function fmtTime(ts){ return new Date(ts).toLocaleTimeString('en-AU', {hour:'2-digit',minute:'2-digit'}); }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function setOrb(s){ orbEl.className = 'orb' + (s ? ' '+s : ''); }
+
+// ─── Key handling ──────────────────────────────────────────
+function savedKey(){ try{ return localStorage.getItem(KEY_LS) || ''; }catch(e){ return ''; } }
+function markKeySaved(){
+  hintEl.className = 'hint saved';
+  hintEl.innerHTML = '✓ Key saved in this browser. Ask away.';
+  keyInput.placeholder = '•••• key saved ••••';
+  keyToggle.classList.add('has-key');
 }
+if (savedKey()) markKeySaved();
 
-// ─── Context from localStorage ────────────────────────────
-function buildContext() {
-  var todayKey = todayStr();
-  var now      = new Date();
-  var timeStr  = now.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
-  var dateStr  = now.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  var ctx      = 'DATE / TIME: ' + dateStr + ' at ' + timeStr + '\n\n';
+keyToggle.addEventListener('click', function(){ keypanel.classList.toggle('open'); });
+document.getElementById('keySave').addEventListener('click', function(){
+  var k = keyInput.value.trim();
+  if (!k) return;
+  try{ localStorage.setItem(KEY_LS, k); }catch(e){}
+  keyInput.value = '';
+  markKeySaved();
+  keypanel.classList.remove('open');
+});
 
-  // Nutrition
-  try {
-    var meals = JSON.parse(localStorage.getItem('macro:meals:' + todayKey) || '[]');
-    var goals = JSON.parse(localStorage.getItem('macro:goals') || '{}');
-    var tot   = meals.reduce(function(a, m) {
-      return { cal: a.cal + (+m.cal||0), prot: a.prot + (+m.prot||0),
-               carb: a.carb + (+m.carb||0), fat: a.fat + (+m.fat||0) };
-    }, { cal:0, prot:0, carb:0, fat:0 });
-    if (meals.length) {
-      ctx += 'NUTRITION: ' + Math.round(tot.cal) + ' kcal';
-      if (goals.cal)  ctx += ' / ' + goals.cal  + ' target';
-      ctx += '. Protein ' + tot.prot.toFixed(0) + 'g';
-      if (goals.prot) ctx += '/' + goals.prot + 'g';
-      ctx += ', Carbs ' + tot.carb.toFixed(0) + 'g, Fat ' + tot.fat.toFixed(0) + 'g.\n';
-      ctx += 'Meals: ' + meals.map(function(m){ return m.name; }).join('; ') + '\n\n';
-    } else {
-      ctx += 'NUTRITION: No food logged yet today.\n\n';
-    }
-  } catch(e) {}
+// ─── Context builder ──────────────────────────────────────
+function buildContext(){
+  var today  = todayStr();
+  var now    = new Date();
+  var ctx    = 'DATE/TIME: ' + now.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'}) +
+               ' at ' + now.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}) + '\n\n';
 
-  // Supplements
-  try {
-    var items = JSON.parse(localStorage.getItem('stack:items') || '[]');
-    var taken = JSON.parse(localStorage.getItem('stack:taken:' + todayKey) || '{}');
-    if (items.length) {
-      var yes = items.filter(function(i){ return taken[i.id]; }).map(function(i){ return i.name; });
-      var no  = items.filter(function(i){ return !taken[i.id]; }).map(function(i){ return i.name; });
+  try{
+    var meals = JSON.parse(localStorage.getItem('macro:meals:'+today)||'[]');
+    var goals = JSON.parse(localStorage.getItem('macro:goals')||'{}');
+    var tot   = meals.reduce(function(a,m){ return {cal:a.cal+(+m.cal||0),prot:a.prot+(+m.prot||0),carb:a.carb+(+m.carb||0),fat:a.fat+(+m.fat||0)}; },{cal:0,prot:0,carb:0,fat:0});
+    if(meals.length){
+      ctx += 'NUTRITION: '+Math.round(tot.cal)+' kcal'+(goals.cal?' / '+goals.cal+' target':'')+'. Protein '+tot.prot.toFixed(0)+'g'+(goals.prot?'/'+goals.prot+'g':'')+', Carbs '+tot.carb.toFixed(0)+'g, Fat '+tot.fat.toFixed(0)+'g.\n';
+      ctx += 'Meals: '+meals.map(function(m){return m.name;}).join('; ')+'\n\n';
+    } else { ctx += 'NUTRITION: No food logged yet today.\n\n'; }
+  }catch(e){}
+
+  try{
+    var items = JSON.parse(localStorage.getItem('stack:items')||'[]');
+    var taken = JSON.parse(localStorage.getItem('stack:taken:'+today)||'{}');
+    if(items.length){
+      var yes=items.filter(function(i){return taken[i.id];}).map(function(i){return i.name;});
+      var no =items.filter(function(i){return !taken[i.id];}).map(function(i){return i.name;});
       ctx += 'SUPPLEMENTS:\n';
-      if (yes.length) ctx += '  Taken: ' + yes.join(', ') + '\n';
-      if (no.length)  ctx += '  Not yet: ' + no.join(', ') + '\n';
-      ctx += '\n';
+      if(yes.length) ctx += '  Taken: '+yes.join(', ')+'\n';
+      if(no.length)  ctx += '  Not yet: '+no.join(', ')+'\n\n';
     }
-  } catch(e) {}
+  }catch(e){}
 
-  // Hydration
-  try {
-    var w      = JSON.parse(localStorage.getItem('po_water_v1') || '{}');
-    var wDone  = (w.logs || {})[todayKey] || 0;
-    var wKg    = ((w.profile || {}).weightKg) || 75;
-    var unitVol = w.unit === 'glass' ? (w.glassMl || 250) : (w.bottleMl || 500);
-    var wTotal  = Math.max(1, Math.ceil(wKg * 35 / unitVol));
-    ctx += 'HYDRATION: ' + wDone + '/' + wTotal + ' ' + (w.unit || 'bottle') + 's.\n\n';
-  } catch(e) {}
+  try{
+    var w     = JSON.parse(localStorage.getItem('po_water_v1')||'{}');
+    var wDone = ((w.logs||{})[today])||0;
+    var wKg   = ((w.profile||{}).weightKg)||75;
+    var uVol  = w.unit==='glass'?(w.glassMl||250):(w.bottleMl||500);
+    var wTot  = Math.max(1,Math.ceil(wKg*35/uVol));
+    ctx += 'HYDRATION: '+wDone+'/'+wTot+' '+(w.unit||'bottle')+'s.\n\n';
+  }catch(e){}
 
-  // Workout
-  try {
-    var st       = JSON.parse(localStorage.getItem('po_coach_v1') || '{}');
-    var doneDays = JSON.parse(localStorage.getItem('po_coach_workout_done') || '{}');
-    if (st.phase || st.plan) {
-      ctx += 'TRAINING: ';
-      if (st.phase) ctx += 'Phase ' + st.phase;
-      if (st.block) ctx += ' · ' + st.block + ' block';
-      ctx += '. Today: ' + (doneDays[todayKey] ? 'DONE ✓' : 'NOT YET DONE') + '\n\n';
+  try{
+    var coach   = JSON.parse(localStorage.getItem('po_coach_v1')||'{}');
+    var doneMap = JSON.parse(localStorage.getItem('po_coach_workout_done')||'{}');
+    if(coach.phase||coach.plan){
+      ctx += 'TRAINING: Phase '+(coach.phase||'?')+(coach.block?' · '+coach.block+' block':'')+'. Today: '+(doneMap[today]?'DONE ✓':'not done yet')+'.\n\n';
     }
-  } catch(e) {}
+  }catch(e){}
 
-  // Stimulants
-  try {
-    var peakEntries = JSON.parse(localStorage.getItem('peak:entries') || '[]');
-    var todayIn = peakEntries.filter(function(e){
-      return e.type === 'intake' && e.timestamp && localDateOf(e.timestamp) === todayKey;
-    });
-    if (todayIn.length) {
-      ctx += 'STIMULANTS TODAY:\n';
-      todayIn.forEach(function(e) {
-        var t = new Date(e.timestamp);
-        ctx += '  ' + e.substance + ' ' + e.dose_mg + 'mg at ' +
-               t.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' }) + '\n';
-      });
-      ctx += '\n';
+  try{
+    var pe = JSON.parse(localStorage.getItem('peak:entries')||'[]');
+    var ti = pe.filter(function(e){ return e.type==='intake'&&e.timestamp&&localDateOf(e.timestamp)===today; });
+    if(ti.length){
+      ctx += 'STIMULANTS: '+ti.map(function(e){
+        return e.substance+' '+e.dose_mg+'mg at '+new Date(e.timestamp).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
+      }).join('; ')+'.\n\n';
     }
-  } catch(e) {}
+  }catch(e){}
 
   return ctx.trim();
 }
 
 // ─── History ──────────────────────────────────────────────
-function loadHistory()  { try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(e) { return []; } }
-function saveHistory(h) { try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(-MAX_HISTORY))); } catch(e) {} }
-
-// ─── State ────────────────────────────────────────────────
-var messages  = loadHistory();
-var isLoading = false;
+function loadHistory(){ try{ return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]'); }catch(e){ return []; } }
+function saveHistory(h){ try{ localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(-MAX_HIST))); }catch(e){} }
 
 // ─── Render ───────────────────────────────────────────────
-function fmtTime(ts) {
-  return new Date(ts).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+function inlineMark(s){ return esc(s).replace(/\*\*(.+?)\*\*/g,'<span class="pill">$1</span>'); }
+function renderText(text){
+  var lines = String(text).split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean);
+  var items=[], loose=[];
+  lines.forEach(function(l){
+    if(/^[-•*]\s+/.test(l)) items.push('<li>'+inlineMark(l.replace(/^[-•*]\s+/,''))+'</li>');
+    else loose.push(inlineMark(l));
+  });
+  var html = loose.join('<br>');
+  if(items.length) html += (html?'<br>':'')+'<ul class="reply-list">'+items.join('')+'</ul>';
+  return html;
 }
 
-function renderMessages() {
-  var el = document.getElementById('mentorMessages');
-  // Show/hide welcome
-  var welcome = document.getElementById('mentorWelcome');
-  if (welcome) welcome.style.display = messages.length ? 'none' : '';
-  // Show/hide clear
-  var clearRow = document.getElementById('mentorClearRow');
-  if (clearRow) clearRow.classList.toggle('visible', messages.length > 0);
-  // Remove existing bubbles
-  Array.prototype.forEach.call(el.querySelectorAll('.mentor-msg'), function(n){ n.remove(); });
-  messages.forEach(function(m) { el.appendChild(makeBubble(m)); });
-  el.scrollTop = el.scrollHeight;
+var messages = loadHistory();
+
+function renderFeed(){
+  feed.innerHTML = '';
+  clearRow.style.display = messages.length ? '' : 'none';
+  if(chips) chips.style.display = messages.length ? 'none' : '';
+  messages.forEach(function(m){ feed.appendChild(makeBubble(m)); });
+  if(!messages.length) addWelcome();
+  scrollBottom();
 }
 
-function makeBubble(m) {
-  var wrap   = document.createElement('div');
-  wrap.className = 'mentor-msg ' + (m.role === 'user' ? 'user' : 'ai');
-  var bubble = document.createElement('div');
-  bubble.className = 'mentor-bubble';
-  bubble.textContent = m.content;
-  var time   = document.createElement('div');
-  time.className = 'mentor-msg-time';
-  time.textContent = fmtTime(m.ts || Date.now());
-  wrap.appendChild(bubble);
-  wrap.appendChild(time);
+function addWelcome(){
+  var d = document.createElement('div');
+  d.className = 'msg coach';
+  d.innerHTML = '<div class="bubble"><span class="tag">Nova</span><div>Hey — I\'m <b>Nova</b>. '+(savedKey()
+    ? 'Ask me about your food, training, sleep, or where to start today.'
+    : 'Paste your <b>OpenRouter key</b> above first, then ask me anything.')+'</div></div>';
+  feed.appendChild(d);
+}
+
+function makeBubble(m){
+  var wrap = document.createElement('div');
+  wrap.className = 'msg ' + (m.role==='user' ? 'user' : 'coach');
+  if(m.role==='user'){
+    wrap.innerHTML = '<div class="bubble">'+esc(m.content)+'</div><div class="msg-time">'+fmtTime(m.ts||Date.now())+'</div>';
+  } else {
+    wrap.innerHTML = '<div class="bubble"><span class="tag">Nova</span><div>'+renderText(m.content)+'</div></div><div class="msg-time">'+fmtTime(m.ts||Date.now())+'</div>';
+  }
   return wrap;
 }
 
-function showTyping() {
-  var el = document.getElementById('mentorMessages');
-  var ind = document.createElement('div');
-  ind.id = 'mentorTyping';
-  ind.className = 'mentor-typing';
-  ind.innerHTML = '<div class="mentor-typing-dot"></div><div class="mentor-typing-dot"></div><div class="mentor-typing-dot"></div>';
-  el.appendChild(ind);
-  el.scrollTop = el.scrollHeight;
-}
-function hideTyping() {
-  var ind = document.getElementById('mentorTyping');
-  if (ind) ind.remove();
-}
+function scrollBottom(){ window.scrollTo(0, document.body.scrollHeight); }
 
 // ─── Send ─────────────────────────────────────────────────
-async function send(text) {
-  text = (text || '').trim();
-  if (!text || isLoading) return;
-  isLoading = true;
-  setSendDisabled(true);
+var busy = false;
 
-  messages.push({ role: 'user', content: text, ts: Date.now() });
-  saveHistory(messages);
-  renderMessages();
-  clearInput();
-
-  var prompts = document.getElementById('mentorPrompts');
-  if (prompts) prompts.style.display = 'none';
-
-  showTyping();
-  try {
-    var apiMsgs = messages.slice(-20).map(function(m){ return { role: m.role, content: m.content }; });
-    var resp = await fetch(MENTOR_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPA_ANON,
-        'Authorization': 'Bearer ' + SUPA_ANON,
-      },
-      body: JSON.stringify({ messages: apiMsgs, context: buildContext() }),
-    });
-    var data = await resp.json();
-    if (data.error) throw new Error(data.error);
-    messages.push({ role: 'assistant', content: data.reply || '…', ts: Date.now() });
-  } catch(err) {
-    messages.push({ role: 'assistant', content: '⚠️ ' + (err.message || 'Something went wrong.'), ts: Date.now() });
+async function ask(text){
+  text = (text||'').trim();
+  if(!text || busy) return;
+  var key = savedKey();
+  if(!key){
+    keypanel.classList.add('open');
+    keyInput.focus();
+    return;
   }
+  busy = true;
+  setSendDisabled(true);
+  if(chips) chips.style.display = 'none';
+
+  messages.push({role:'user', content:text, ts:Date.now()});
   saveHistory(messages);
-  hideTyping();
-  renderMessages();
-  isLoading = false;
+  renderFeed();
+  clearInput();
+  setOrb('think');
+
+  // add typing indicator
+  var typingEl = document.createElement('div');
+  typingEl.className = 'msg coach';
+  typingEl.innerHTML = '<div class="bubble"><span class="tag">Nova</span><div><span class="dots"><i></i><i></i><i></i></span></div></div>';
+  feed.appendChild(typingEl);
+  scrollBottom();
+
+  try{
+    var apiMsgs = [
+      { role:'system', content: 'You are Nova, a personal health and performance mentor.\n\nDASHBOARD DATA:\n'+buildContext()+'\n\nGive honest, specific, short advice. Bullet points with "- ". Wrap key numbers in **double asterisks**. End with "- Do today:" with one action.' },
+    ].concat(messages.slice(-20).map(function(m){ return {role:m.role==='assistant'?'assistant':m.role, content:m.content}; }));
+
+    var res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer '+key,
+        'HTTP-Referer':'https://lucasdashboard.app',
+        'X-Title':'Lucas Dashboard Nova',
+      },
+      body: JSON.stringify({ model:MODEL, messages:apiMsgs, max_tokens:500 }),
+    });
+    var json = await res.json();
+    if(json.error) throw new Error(json.error.message || 'OpenRouter error');
+    var reply = (json.choices&&json.choices[0]&&json.choices[0].message&&json.choices[0].message.content)||'…';
+    messages.push({role:'assistant', content:reply.trim(), ts:Date.now()});
+    setOrb('happy'); setTimeout(function(){setOrb('');},2500);
+  }catch(err){
+    messages.push({role:'assistant', content:'- Could not reach OpenRouter — check your key and connection.\n- Error: '+err.message, ts:Date.now()});
+    setOrb('');
+  }
+
+  typingEl.remove();
+  saveHistory(messages);
+  renderFeed();
+  busy = false;
   setSendDisabled(false);
 }
 
-function setSendDisabled(on) { var b = document.getElementById('mentorSend'); if (b) b.disabled = on; }
-function clearInput() {
-  var inp = document.getElementById('mentorInput');
-  if (!inp) return; inp.value = ''; inp.style.height = 'auto';
+function setSendDisabled(on){ var b=document.getElementById('send'); if(b) b.disabled=on; }
+function clearInput(){ input.value=''; input.style.height='auto'; }
+
+// ─── Events ───────────────────────────────────────────────
+document.getElementById('send').addEventListener('click', function(){ ask(input.value); });
+input.addEventListener('keydown', function(e){
+  if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); ask(this.value); }
+});
+input.addEventListener('input', function(){
+  this.style.height='auto';
+  this.style.height=Math.min(this.scrollHeight,100)+'px';
+});
+document.getElementById('clearBtn').addEventListener('click', function(){
+  messages=[]; saveHistory(messages); renderFeed();
+});
+document.querySelectorAll('.chip').forEach(function(btn){
+  btn.addEventListener('click', function(){ ask(this.dataset.q); });
+});
+
+// Auto-send from main page quick prompts (#q=...)
+var hash = window.location.hash;
+if(hash && hash.indexOf('#q=')===0){
+  var autoQ = decodeURIComponent(hash.slice(3));
+  history.replaceState(null,'',window.location.pathname);
+  if(autoQ) setTimeout(function(){ ask(autoQ); }, 300);
 }
 
 // ─── Boot ─────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function() {
-  renderMessages();
-
-  // Auto-send if opened with #q=... from main page quick prompts
-  var hash = window.location.hash;
-  if (hash && hash.indexOf('#q=') === 0) {
-    var autoQ = decodeURIComponent(hash.slice(3));
-    history.replaceState(null, '', window.location.pathname);
-    if (autoQ) setTimeout(function() { send(autoQ); }, 300);
-  }
-
-  var input   = document.getElementById('mentorInput');
-  var sendBtn = document.getElementById('mentorSend');
-  var clearBtn = document.getElementById('mentorClear');
-
-  if (input) {
-    input.addEventListener('input', function() {
-      this.style.height = 'auto';
-      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-    });
-    input.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(this.value); }
-    });
-  }
-  if (sendBtn) sendBtn.addEventListener('click', function() { send(input ? input.value : ''); });
-  if (clearBtn) clearBtn.addEventListener('click', function() {
-    messages = []; saveHistory(messages); renderMessages();
-    var prompts = document.getElementById('mentorPrompts');
-    if (prompts) prompts.style.display = '';
-  });
-  document.querySelectorAll('.mentor-prompt-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() { send(this.dataset.q); });
-  });
-});
+renderFeed();
 
 })();
 </script>
