@@ -6,7 +6,7 @@ const CORS = {
 const BASE_PROMPT = `You are a precision nutrition analyst. Examine this food photo carefully and:
 
 1. Identify each item specifically — e.g. "grilled chicken breast with roasted broccoli", not just "chicken and vegetables"
-2. Estimate total grams of the ENTIRE visible portion using visual reference points: a standard dinner plate is ~26 cm, a fork ~20 cm, a tablespoon ~15 ml, a mug ~300 ml
+2. Estimate total grams of the ENTIRE visible portion using visual reference points: a standard dinner plate is ~26 cm, a fork ~20 cm, a tablespoon ~15 ml, a mug ~300 ml; if a hand is visible — adult palm (no fingers) ≈ 85 g of protein, a closed fist ≈ 1 cup / ~240 ml, a cupped hand ≈ ½ cup, a thumb tip ≈ 1 teaspoon
 3. Calculate total nutrition for the FULL portion shown — use USDA FoodData Central values, NOT per-100g values
 4. All minerals and vitamins must be in mg (convert from mcg or g where needed)
 
