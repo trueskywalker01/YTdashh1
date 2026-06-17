@@ -684,10 +684,41 @@ main {
   width: 100%; padding: 9px 12px; border-radius: 10px;
   background: rgba(255,255,255,0.04); border: 1px solid var(--border-strong);
   color: var(--text-secondary); font-size: 13px; font-family: inherit;
-  resize: none; outline: none; line-height: 1.5; display: block;
+  resize: none; outline: none; line-height: 1.5; display: block; box-sizing: border-box;
 }
 .macro-scan-note-input::placeholder { color: var(--text-quaternary); }
 .macro-scan-note-input:focus { border-color: rgba(255,255,255,0.22); }
+.macro-scan-review-card {
+  margin-top: 14px; border-radius: 14px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.025);
+  animation: macro-fade-in 0.25s ease both;
+}
+.macro-scan-review-card[hidden] { display: none; }
+.macro-scan-review-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px 11px; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.macro-scan-review-title { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.macro-scan-preview-wrap {
+  display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px 10px;
+}
+.macro-scan-thumb {
+  width: 76px; height: 76px; object-fit: cover; border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+}
+.macro-scan-notes-wrap { flex: 1; min-width: 0; }
+.macro-scan-notes-label {
+  font-size: 10px; color: var(--text-tertiary); margin-bottom: 6px;
+  font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.macro-scan-review-footer { padding: 2px 14px 14px; display: flex; gap: 8px; }
+.macro-scan-review-cancel {
+  flex-shrink: 0; padding: 10px 14px; border-radius: 10px; font-size: 12px;
+  background: transparent; border: 1px solid rgba(255,255,255,0.10);
+  color: var(--text-tertiary); font-weight: 600; font-family: inherit; cursor: pointer;
+  transition: background 0.15s;
+}
+.macro-scan-review-cancel:hover { background: rgba(255,255,255,0.06); }
 /* ── Meal Logger ── */
 .macro-add-wrap { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-soft); }
 .macro-search-row { display: flex; gap: 8px; align-items: center; }
@@ -1153,6 +1184,25 @@ main {
             <input id="macroManualFat"  type="number" min="0" step="0.1" class="stack-input" placeholder="fat (g)" />
           </div>
           <button id="macroManualAdd" class="macro-modal-save" style="width:100%">Add to log</button>
+        </div>
+
+        <!-- Scan review card: photo preview + notes before submitting -->
+        <div id="macroScanReviewCard" class="macro-scan-review-card" hidden>
+          <div class="macro-scan-review-header">
+            <span class="macro-scan-review-title">📷 Add notes before scanning</span>
+            <button class="macro-result-dismiss" id="macroScanReviewDismiss" aria-label="Cancel">✕</button>
+          </div>
+          <div class="macro-scan-preview-wrap">
+            <img id="macroScanThumb" class="macro-scan-thumb" src="" alt="Food preview" />
+            <div class="macro-scan-notes-wrap">
+              <div class="macro-scan-notes-label">Notes (optional)</div>
+              <textarea id="macroScanNotes" class="macro-scan-note-input" rows="3" placeholder='e.g. "350g serving", "milk added", "chicken salt instead of regular"'></textarea>
+            </div>
+          </div>
+          <div class="macro-scan-review-footer">
+            <button id="macroScanSubmit" class="macro-modal-save" style="flex:1">Scan food</button>
+            <button id="macroScanReviewCancel" class="macro-scan-review-cancel">Cancel</button>
+          </div>
         </div>
 
         <!-- Loading skeleton -->
@@ -2607,18 +2657,28 @@ document.addEventListener('DOMContentLoaded', function () {
   const SCAN_URL = 'https://irchofgefxpgohqfngyo.supabase.co/functions/v1/scan-food';
   const SUPA_ANON = 'sb_publishable_sNUOPZ-EBvdFBqUpO2N1Fw_-g6DWPst';
 
+  let pendingScanBase64 = null;
+
+  function closeScanReview() {
+    $('macroScanReviewCard').hidden = true;
+    $('macroScanNotes').value = '';
+    $('macroScanThumb').src = '';
+    pendingScanBase64 = null;
+  }
+
   $('macroScanBtn').addEventListener('click', () => $('macroScanInput').click());
+
   $('macroScanInput').addEventListener('change', async function () {
     const file = this.files[0];
     if (!file) return;
-    const btn = $('macroScanBtn');
-    btn.classList.add('scanning'); btn.textContent = '⏳';
+    this.value = '';
     try {
-      const base64 = await new Promise((res, rej) => {
+      const objectUrl = URL.createObjectURL(file);
+      $('macroScanThumb').src = objectUrl;
+      pendingScanBase64 = await new Promise((res, rej) => {
         const img = new Image();
-        const url = URL.createObjectURL(file);
         img.onload = () => {
-          URL.revokeObjectURL(url);
+          URL.revokeObjectURL(objectUrl);
           const MAX = 512;
           const scale = Math.min(1, MAX / Math.max(img.width, img.height));
           const canvas = document.createElement('canvas');
@@ -2628,8 +2688,28 @@ document.addEventListener('DOMContentLoaded', function () {
           res(canvas.toDataURL('image/jpeg', 0.60).split(',')[1]);
         };
         img.onerror = rej;
-        img.src = url;
+        img.src = objectUrl;
       });
+      $('macroScanReviewCard').hidden = false;
+      $('macroScanReviewCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      $('macroScanNotes').focus();
+    } catch (err) {
+      alert('Could not load image: ' + err.message);
+    }
+  });
+
+  $('macroScanReviewDismiss').addEventListener('click', closeScanReview);
+  $('macroScanReviewCancel').addEventListener('click', closeScanReview);
+
+  $('macroScanSubmit').addEventListener('click', async () => {
+    if (!pendingScanBase64) return;
+    const notes = ($('macroScanNotes').value || '').trim();
+    const base64 = pendingScanBase64;
+    closeScanReview();
+    const btn = $('macroScanBtn');
+    btn.classList.add('scanning'); btn.textContent = '⏳';
+    setLoadingState(true);
+    try {
       const resp = await fetch(SCAN_URL, {
         method: 'POST',
         headers: {
@@ -2637,7 +2717,7 @@ document.addEventListener('DOMContentLoaded', function () {
           'apikey': SUPA_ANON,
           'Authorization': 'Bearer ' + SUPA_ANON,
         },
-        body: JSON.stringify({ image: base64, mimeType: 'image/jpeg' })
+        body: JSON.stringify({ image: base64, mimeType: 'image/jpeg', notes: notes || undefined }),
       });
       const data = await resp.json();
       if (data.error) throw new Error(data.error);
@@ -2665,7 +2745,7 @@ document.addEventListener('DOMContentLoaded', function () {
       alert('Scan failed: ' + err.message);
     } finally {
       btn.classList.remove('scanning'); btn.textContent = '📷';
-      this.value = '';
+      setLoadingState(false);
     }
   });
 
