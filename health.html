@@ -2925,7 +2925,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const total   = k + na;
         const kPct    = total > 0 ? Math.round(k  / total * 100) : 0;
         const naPct   = total > 0 ? Math.round(na / total * 100) : 0;
-        const seg = (pct: number, color: string) =>
+        const seg = (pct, color) =>
           '<div style="width:' + pct + '%;height:100%;background:' + color + ';transition:width 0.5s cubic-bezier(0.22,1,0.36,1)"></div>';
         row.innerHTML =
           '<div class="nutr-row-top">' +
