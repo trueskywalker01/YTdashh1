@@ -3,11 +3,44 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const BASE_PROMPT = 'Identify the food in this image. Estimate the grams shown and provide total nutrition for that portion. All mineral/vitamin values must be in mg. Respond with JSON only — no markdown, no explanation: {"name":"","grams":0,"cal":0,"prot":0,"carb":0,"fat":0,"fiber":0,"servingDesc":"","potassium":0,"sodium":0,"calcium":0,"iron":0,"magnesium":0,"vitamin_c":0,"zinc":0}'
+const BASE_PROMPT = `You are a precision nutrition analyst. Examine this food photo carefully and:
+
+1. Identify each item specifically — e.g. "grilled chicken breast with roasted broccoli", not just "chicken and vegetables"
+2. Estimate total grams of the ENTIRE visible portion using visual reference points: a standard dinner plate is ~26 cm, a fork ~20 cm, a tablespoon ~15 ml, a mug ~300 ml
+3. Calculate total nutrition for the FULL portion shown — use USDA FoodData Central values, NOT per-100g values
+4. All minerals and vitamins must be in mg (convert from mcg or g where needed)
+
+Return ONLY this JSON with no markdown, no explanation, no preamble:
+{"name":"","grams":0,"cal":0,"prot":0,"carb":0,"fat":0,"fiber":0,"servingDesc":"","potassium":0,"sodium":0,"calcium":0,"iron":0,"magnesium":0,"vitamin_c":0,"zinc":0}`
 
 function buildPrompt(notes?: string): string {
   if (!notes || !notes.trim()) return BASE_PROMPT
-  return BASE_PROMPT + `\n\nImportant user context — adjust all estimates to account for this: "${notes.trim()}"`
+  return BASE_PROMPT + `\n\nCritical user context — you MUST adjust your estimates to reflect this: "${notes.trim()}"`
+}
+
+// Robust JSON extraction: find outermost { ... } by brace counting
+function extractJSON(text: string): Record<string, unknown> {
+  let depth = 0, start = -1
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === '{') {
+      if (depth === 0) start = i
+      depth++
+    } else if (text[i] === '}') {
+      depth--
+      if (depth === 0 && start !== -1) {
+        return JSON.parse(text.slice(start, i + 1))
+      }
+    }
+  }
+  throw new Error('No JSON object found in response')
+}
+
+function isValid(data: unknown): boolean {
+  if (!data || typeof data !== 'object') return false
+  const d = data as Record<string, unknown>
+  return typeof d.name === 'string' && d.name.trim().length > 0
+    && Number(d.cal) > 0
+    && Number(d.grams) > 0
 }
 
 async function queryModel(model: string, image: string, mimeType: string, apiKey: string, prompt: string) {
@@ -18,27 +51,38 @@ async function queryModel(model: string, image: string, mimeType: string, apiKey
       model,
       messages: [{ role: 'user', content: [
         { type: 'image_url', image_url: { url: `data:${mimeType || 'image/jpeg'};base64,${image}` } },
-        { type: 'text', text: prompt }
+        { type: 'text', text: prompt },
       ]}],
-      max_tokens: 200,
+      max_tokens: 350,
     })
   })
-  if (!res.ok) throw new Error(`${model} ${res.status}`)
+  if (!res.ok) throw new Error(`${model} HTTP ${res.status}`)
   const data = await res.json()
-  const text = data.choices?.[0]?.message?.content || ''
-  const match = text.match(/\{[\s\S]*?\}/)
-  if (!match) throw new Error(`No JSON from ${model}`)
-  return JSON.parse(match[0])
+  const text = (data.choices?.[0]?.message?.content || '').trim()
+  if (!text) throw new Error(`Empty response from ${model}`)
+  const parsed = extractJSON(text)
+  if (!isValid(parsed)) throw new Error(`Invalid nutrition data from ${model}`)
+  return parsed
 }
 
-// Returns the first model that succeeds; only rejects if ALL fail.
-function raceFirst(promises: Promise<unknown>[]): Promise<unknown> {
+// Resolves with the first response that passes validation; rejects only if all fail.
+function raceFirstValid(promises: Promise<Record<string, unknown>>[]): Promise<Record<string, unknown>> {
   return new Promise((resolve, reject) => {
-    let failed = 0
-    promises.forEach(p => p.then(resolve).catch(() => {
-      failed++
-      if (failed === promises.length) reject(new Error('All models failed'))
-    }))
+    let resolved = false
+    let done = 0
+    for (const p of promises) {
+      p.then(result => {
+        done++
+        if (resolved) return
+        resolved = true
+        resolve(result)
+      }).catch(() => {
+        done++
+        if (!resolved && done === promises.length) {
+          reject(new Error('All vision models failed or returned invalid data'))
+        }
+      })
+    }
   })
 }
 
@@ -54,10 +98,10 @@ Deno.serve(async (req: Request) => {
 
     const prompt = buildPrompt(notes)
 
-    // Race two free vision models — use whichever responds first.
-    const parsed = await raceFirst([
-      queryModel('nvidia/nemotron-nano-12b-v2-vl:free', image, mimeType, apiKey, prompt),
-      queryModel('google/gemma-4-26b-a4b-it:free',     image, mimeType, apiKey, prompt),
+    const parsed = await raceFirstValid([
+      queryModel('google/gemini-2.0-flash-exp:free',     image, mimeType, apiKey, prompt),
+      queryModel('meta-llama/llama-4-scout:free',        image, mimeType, apiKey, prompt),
+      queryModel('google/gemma-4-26b-a4b-it:free',       image, mimeType, apiKey, prompt),
     ])
 
     return new Response(JSON.stringify(parsed), {
