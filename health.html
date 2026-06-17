@@ -2222,15 +2222,6 @@ document.addEventListener('DOMContentLoaded', function () {
           '<button class="macro-meal-del" data-i="' + i + '" aria-label="Delete">✕</button>';
         list.appendChild(row);
       });
-      list.addEventListener('click', (e) => {
-        const btn = e.target.closest('.macro-meal-del');
-        if (!btn) return;
-        const meals2 = loadMeals();
-        meals2.splice(Number(btn.dataset.i), 1);
-        saveMeals(meals2);
-        render();
-        window.dispatchEvent(new Event('storage'));
-      }, { once: true });
     }
   }
 
@@ -2359,6 +2350,14 @@ document.addEventListener('DOMContentLoaded', function () {
       if (res) saveGoals({ cal: res.cal, prot: res.prot, carb: res.carb, fat: res.fat });
     }
   })();
+
+  $('macroMealsList').addEventListener('click', (e) => {
+    const btn = e.target.closest('.macro-meal-del');
+    if (!btn) return;
+    const meals2 = loadMeals();
+    meals2.splice(Number(btn.dataset.i), 1);
+    saveMeals(meals2);
+  });
 
   window.addEventListener('storage', render);
   render();
