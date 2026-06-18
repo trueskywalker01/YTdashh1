@@ -1025,6 +1025,9 @@ main {
           <div class="aw-ring-leg"><span class="aw-ring-dot" style="background:var(--ring-exercise)"></span>Exercise <span id="awExVal" style="font-weight:700;font-family:var(--font-mono);margin-left:4px">—</span></div>
           <div class="aw-ring-leg"><span class="aw-ring-dot" style="background:var(--ring-stand)"></span>Stand <span id="awStandVal" style="font-weight:700;font-family:var(--font-mono);margin-left:4px">—</span></div>
         </div>
+        <div style="text-align:center;margin-top:-8px">
+          <button id="awMoveGoalBtn" style="background:none;border:none;color:var(--text-tertiary);font-size:11px;cursor:pointer;padding:4px 8px;border-radius:6px" title="Tap to set your Move goal">Move goal: <span id="awMoveGoalLbl">—</span> ✎</button>
+        </div>
 
         <!-- Sleep stages -->
         <div class="aw-stages" id="awStages" style="display:none">
@@ -2124,11 +2127,31 @@ document.addEventListener('DOMContentLoaded', function () {
     return vals;
   }
 
+  const MOVE_GOAL_KEY = 'aw:move_goal';
+  function getMoveGoal() {
+    const v = parseInt(localStorage.getItem(MOVE_GOAL_KEY));
+    return v > 0 ? v : 1800;
+  }
+  function setMoveGoal(v) { localStorage.setItem(MOVE_GOAL_KEY, String(v)); }
+
+  $('awMoveGoalBtn').addEventListener('click', () => {
+    const cur = getMoveGoal();
+    const raw = prompt('Enter your Move goal (same number shown on your Apple Watch):', cur);
+    if (raw === null) return;
+    const v = parseInt(raw);
+    if (!v || v <= 0) return;
+    setMoveGoal(v);
+    $('awMoveGoalLbl').textContent = v;
+    const cached = window._lastAwData;
+    if (cached) render(cached, window._lastAwFromSupa);
+  });
+
   function loadDemo(){
     render({ steps:8742, activeCal:534, exerciseMin:42, standHrs:10, rhr:56, hrv:48, spo2:97, resp:15.2, wristTemp:0.3, sleepMin:432, rem:95, deep:72, core:235, awake:30 }, false);
   }
 
   function render(d, fromSupabase){
+    window._lastAwData = d; window._lastAwFromSupa = fromSupabase;
     discEl.style.display='none'; connEl.style.display='';
     const tagEl = $('awTag');
     if (fromSupabase && d._date) {
@@ -2140,12 +2163,13 @@ document.addEventListener('DOMContentLoaded', function () {
       $('awUpdated').textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
       if (tagEl) tagEl.innerHTML = '<span class="aw-tag-dot"></span>imported';
     }
-    const moveGoal=500, exGoal=30, standGoal=12;
+    const moveGoal = getMoveGoal(), exGoal=30, standGoal=12;
     setRing('ringMove',96,Math.min(d.activeCal/moveGoal,1));
     setRing('ringExercise',78,Math.min(d.exerciseMin/exGoal,1));
     setRing('ringStand',60,Math.min(d.standHrs/standGoal,1));
     $('awActivityScore').textContent = Math.round(d.activeCal);
     $('awMoveVal').textContent = Math.round(d.activeCal)+'/'+moveGoal;
+    $('awMoveGoalLbl').textContent = moveGoal;
     $('awExVal').textContent = Math.round(d.exerciseMin)+'/'+exGoal+'m';
     $('awStandVal').textContent = Math.round(d.standHrs)+'/'+standGoal+'h';
     const sleepH=(d.sleepMin/60).toFixed(1);
