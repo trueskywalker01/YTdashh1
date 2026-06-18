@@ -1017,7 +1017,7 @@ main {
           <div class="aw-rings-center">
             <div class="aw-rings-label">Activity</div>
             <div class="aw-rings-score" id="awActivityScore">—</div>
-            <div class="aw-rings-unit" id="awActivityUnit">kcal burned</div>
+            <div class="aw-rings-unit" id="awActivityUnit">cal burned</div>
           </div>
         </div>
         <div class="aw-ring-legend">
@@ -2140,13 +2140,12 @@ document.addEventListener('DOMContentLoaded', function () {
       $('awUpdated').textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
       if (tagEl) tagEl.innerHTML = '<span class="aw-tag-dot"></span>imported';
     }
-    const moveGoalKj=500, exGoal=30, standGoal=12;
-    const moveKcal = Math.round(d.activeCal / 4.184);
-    setRing('ringMove',96,Math.min(d.activeCal/moveGoalKj,1));
+    const moveGoal=500, exGoal=30, standGoal=12;
+    setRing('ringMove',96,Math.min(d.activeCal/moveGoal,1));
     setRing('ringExercise',78,Math.min(d.exerciseMin/exGoal,1));
     setRing('ringStand',60,Math.min(d.standHrs/standGoal,1));
-    $('awActivityScore').textContent = moveKcal;
-    $('awMoveVal').textContent = Math.round(d.activeCal)+'kJ';
+    $('awActivityScore').textContent = Math.round(d.activeCal);
+    $('awMoveVal').textContent = Math.round(d.activeCal)+'/'+moveGoal;
     $('awExVal').textContent = Math.round(d.exerciseMin)+'/'+exGoal+'m';
     $('awStandVal').textContent = Math.round(d.standHrs)+'/'+standGoal+'h';
     const sleepH=(d.sleepMin/60).toFixed(1);
