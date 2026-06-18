@@ -13,6 +13,7 @@
     const syncedKeys = (config && config.syncedKeys) || [];
     const syncedPrefixes = (config && config.syncedPrefixes) || [];
     const onApplied = config && config.onApplied;
+    const mergeFns = (config && config.merge) || {};
     if (!appKey || !window.supabase) return;
     if (!SUPABASE_URL || !SUPABASE_KEY) return;
     if (SUPABASE_URL.indexOf('PASTE-') === 0 || SUPABASE_KEY.indexOf('PASTE-') === 0) return;
@@ -61,9 +62,20 @@
       try {
         for (const k of Object.keys(remote)) {
           if (!matches(k)) continue;
-          const incoming = JSON.stringify(remote[k]);
+          let mergeFn = null;
+          for (const prefix of Object.keys(mergeFns)) {
+            if (k.indexOf(prefix) === 0) { mergeFn = mergeFns[prefix]; break; }
+          }
+          let valueToStore;
+          if (mergeFn) {
+            let localVal = null;
+            try { localVal = JSON.parse(localStorage.getItem(k)); } catch (e) {}
+            valueToStore = JSON.stringify(mergeFn(localVal, remote[k]));
+          } else {
+            valueToStore = JSON.stringify(remote[k]);
+          }
           const local = localStorage.getItem(k);
-          if (local !== incoming) { try { origSet(k, incoming); changed = true; } catch (e) {} }
+          if (local !== valueToStore) { try { origSet(k, valueToStore); changed = true; } catch (e) {} }
         }
         // Only delete a local key if it existed in the PREVIOUS sync snapshot AND is
         // now absent from remote — meaning it was intentionally removed on another device.
