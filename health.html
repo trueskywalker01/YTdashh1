@@ -1986,6 +1986,21 @@ document.addEventListener('DOMContentLoaded', function () {
     appKey: 'health',
     syncedKeys: ['stack:items', 'stack:version', 'stack:low', 'macro:goals', 'nutrients:goals'],
     syncedPrefixes: ['stack:taken:', 'macro:meals:', 'nutrients:log:'],
+    merge: {
+      'macro:meals:': function (local, remote) {
+        const localArr  = Array.isArray(local)  ? local  : [];
+        const remoteArr = Array.isArray(remote) ? remote : [];
+        const seen = new Set();
+        const out = [];
+        for (const m of localArr.concat(remoteArr)) {
+          const key = m.id || (m.name + '|' + m.cal);
+          if (seen.has(key)) continue;
+          seen.add(key);
+          out.push(m);
+        }
+        return out;
+      },
+    },
     onApplied: function () { window.dispatchEvent(new Event('storage')); }
   });
 });
@@ -2608,6 +2623,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const key = todayStr();
     const meals = loadMeals(key);
     meals.push({
+      id:        Date.now() + '-' + Math.random().toString(36).slice(2, 7),
       name:      pendingFood.name + ' (' + Math.round(pendingFood.perG * pendingQty) + 'g)',
       cal:       m.cal,
       prot:      m.prot,
@@ -2646,6 +2662,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const key = todayStr();
     const meals = loadMeals(key);
     meals.push({
+      id:   Date.now() + '-' + Math.random().toString(36).slice(2, 7),
       name,
       cal:  Math.round(parseFloat($('macroManualCal').value)  || 0),
       prot: parseFloat($('macroManualProt').value) || 0,
