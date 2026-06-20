@@ -945,13 +945,13 @@ body::after {
       </div>
       <div class="cal-inner">
         <div class="cal-weekdays">
-          <div class="cal-weekday">Su</div>
           <div class="cal-weekday">Mo</div>
           <div class="cal-weekday">Tu</div>
           <div class="cal-weekday">We</div>
           <div class="cal-weekday">Th</div>
           <div class="cal-weekday">Fr</div>
           <div class="cal-weekday">Sa</div>
+          <div class="cal-weekday">Su</div>
         </div>
         <div class="cal-grid" id="calGrid"></div>
       </div>
@@ -1818,7 +1818,7 @@ body::after {
     String(_now.getDate()).padStart(2,'0');
   var calWindowStart = (function() {
     var d = new Date(_now);
-    d.setDate(d.getDate() - d.getDay()); // back to Sunday
+    d.setDate(d.getDate() - (d.getDay() + 6) % 7); // back to Monday
     return toKey(d);
   }());
   let calSelected = null;
