@@ -1534,7 +1534,11 @@ body::after {
       case 'custom': var n = task.customIntervalDays || 1; return n > 0 && diff % n === 0;
       case 'biweek':
         if (!task.biweekDays || !task.biweekDays.length) return false;
-        var pos = diff % 14, dow = fk(ds).getDay(), wk = Math.floor(pos / 7);
+        var startD2 = fk(task.date);
+        var startMon2 = new Date(startD2);
+        startMon2.setDate(startD2.getDate() - (startD2.getDay() + 6) % 7);
+        var dfm = Math.round((fk(ds) - startMon2) / 864e5);
+        var pos = ((dfm % 14) + 14) % 14, dow = fk(ds).getDay(), wk = Math.floor(pos / 7);
         return task.biweekDays.some(function(s) { return s.week === wk && s.dow === dow; });
       default: return diff === 0;
     }
@@ -1871,9 +1875,15 @@ body::after {
       }
       case 'biweek': {
         if (!task.biweekDays || !task.biweekDays.length) return false;
-        var pos = diff % 14;
-        var currentDow = fromKey(ds).getDay();
+        // Anchor cycle to the Monday of the task's start week so week
+        // boundaries always fall on Monday, matching the Mon-Sun grid.
+        var startD = fromKey(task.date);
+        var startMon = new Date(startD);
+        startMon.setDate(startD.getDate() - (startD.getDay() + 6) % 7);
+        var diffFromMon = Math.round((fromKey(ds) - startMon) / 864e5);
+        var pos = ((diffFromMon % 14) + 14) % 14;
         var thisWeek = Math.floor(pos / 7);
+        var currentDow = fromKey(ds).getDay();
         return task.biweekDays.some(function(s) { return s.week === thisWeek && s.dow === currentDow; });
       }
       default: return diff === 0;
