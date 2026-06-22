@@ -2508,6 +2508,7 @@ document.addEventListener('DOMContentLoaded', function () {
       carb100:      n['carbohydrates_100g'] || 0,
       fat100:       n['fat_100g']           || 0,
       fiber100:     n['fiber_100g']         || 0,
+      sugar100:     n['sugars_100g']        || 0,
       potassium100: mg(n['potassium_100g']),
       sodium100:    mg(n['sodium_100g']),
       calcium100:   mg(n['calcium_100g']),
@@ -2527,6 +2528,7 @@ document.addEventListener('DOMContentLoaded', function () {
       carb:      sc(food.carb100),
       fat:       sc(food.fat100),
       fiber:     sc(food.fiber100),
+      sugar:     sc(food.sugar100),
       potassium: sc(food.potassium100),
       sodium:    sc(food.sodium100),
       calcium:   sc(food.calcium100),
@@ -2653,6 +2655,7 @@ document.addEventListener('DOMContentLoaded', function () {
       carb:      m.carb,
       fat:       m.fat,
       fiber:     m.fiber     || 0,
+      sugar:     m.sugar     || 0,
       note:      m.fiber ? m.fiber + 'g fibre' : undefined,
       potassium: m.potassium || 0,
       sodium:    m.sodium    || 0,
@@ -2781,6 +2784,7 @@ document.addEventListener('DOMContentLoaded', function () {
         carb100:      sc100(data.carb),
         fat100:       sc100(data.fat),
         fiber100:     sc100(data.fiber),
+        sugar100:     sc100(data.sugar),
         potassium100: sc100(data.potassium),
         sodium100:    sc100(data.sodium),
         calcium100:   sc100(data.calcium),
@@ -2895,6 +2899,7 @@ document.addEventListener('DOMContentLoaded', function () {
     { id:'chromium',   name:'Chromium',       unit:'mcg', rda:35,    tab:'minerals', color:'#64D2FF', tip:'Supports insulin sensitivity. Found in broccoli, whole grains, and grape juice.' },
     { id:'omega3',     name:'Omega-3',        unit:'g',   rda:1.6,   tab:'minerals', color:'#30D158', tip:'EPA+DHA most bioavailable. Take with a fatty meal. Pairs with astaxanthin for oxidation protection.' },
     { id:'fiber',      name:'Fiber',          unit:'g',   rda:38,    tab:'minerals', color:'#30D158', tip:'Aim for both soluble and insoluble types. Increase gradually to avoid bloating. Drink more water.' },
+    { id:'sugar',      name:'Sugar',          unit:'g',   rda:36,    tab:'minerals', color:'#FF6B6B', tip:'WHO recommends under 25 g/day of added sugar. Natural fruit sugars are less harmful; limit processed food and sugary drinks.' },
   ];
 
   let nutrActiveTab = 'minerals';
@@ -2910,6 +2915,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Map from meal field → nutrient id
   const MEAL_NUTR_MAP = {
     fiber:     'fiber',
+    sugar:     'sugar',
     potassium: 'potassium',
     sodium:    'sodium',
     calcium:   'calcium',
